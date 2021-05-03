@@ -23,7 +23,7 @@ async def on_message(message):
                 break
 
 key = ''
-with open(api.key, 'r') as keyfile:
+with open('api.key', 'r') as keyfile:
     key = keyfile.readline()
 
 client.run(key)
