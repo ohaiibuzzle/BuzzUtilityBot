@@ -8,12 +8,12 @@ image_format = ['.jpg', '.JPG',
                 '.png', '.PNG',
                 '.gif']
 
-client = pixivpy3.AppPixivAPI()
-
-with open('pixiv.key', 'r') as pixivkey:
-    client.auth(refresh_token=pixivkey.readline())
-
 def construct_saucenao_embed_pixiv(attachment: BasicSauce):
+    
+    client = pixivpy3.AppPixivAPI()
+
+    with open('pixiv.key', 'r') as pixivkey:
+        client.auth(refresh_token=pixivkey.readline())
     
     raw_json = attachment.raw
     #print(raw_json)
@@ -30,6 +30,12 @@ def construct_saucenao_embed_pixiv(attachment: BasicSauce):
     embed.add_field(
         name = 'Title',
         value = illust.title,
+        inline = False
+    )
+    
+    embed.add_field(
+        name = 'Type',
+        value = illust.type.capitalize(),
         inline = False
     )
     
