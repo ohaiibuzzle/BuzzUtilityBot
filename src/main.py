@@ -41,8 +41,8 @@ async def sauceplz(ctx):
                             await ctx.send("I am sssorry, can't get your sauce :(")
                             await ctx.send("Ask Buzzle why that is")
                         else:
-                            att_embed = construct_saucenao_embed_pixiv(attachment)
-                            await ctx.send(att_embed)
+                            att_embed = construct_saucenao_embed_pixiv(found)
+                            await ctx.send(embed=att_embed)
             elif (search_msg.attachments.__len__() > 0):
                 for attachment in search_msg.attachments:
                     if attachment.content_type.startswith('image'):
