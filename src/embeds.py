@@ -4,6 +4,10 @@ import json
 import discord 
 import pixivpy3 
 
+image_format = ['.jpg', '.JPG',
+                '.png', '.PNG',
+                '.gif']
+
 client = pixivpy3.AppPixivAPI()
 
 with open('pixiv.key', 'r') as pixivkey:
@@ -66,15 +70,19 @@ def construct_saucenao_embed_pixiv(attachment: BasicSauce):
 
 def construct_save_embed_img(message: discord.Message):
     embed = discord.Embed(title = 'Saved!')
-    embed.url = message.jump_url
     
     embed.add_field(
-        name = 'From',
+        name = 'Fom',
         value = '@'+ message.author.name + '#' + message.author.discriminator +
         ' in #' + message.channel.name + ' on ' + message.channel.guild.name,
         inline = False
     )
     
+    embed.add_field(
+        name = 'Location',
+        value = message.jump_url,
+        inline = False
+    )
     if message.content != '':
         embed.add_field(
             name = 'Content',
@@ -84,7 +92,11 @@ def construct_save_embed_img(message: discord.Message):
     
     if (message.embeds.__len__() > 0):
         if (message.embeds[0].image):
-            embed.set_thumbnail(url=message.embeds[0].image.proxy_url)
+            embed.set_image(url=message.embeds[0].image.proxy_url)
+        elif (message.embeds[0].video):
+            embed.set_image(url=message.embeds[0].video.url)
+        elif (message.embeds[0].url.startswith('https://media.discordapp.net/attachments')) and (message.embeds[0].url[-4:] in image_format):
+            embed.set_image(url=message.embeds[0].url)
         else:
             embedded_contents = ''
             for _ in message.embeds:
@@ -101,7 +113,7 @@ def construct_save_embed_img(message: discord.Message):
         att_contents = ''
         for _ in message.attachments:
             if _.content_type.startswith('image'):
-                embed.set_thumbnail(url=_.url)
+                embed.set_image(url=_.url)
             else:
                 embedded_contents += _.url
                 embedded_contents += '\n'
