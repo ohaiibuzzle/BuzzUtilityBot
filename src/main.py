@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from saucenao import find_sauce
+from embeds import construct_saucenao_embed_pixiv, construct_save_embed_img
 
 game = discord.Game("In Buzzle's Development Environment!")
 
@@ -16,7 +17,13 @@ async def on_ready():
 async def on_message(message):
     if message.author == client.user:
         return
-
+    
+    if message.content.startswith('. so I can save'):
+        messages = await message.channel.history(limit=10).flatten()
+        for mesg in messages:
+            if mesg.attachments.__len__() > 0 or mesg.embeds.__len__() > 0:
+                await message.author.send(embed=construct_save_embed_img(mesg))
+                break
     await client.process_commands(message)
 
 @client.command()
@@ -34,7 +41,8 @@ async def sauceplz(ctx):
                             await ctx.send("I am sssorry, can't get your sauce :(")
                             await ctx.send("Ask Buzzle why that is")
                         else:
-                            await ctx.send(found)
+                            att_embed = construct_saucenao_embed_pixiv(attachment)
+                            await ctx.send(att_embed)
             elif (search_msg.attachments.__len__() > 0):
                 for attachment in search_msg.attachments:
                     if attachment.content_type.startswith('image'):
@@ -44,7 +52,8 @@ async def sauceplz(ctx):
                             await ctx.send("I am sssorry, can't get your sauce :(")
                             await ctx.send("Ask Buzzle why that is")
                         else:
-                            await ctx.send(found)
+                            att_embed = construct_saucenao_embed_pixiv(found)
+                            await ctx.send(embed=att_embed)
     else:
         await ctx.send("Please mention a message containing pasta!")
 
@@ -54,26 +63,13 @@ async def savethis(ctx):
     if (ctx.message.reference):
         if (ctx.message.reference.resolved != None):
             search_msg = ctx.message.reference.resolved
-            if (search_msg.embeds.__len__() > 0):
-                await ctx.message.author.send("Saved it for ya")
-                for attachment in search_msg.embeds:
-                    await ctx.message.author.send(attachment.url)
-
-            elif (search_msg.attachments.__len__() > 0):
-                await ctx.message.author.send("Saved it for ya")
-                for attachment in search_msg.attachments:
-                    await ctx.message.author.send(attachment.link)
-            
-            else:
-                await ctx.message.author.send("Saved it for ya")
-                await ctx.message.author.send(search_msg.jump_url)
+            await ctx.message.author.send(embed=construct_save_embed_img(search_msg))
 
     else:
         messages = await ctx.message.channel.history(limit=10).flatten()
         for mesg in messages:
             if mesg.attachments.__len__() > 0 or mesg.embeds.__len__() > 0:
-                await ctx.message.author.send('Saved it for ya!')
-                await ctx.message.author.send(mesg.jump_url)
+                await ctx.message.author.send(embed=construct_save_embed_img(mesg))
                 break
 
 
