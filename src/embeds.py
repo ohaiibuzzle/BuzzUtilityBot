@@ -19,8 +19,8 @@ def construct_saucenao_embed_pixiv(attachment: BasicSauce):
     #print(raw_json)
     
     illust = client.illust_detail(raw_json['data']['pixiv_id']).illust
-    print(illust)
-    
+    #print(illust)
+
     embed = discord.Embed(title='Sauce found!')
     embed.type = 'rich'
     embed.url = attachment.urls[0]
@@ -52,14 +52,17 @@ def construct_saucenao_embed_pixiv(attachment: BasicSauce):
     )
     
     tag_str = ''
-    for tag in illust.tags:
-        if tag.translated_name != None:
-            tag_str += tag.translated_name
-            tag_str += ', '
-        else:
-            tag_str += tag.name
-            tag_str += ', '
-    tag_str = tag_str[:-2]
+    if illust.tags.__len__() > 0 :
+        for tag in illust.tags:
+            if tag.translated_name != None:
+                tag_str += tag.translated_name
+                tag_str += ', '
+            else:
+                tag_str += tag.name
+                tag_str += ', '
+        tag_str = tag_str[:-2]
+    else:
+        tag_str = None
     
     embed.add_field (
         name = 'Tags',
@@ -78,7 +81,7 @@ def construct_save_embed_img(message: discord.Message):
     embed = discord.Embed(title = 'Saved!')
     
     embed.add_field(
-        name = 'Fom',
+        name = 'From',
         value = '@'+ message.author.name + '#' + message.author.discriminator +
         ' in #' + message.channel.name + ' on ' + message.channel.guild.name,
         inline = False

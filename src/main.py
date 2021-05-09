@@ -2,6 +2,8 @@ import discord
 from discord.ext import commands
 from saucenao import find_sauce
 from embeds import construct_saucenao_embed_pixiv, construct_save_embed_img
+from safebooru import random_image
+from iqdb import construct_iqdb_embed
 
 game = discord.Game("In Buzzle's Development Environment!")
 
@@ -28,21 +30,28 @@ async def on_message(message):
 
 @client.command()
 async def sauceplz(ctx):
-    print (ctx.message.author.name + '#' + ctx.message.author.discriminator + ' try to find sauce!')
+    print ('@' + ctx.message.author.name + '#' + ctx.message.author.discriminator + ' try to find sauce!')
     if (ctx.message.reference):
         if (ctx.message.reference.resolved != None):
             search_msg = ctx.message.reference.resolved
             if (search_msg.embeds.__len__() > 0):
                 for attachment in search_msg.embeds:
                     if attachment.image != None:
-                        found = find_sauce(attachment.url)
-                        print(attachment.url)
-                        if found == None:
-                            await ctx.send("I am sssorry, can't get your sauce :(")
-                            await ctx.send("Ask Buzzle why that is")
-                        else:
-                            att_embed = construct_saucenao_embed_pixiv(found)
-                            await ctx.send(embed=att_embed)
+                        try:
+                            found = find_sauce(attachment.url)
+                            print(attachment.url)
+                            if found == None:
+                                await ctx.send("I am sssorry, can't get your sauce :(")
+                                await ctx.send("Ask Buzzle why that is")
+                            else:
+                                try:
+                                    att_embed = construct_saucenao_embed_pixiv(found)
+                                    await ctx.send(embed=att_embed)
+                                except (discord.errors.HTTPException, AttributeError):
+                                    await ctx.send('Something went wrong and I can\'t look up your image.')
+                                    await ctx.send('Either it has been deleted or hidden by the author, or it isn\'t on Pixiv')
+                        except TypeError:
+                            ctx.send("I couldn't find anything :(")
             elif (search_msg.attachments.__len__() > 0):
                 for attachment in search_msg.attachments:
                     if attachment.content_type.startswith('image'):
@@ -52,14 +61,18 @@ async def sauceplz(ctx):
                             await ctx.send("I am sssorry, can't get your sauce :(")
                             await ctx.send("Ask Buzzle why that is")
                         else:
-                            att_embed = construct_saucenao_embed_pixiv(found)
-                            await ctx.send(embed=att_embed)
+                            try:
+                                att_embed = construct_saucenao_embed_pixiv(found)
+                                await ctx.send(embed=att_embed)
+                            except (discord.errors.HTTPException, AttributeError):
+                                await ctx.send('Something went wrong and I can\'t look up your image.')
+                                await ctx.send('Either it has been deleted or hidden by the author, or it isn\'t on Pixiv')
     else:
         await ctx.send("Please mention a message containing pasta!")
 
 @client.command()
 async def savethis(ctx):
-    print (ctx.message.author.name + '#' + ctx.message.author.discriminator + ' try to save!')
+    print ('@' + ctx.message.author.name + '#' + ctx.message.author.discriminator + ' try to save!')
     if (ctx.message.reference):
         if (ctx.message.reference.resolved != None):
             search_msg = ctx.message.reference.resolved
@@ -72,6 +85,63 @@ async def savethis(ctx):
                 await ctx.message.author.send(embed=construct_save_embed_img(mesg))
                 break
 
+@client.command()
+async def sbrandom(ctx, *args):
+    print ('@' + ctx.message.author.name + '#' + ctx.message.author.discriminator + ' wants something random!')
+    tags = ' '.join(args)
+    target = random_image(tags.split('+'))
+    if target:
+        await ctx.send(embed=target)
+    else:
+        await ctx.send("Your search returned no result :(")           
+
+@client.command()
+async def oofie(ctx):
+    print ('Uh oh, @' + ctx.message.author.name + '#' + ctx.message.author.discriminator + ' told us we messed up!')
+    messages = await ctx.channel.history(limit=10).flatten()
+    for mesg in messages:
+        if mesg.author == client.user:
+            await mesg.delete()
+            break
+
+@client.command()
+async def iqdb(ctx):
+    print ('@' + ctx.message.author.name + '#' + ctx.message.author.discriminator + ' try to find sauce on IQDB!')
+    if (ctx.message.reference):
+        if (ctx.message.reference.resolved != None):
+            search_msg = ctx.message.reference.resolved
+            if (search_msg.embeds.__len__() > 0):
+                for attachment in search_msg.embeds:
+                    if attachment.image != None:
+                        try:
+                            found = construct_iqdb_embed(attachment.url)
+                            print(attachment.url)
+                            if found == None:
+                                await ctx.send("I am sssorry, can't get your sauce :(")
+                                await ctx.send("Ask Buzzle why that is")
+                            else:
+                                try:
+                                    await ctx.send(embed=found)
+                                except (discord.errors.HTTPException, AttributeError):
+                                    await ctx.send('Something went wrong and I can\'t look up your image.')
+                                    await ctx.send('Either it has been deleted or hidden by the author, or it isn\'t on Pixiv')
+                        except TypeError:
+                            await ctx.send("I couldn't find anything :(")
+            elif (search_msg.attachments.__len__() > 0):
+                for attachment in search_msg.attachments:
+                    if attachment.content_type.startswith('image'):
+                        found = construct_iqdb_embed(attachment.url)
+                        if found == None:
+                            await ctx.send("I am sssorry, can't get your sauce :(")
+                            await ctx.send("Ask Buzzle why that is")
+                        else:
+                            try:
+                                await ctx.send(embed=found)
+                            except (discord.errors.HTTPException, AttributeError):
+                                await ctx.send('Something went wrong and I can\'t look up your image.')
+                                await ctx.send('Either it has batt_embedeen deleted or hidden by the author, or it isn\'t on Pixiv')
+    else:
+        await ctx.send("Please mention a message containing pasta!")
 
 key = ''
 with open('discord.key', 'r') as keyfile:
