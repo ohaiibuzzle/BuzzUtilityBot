@@ -152,15 +152,14 @@ async def zcrandom(ctx, *args):
     tags = ' '.join(args).strip()
     tags = tags.replace('+', ',')
     try:
-        res = construct_zerochan_embed(tags)
+        res = construct_zerochan_embed(ctx.channel, tags)
     except TypeError:
-        await ctx.send('Your search string was too wide. Narrow the query to try again')
+        await ctx.send('Your search string was too wide, or it included NSFW tags.\nNarrow the query to try again')
         return
     if res != None:
         await ctx.send(embed=res)
     else:
         await ctx.send("Sorry, I can't find you anything :( \nEither check your search, or Buzzle banned a tag in the result")
-        
 
 key = ''
 with open('discord.key', 'r') as keyfile:

@@ -8,9 +8,9 @@ from discord import Embed
 global random_gen
 random_gen = SystemRandom()
 
-pls_no_tags = ['Nipples', 'Bend Over', 'Panties', 'Bra']
+pls_no_tags = ['Nipples', 'Bend Over', 'Panties', 'Bra', 'Underwear', 'Lingerie']
 
-def search_zerochan(query: str):
+def search_zerochan(bypass, query: str):
     is_tag = True
     random_gen = SystemRandom()
     target = 'https://zerochan.net/search?q='
@@ -46,14 +46,17 @@ def search_zerochan(query: str):
         for _ in range(3):
             choice = random_gen.randint(0, total_amount)
             if choice < item_amount-1:
+                if choice < 0:
+                    choice = 0
                 item = soup.find_all('item')[choice]
                 
-                kw = item.find('media:keywords').text.strip()
-                
-                for x in pls_no_tags:
-                    if x in kw:
-                        print('Found banned tag: ' + x)
-                        continue
+                if not bypass:
+                    kw = item.find('media:keywords').text.strip()
+                    
+                    for x in pls_no_tags:
+                        if x in kw:
+                            print('Found banned tag: ' + x)
+                            continue
                     
                 #print(item)
                 
@@ -68,15 +71,18 @@ def search_zerochan(query: str):
             else:
                 page = int(choice / (item_amount - 1))
                 c = choice % (item_amount)
+                if c < 0:
+                    c = 0
                 soup = BeautifulSoup(requests.get(tag_target+query+'?xml'+pagination+str(page)).content, features='lxml')
                 item = soup.find_all('item')[c]
                 
-                kw = item.find('media:keywords').text.strip()
-                
-                for x in pls_no_tags:
-                    if x in kw:
-                        print('Found banned tag: ' + x)
-                        continue
+                if not bypass:
+                    kw = item.find('media:keywords').text.strip()
+                    
+                    for x in pls_no_tags:
+                        if x in kw:
+                            print('Found banned tag: ' + x)
+                            continue
                 
                 #print(item)
 
@@ -92,12 +98,13 @@ def search_zerochan(query: str):
             c = random_gen.randint(0, item_amount-1)
             item = soup.find_all('item')[c]
             
-            kw = item.find('media:keywords').text.strip()
-            
-            for x in pls_no_tags:
-                    if x in kw:
-                        print('Found banned tag: ' + x)
-                        continue
+            if not bypass:
+                kw = item.find('media:keywords').text.strip()
+                
+                for x in pls_no_tags:
+                        if x in kw:
+                            print('Found banned tag: ' + x)
+                            continue
 
             #print(item)
 
@@ -109,8 +116,8 @@ def search_zerochan(query: str):
                 'keywords': item.find('media:keywords').text.replace(chr(0x09), '').replace('\r\n', ' ').strip()
             }
 
-def construct_zerochan_embed(query: str):
-    res = search_zerochan(query)
+def construct_zerochan_embed(ch, query: str):
+    res = search_zerochan(ch.is_nsfw(), query)
     if res == None:
         return None
     else:
@@ -132,7 +139,7 @@ def construct_zerochan_embed(query: str):
         
     
 if __name__ == '__main__':
-    res = search_zerochan('hu tao,xiao (genshin impact)')
+    res = search_zerochan(None, 'hu tao,xiao (genshin impact)')
 
     if res != None:
         print(res)
