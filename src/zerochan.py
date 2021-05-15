@@ -54,9 +54,12 @@ def search_zerochan(query: str):
                     if x in kw:
                         print('Found banned tag: ' + x)
                         continue
+                    
+                #print(item)
                 
                 return {
-                    'title': item.find('media:title').string,
+                    'link': item.find('guid').text,
+                    'title': item.find('media:title').text,
                     'thumbnail': item.find('media:thumbnail')['url'],
                     'content': item.find('media:content')['url'],
                     'keywords': item.find('media:keywords').text.replace(chr(0x09), '').replace('\r\n', ' ').strip()
@@ -64,9 +67,9 @@ def search_zerochan(query: str):
 
             else:
                 page = int(choice / (item_amount - 1))
-                choice = choice % (item_amount)
+                c = choice % (item_amount)
                 soup = BeautifulSoup(requests.get(tag_target+query+'?xml'+pagination+str(page)).content, features='lxml')
-                item = soup.find_all('item')[choice]
+                item = soup.find_all('item')[c]
                 
                 kw = item.find('media:keywords').text.strip()
                 
@@ -74,8 +77,11 @@ def search_zerochan(query: str):
                     if x in kw:
                         print('Found banned tag: ' + x)
                         continue
+                
+                #print(item)
 
                 return {
+                    'link': item.find('guid').text,
                     'title': item.find('media:title').text,
                     'thumbnail': item.find('media:thumbnail')['url'],
                     'content': item.find('media:content')['url'],
@@ -83,18 +89,21 @@ def search_zerochan(query: str):
                 }
     else:
         for _ in range(3):
-            choice = random_gen.randint(0, item_amount-1)
+            c = random_gen.randint(0, item_amount-1)
+            item = soup.find_all('item')[c]
+            
             kw = item.find('media:keywords').text.strip()
             
             for x in pls_no_tags:
                     if x in kw:
                         print('Found banned tag: ' + x)
                         continue
-            
-            item = soup.find_all('item')[choice]
+
+            #print(item)
 
             return {
-                'title': item.find('media:title').string,
+                'link': item.find('guid').text,
+                'title': item.find('media:title').text,
                 'thumbnail': item.find('media:thumbnail')['url'],
                 'content': item.find('media:content')['url'],
                 'keywords': item.find('media:keywords').text.replace(chr(0x09), '').replace('\r\n', ' ').strip()
@@ -106,7 +115,7 @@ def construct_zerochan_embed(query: str):
         return None
     else:
         embed = Embed(title=res['title'])
-        embed.url = res['content']
+        embed.url = res['link']
         embed.set_image(url=res['content'])
         
         embed.add_field(

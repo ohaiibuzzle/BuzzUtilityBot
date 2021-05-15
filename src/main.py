@@ -100,6 +100,7 @@ async def sbrandom(ctx, *args):
 @client.command()
 async def oofie(ctx):
     print ('Uh oh, @' + ctx.message.author.name + '#' + ctx.message.author.discriminator + ' told us we messed up!')
+    await ctx.message.delete()
     messages = await ctx.channel.history(limit=10).flatten()
     for mesg in messages:
         if mesg.author == client.user:
@@ -149,6 +150,7 @@ async def iqdb(ctx):
 async def zcrandom(ctx, *args):
     print ('@' + ctx.message.author.name + '#' + ctx.message.author.discriminator + ' wants something random(zerochan)!')
     tags = ' '.join(args).strip()
+    tags = tags.replace('+', ',')
     try:
         res = construct_zerochan_embed(tags)
     except TypeError:
