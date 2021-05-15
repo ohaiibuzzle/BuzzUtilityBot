@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from saucenao import find_sauce
 from embeds import construct_saucenao_embed_pixiv, construct_save_embed_img
+from zerochan import construct_zerochan_embed
 from safebooru import random_image
 from iqdb import construct_iqdb_embed
 
@@ -87,8 +88,9 @@ async def savethis(ctx):
 
 @client.command()
 async def sbrandom(ctx, *args):
-    print ('@' + ctx.message.author.name + '#' + ctx.message.author.discriminator + ' wants something random!')
+    print ('@' + ctx.message.author.name + '#' + ctx.message.author.discriminator + ' wants something random (SafeBooru)!')
     tags = ' '.join(args)
+    tags = tags.replace('+', ',')
     target = random_image(tags.split('+'))
     if target:
         await ctx.send(embed=target)
@@ -142,6 +144,21 @@ async def iqdb(ctx):
                                 await ctx.send('Either it has batt_embedeen deleted or hidden by the author, or it isn\'t on Pixiv')
     else:
         await ctx.send("Please mention a message containing pasta!")
+
+@client.command()
+async def zcrandom(ctx, *args):
+    print ('@' + ctx.message.author.name + '#' + ctx.message.author.discriminator + ' wants something random(zerochan)!')
+    tags = ' '.join(args).strip()
+    try:
+        res = construct_zerochan_embed(tags)
+    except TypeError:
+        await ctx.send('Your search string was too wide. Narrow the query to try again')
+        return
+    if res != None:
+        await ctx.send(embed=res)
+    else:
+        await ctx.send("Sorry, I can't find you anything :( \nEither check your search, or Buzzle banned a tag in the result")
+        
 
 key = ''
 with open('discord.key', 'r') as keyfile:
