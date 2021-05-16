@@ -18,7 +18,7 @@ def get_image(tags:str, position: int):
         return None
     try:
         post = soup.find_all('post')[position]
-        print(position)
+        #print(position)
         
         embed = discord.Embed(title="Your random image!")
         embed.set_image(url = post.get('file_url'))

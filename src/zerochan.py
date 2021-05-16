@@ -10,6 +10,14 @@ random_gen = SystemRandom()
 
 pls_no_tags = ['Nipples', 'Bend Over', 'Panties', 'Bra', 'Underwear', 'Lingerie']
 
+def kw_filter(keywords: str):
+    for x in pls_no_tags:
+        if x in keywords:
+            print('Found banned tag: ' + x)
+            return False
+    return True
+                    
+
 def search_zerochan(bypass, query: str):
     is_tag = True
     random_gen = SystemRandom()
@@ -22,12 +30,20 @@ def search_zerochan(bypass, query: str):
         'referer':'https://www.zerochan.net/'
     }
 
-    soup = BeautifulSoup(requests.get(tag_target+query+xml_specifier, headers=headers).content, features='lxml')
-    if soup.find_all('item'):
+    res = requests.get(tag_target+query+xml_specifier, headers=headers)
+    
+    if not '?xml' in res.url:
         is_tag = True
+        soup = BeautifulSoup(requests.get(res.url+xml_specifier, headers=headers).content, features='lxml')
+        query = res.url.split('/')[-1].replace('+', ' ')
+        #print(query)
+    elif 'application/rss+xml' in str(res.content):
+        is_tag = True
+        soup = BeautifulSoup(res.content, features = 'lxml')
     else:
         soup = BeautifulSoup(requests.get(target+query+'&xml', headers=headers).content, features='lxml')
-        sleep(1)
+        is_tag = False
+        sleep(0.5)
     
     total_amount = 0
     item_amount = len(soup.find_all('item'))
@@ -43,9 +59,11 @@ def search_zerochan(bypass, query: str):
             total_amount = int(re.search(r'\d{1,3}(,\d{3})*(\.\d+)?', soup.find('description').text)[0].replace(',',''))
         except TypeError:
             total_amount = item_amount
+
         for _ in range(3):
-            choice = random_gen.randint(0, total_amount)
+            choice = random_gen.randint(0, total_amount-1)
             if choice < item_amount-1:
+                
                 if choice < 0:
                     choice = 0
                 item = soup.find_all('item')[choice]
@@ -53,10 +71,8 @@ def search_zerochan(bypass, query: str):
                 if not bypass:
                     kw = item.find('media:keywords').text.strip()
                     
-                    for x in pls_no_tags:
-                        if x in kw:
-                            print('Found banned tag: ' + x)
-                            continue
+                    if not kw_filter(kw):
+                        continue
                     
                 #print(item)
                 
@@ -69,20 +85,26 @@ def search_zerochan(bypass, query: str):
                 }
 
             else:
-                page = int(choice / (item_amount - 1))
-                c = choice % (item_amount)
+                page = int(choice / (item_amount))+1
+                page_soup = BeautifulSoup(requests.get(tag_target+query+'?xml'+pagination+str(page)).content, features='lxml')
+                
+                if 'Some content is for members only, please' in page_soup.text:
+                    continue
+                
+                c = choice % (page_soup.find_all('item').__len__())
                 if c < 0:
                     c = 0
-                soup = BeautifulSoup(requests.get(tag_target+query+'?xml'+pagination+str(page)).content, features='lxml')
-                item = soup.find_all('item')[c]
+                    
+                try:
+                    item = page_soup.find_all('item')[c]
+                except ZeroDivisionError:
+                    return None
                 
                 if not bypass:
                     kw = item.find('media:keywords').text.strip()
                     
-                    for x in pls_no_tags:
-                        if x in kw:
-                            print('Found banned tag: ' + x)
-                            continue
+                    if not kw_filter(kw):
+                        continue
                 
                 #print(item)
 
@@ -95,16 +117,15 @@ def search_zerochan(bypass, query: str):
                 }
     else:
         for _ in range(3):
+            
             c = random_gen.randint(0, item_amount-1)
             item = soup.find_all('item')[c]
             
             if not bypass:
                 kw = item.find('media:keywords').text.strip()
                 
-                for x in pls_no_tags:
-                        if x in kw:
-                            print('Found banned tag: ' + x)
-                            continue
+                if not kw_filter(kw):
+                    continue
 
             #print(item)
 
@@ -139,7 +160,7 @@ def construct_zerochan_embed(ch, query: str):
         
     
 if __name__ == '__main__':
-    res = search_zerochan(None, 'hu tao,xiao (genshin impact)')
+    res = search_zerochan(False, 'Tatsumaki')
 
     if res != None:
         print(res)
