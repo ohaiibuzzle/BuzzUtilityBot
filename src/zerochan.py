@@ -12,7 +12,7 @@ pls_no_tags = ['Nipples', 'Bend Over', 'Panties', 'Bra', 'Underwear', 'Lingerie'
 
 def kw_filter(keywords: str):
     for x in pls_no_tags:
-        if x in keywords:
+        if re.search(r"\b" + re.escape(x) + r"\b", keywords):
             print('Found banned tag: ' + x)
             return False
     return True
