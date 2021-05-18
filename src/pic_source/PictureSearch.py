@@ -26,7 +26,7 @@ class PictureSearch(commands.Cog, name='Random image finder'):
                           Combine tags using "+"',
                           aliases=['zcr'])
     async def zcrandom(self, ctx, *args):
-        with ctx.channel.typing():
+        async with ctx.channel.typing():
             print ('@' + ctx.message.author.name + '#' + ctx.message.author.discriminator + ' wants something random(zerochan)!')
             tags = ' '.join(args).strip()
             tags = tags.replace('+', ',')
