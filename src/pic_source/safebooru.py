@@ -48,7 +48,7 @@ def convert_to_sb_tag(tags: str):
     #print(ret)
     return ret
 
-def random_image(tags: str):
+def safebooru_random_img(tags: str):
     global random_gen
     random_gen = random.SystemRandom()
     tags = convert_to_sb_tag(tags)
@@ -62,5 +62,5 @@ if __name__ == "__main__":
     arg = 'Ganyu (Genshin Impact) + Amber (Genshin Impact)'
     args = arg.split('+')
     
-    print(random_image(args).to_dict())
+    print(safebooru_random_img(args).to_dict())
     pass
