@@ -3,6 +3,7 @@ from discord.ext import commands
 from pic_source.PictureSearch import PictureSearch
 from sauce_find.SauceFinder import SauceFinder
 from utils.MessageUtils import MessageUtils
+from tf_image_processor.TFImage import TFImage
 
 client = commands.Bot(command_prefix='.', owner_id=169257697345011712)
 
@@ -15,6 +16,7 @@ async def on_ready():
 client.add_cog(PictureSearch(client))
 client.add_cog(SauceFinder(client))
 client.add_cog(MessageUtils(client))
+client.add_cog(TFImage(client))
 
 key = ''
 with open('discord.key', 'r') as keyfile:

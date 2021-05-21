@@ -5,10 +5,28 @@ from bs4 import BeautifulSoup
 from random import SystemRandom, random
 from discord import Embed
 
+from tf_image_processor.tf_process import process_url
+
 global random_gen
 random_gen = SystemRandom()
 
-pls_no_tags = ['Nipples', 'Bend Over', 'Panties', 'Bra', 'Underwear', 'Lingerie']
+pls_no_tags = ['Nipples'] #The AI *should* handle these, 'Bend Over', 'Panties', 'Bra', 'Underwear', 'Lingerie']
+
+def tf_scan(url:str):
+    try:
+        res = process_url(url)
+    except ValueError:
+        return True
+    if res['(o-_-o) (H)'][0] >= 0.60:
+        print('AI test failed with H content')
+        return False
+    if res['(╬ Ò﹏Ó) (P)'][0] >= 0.5:
+        print('AI test failed with P content')
+        return False
+    if res['(°ㅂ°╬) (S)'][0] >= 0.5:
+        print('AI test failed with S content')
+        return False
+    return True
 
 def kw_filter(keywords: str):
     for x in pls_no_tags:
@@ -43,7 +61,7 @@ def search_zerochan(bypass, query: str):
     else:
         soup = BeautifulSoup(requests.get(target+query+'&xml', headers=headers).content, features='lxml')
         is_tag = False
-        sleep(0.5)
+        #sleep(0.5)
     
     total_amount = 0
     item_amount = len(soup.find_all('item'))
@@ -72,6 +90,9 @@ def search_zerochan(bypass, query: str):
                     kw = item.find('media:keywords').text.strip()
                     
                     if not kw_filter(kw):
+                        continue
+                    
+                    if not tf_scan(item.find('media:thumbnail')['url']):
                         continue
                     
                 #print(item)

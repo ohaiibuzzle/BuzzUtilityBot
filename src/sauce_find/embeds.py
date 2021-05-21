@@ -77,5 +77,6 @@ def construct_saucenao_embed_pixiv(attachment: BasicSauce):
     
     return embed
 
+
 if __name__ == '__main__':
     print(construct_saucenao_embed_pixiv(find_sauce('https://i.pximg.net/img-master/img/2021/04/21/18/00/47/89297449_p0_master1200.jpg')))

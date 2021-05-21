@@ -15,7 +15,7 @@ class PictureSearch(commands.Cog, name='Random image finder'):
         async with ctx.channel.typing():
             tags = ' '.join(args)
             tags = tags.replace('+', ',')
-            target = safebooru_random_img(tags.split('+'))
+            target = safebooru_random_img(tags.split('+'), ctx.channel)
             if target:
                 await ctx.send(embed=target)
             else:
