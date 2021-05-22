@@ -1,5 +1,5 @@
 from discord import Embed, Color
-from tf_image_processor.tf_process import process_url
+from .tf_process import process_url
 
 def tensorflow_embed(url: str):
     result = process_url(url)

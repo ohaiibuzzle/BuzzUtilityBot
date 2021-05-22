@@ -1,10 +1,15 @@
 from discord.ext import commands
-from sauce_find.saucenao import find_sauce
-from sauce_find.embeds import construct_saucenao_embed_pixiv
-from sauce_find.iqdb import construct_iqdb_embed
+from .saucenao import find_sauce
+from .embeds import construct_saucenao_embed_pixiv
+from .iqdb import construct_iqdb_embed
 import discord
 
+image_format = ['.jpg', '.JPG',
+                '.png', '.PNG',
+                '.gif']
+
 class SauceFinder(commands.Cog, name='Picture Sauce Finding'):
+  
     def __init__(self, client):
         self.client = client
         
@@ -94,3 +99,6 @@ class SauceFinder(commands.Cog, name='Picture Sauce Finding'):
                                         await ctx.send('Either it has batt_embedeen deleted or hidden by the author, or it isn\'t on Pixiv')
             else:
                 await ctx.send("Please mention a message containing pasta!")
+                
+def setup(client):
+    client.add_cog(SauceFinder(client))

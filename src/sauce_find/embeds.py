@@ -1,5 +1,5 @@
 from saucenao_api import BasicSauce
-from sauce_find.saucenao import find_sauce
+from .saucenao import find_sauce
 import json
 import discord 
 import pixivpy3 

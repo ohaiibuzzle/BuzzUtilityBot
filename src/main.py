@@ -1,9 +1,6 @@
 import discord
 from discord.ext import commands
-from pic_source.PictureSearch import PictureSearch
-from sauce_find.SauceFinder import SauceFinder
-from utils.MessageUtils import MessageUtils
-from tf_image_processor.TFImage import TFImage
+from utils.AdminTools import AdminTools
 
 client = commands.Bot(command_prefix='.', owner_id=169257697345011712)
 
@@ -13,10 +10,12 @@ async def on_ready():
     game = discord.Game("in Buzzle's Box. Available on GitHub")
     await client.change_presence(status=discord.Status.online, activity=game)
 
-client.add_cog(PictureSearch(client))
-client.add_cog(SauceFinder(client))
-client.add_cog(MessageUtils(client))
-client.add_cog(TFImage(client))
+client.add_cog(AdminTools(client))
+
+client.load_extension('pic_source.PictureSearch')
+client.load_extension('sauce_find.SauceFinder')
+client.load_extension('tf_image_processor.TFImage')
+client.load_extension('utils.MessageUtils')
 
 key = ''
 with open('discord.key', 'r') as keyfile:

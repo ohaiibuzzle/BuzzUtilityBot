@@ -36,6 +36,8 @@ def process_url(url: str):
     image = image[:,:,:3]
     image /= 255
     
+    np.savetxt('test.csv', image.reshape((3,-1)), delimiter=',')
+    
     preds = model.predict(np.asarray([image]))
     
     preds_dict = {}
@@ -44,7 +46,7 @@ def process_url(url: str):
         
     return preds_dict
 
-model = load_model('./src/tf_image_processor/models/')
+model = load_model('./src/tf_image_processor/models/mobileNet/nsfw_mobilenet2.224x224.h5')
 categories = ['(o･ω･o) (D)', '(o-_-o) (H)', '(ﾉ´ з `)ノ (N)', '(╬ Ò﹏Ó) (P)', '(°ㅂ°╬) (S)']
 colors = [0xD53113, 0x5B17B1, 0x2299B8, 0x6B1616, 0x1EB117]
 

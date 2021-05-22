@@ -1,6 +1,6 @@
 from discord.ext import commands
-from pic_source.safebooru import safebooru_random_img
-from pic_source.zerochan import construct_zerochan_embed
+from .safebooru import safebooru_random_img
+from .zerochan import construct_zerochan_embed
 
 class PictureSearch(commands.Cog, name='Random image finder'):
     def __init__(self, client):
@@ -39,3 +39,6 @@ class PictureSearch(commands.Cog, name='Random image finder'):
                 await ctx.send(embed=res)
             else:
                 await ctx.send("Sorry, I can't find you anything :( \nEither check your search, or Buzzle banned a tag in the result")
+                
+def setup(client):
+    client.add_cog(PictureSearch(client))

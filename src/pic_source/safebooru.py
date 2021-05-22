@@ -76,7 +76,11 @@ def safebooru_random_img(tags: str, ch):
     global random_gen
     random_gen = random.SystemRandom()
     tags = convert_to_sb_tag(tags)
-    emb = get_image(tags, random_gen.randint(0,99), ch.is_nsfw())
+
+    if ch.type is not discord.ChannelType.private:
+        emb = get_image(tags, random_gen.randint(0,99), ch.is_nsfw())
+    else:
+        emb = get_image(tags, random_gen.randint(0,99), True)
     if emb:
         return emb
     else:
@@ -86,5 +90,5 @@ if __name__ == "__main__":
     arg = 'Ganyu (Genshin Impact) + Amber (Genshin Impact)'
     args = arg.split('+')
     
-    #print(safebooru_random_img(args).to_dict(), )
+    #print(safebooru_random_img(args).to_dict(), discord.ext.commands.Context())
     pass

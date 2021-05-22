@@ -3,7 +3,7 @@ import re
 from time import sleep
 from bs4 import BeautifulSoup
 from random import SystemRandom, random
-from discord import Embed
+from discord import Embed, ChannelType
 
 from tf_image_processor.tf_process import process_url
 
@@ -159,7 +159,10 @@ def search_zerochan(bypass, query: str):
             }
 
 def construct_zerochan_embed(ch, query: str):
-    res = search_zerochan(ch.is_nsfw(), query)
+    if ch.type is not ChannelType.private:
+        res = search_zerochan(ch.is_nsfw(), query)
+    else: 
+        res = search_zerochan(True, query)
     if res == None:
         return None
     else:

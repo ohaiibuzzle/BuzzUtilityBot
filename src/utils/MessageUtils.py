@@ -1,6 +1,6 @@
 from discord.ext import commands
 import discord
-from utils.embeds import construct_save_embed_img
+from .embeds import construct_save_embed_img
 
 class MessageUtils(commands.Cog, name='Message Utilities'):
     def __init__(self, client):
@@ -47,3 +47,7 @@ class MessageUtils(commands.Cog, name='Message Utilities'):
             if mesg.author == self.client.user:
                 await mesg.delete()
                 break
+
+
+def setup(client):
+    client.add_cog(MessageUtils(client))

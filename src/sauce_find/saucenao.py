@@ -6,12 +6,12 @@ key=''
 with open('saucenao.key', 'r') as keyfile:
     key = keyfile.readline()
 
-saucer = SauceNao(key, dbmask=int(0x10000000020))
+saucer = SauceNao(key, db=DB.Pixiv_Images)
 
 def find_sauce(url):
     try:
         results = saucer.from_url(url)
-        return results
+        return results[0]
     except SauceNaoApiError as e:
         print(e)
         return None

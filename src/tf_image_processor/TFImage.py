@@ -1,5 +1,5 @@
 from discord.ext import commands
-from tf_image_processor.embeds import tensorflow_embed
+from .embeds import tensorflow_embed
 from PIL import UnidentifiedImageError
 
 class TFImage(commands.Cog, name="AI-based image rating"):
@@ -33,4 +33,7 @@ class TFImage(commands.Cog, name="AI-based image rating"):
                                     await ctx.send("Hey, that is not an image")
                                 pass                                
             else:
-                await ctx.send("Please mention a message containing pasta!")
+                await ctx.send("Hey, at least send me something! :(")
+                                
+def setup(client):
+    client.add_cog(TFImage(client))
