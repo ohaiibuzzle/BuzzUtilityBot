@@ -6,6 +6,7 @@ class AdminTools(commands.Cog, name='Administration Tools'):
         pass
     
     @commands.command(hidden=True)
+    @commands.is_owner()
     async def loadCog(self, ctx, *, module):
         try:
             self.client.load_extension(module)
@@ -16,6 +17,7 @@ class AdminTools(commands.Cog, name='Administration Tools'):
             await ctx.send('Done!')
 
     @commands.command(hidden=True)
+    @commands.is_owner()
     async def unloadCog(self, ctx, *, module):
         try:
             self.client.unload_extension(module)
@@ -26,6 +28,7 @@ class AdminTools(commands.Cog, name='Administration Tools'):
             await ctx.send('Done!')
 
     @commands.group(hidden=True, invoke_without_command=True)
+    @commands.is_owner()
     async def reloadCog(self, ctx, *, module):
         try:
             self.client.reload_extension(module)
@@ -34,6 +37,10 @@ class AdminTools(commands.Cog, name='Administration Tools'):
             await ctx.send(f'{e.__class__.__name__}: {e}')
         else:
             await ctx.send('Done!')
+    @commands.command(hidden=True)
+    @commands.is_owner()
+    async def leaveServer(self, ctx):
+        await ctx.guild.leave()
 
 def setup(client):
     client.add_cog(AdminTools(client))
