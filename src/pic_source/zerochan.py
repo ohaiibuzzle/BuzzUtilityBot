@@ -16,7 +16,10 @@ def tf_scan(url:str):
     try:
         res = process_url(url)
     except ValueError:
+        print("AI Error")
         return True
+    
+    print(res)
     if res['(o-_-o) (H)'][0] >= 0.60:
         print('AI test failed with H content')
         return False
@@ -50,16 +53,21 @@ def search_zerochan(bypass, query: str):
 
     res = requests.get(tag_target+query+xml_specifier, headers=headers)
     
-    if not '?xml' in res.url:
+    url = ''
+    
+    if not '?xml' in res.url: #Hit a tag
         is_tag = True
         soup = BeautifulSoup(requests.get(res.url+xml_specifier, headers=headers).content, features='lxml')
+        url = res.url+xml_specifier
         query = res.url.split('/')[-1].replace('+', ' ')
         #print(query)
     elif 'application/rss+xml' in str(res.content):
         is_tag = True
         soup = BeautifulSoup(res.content, features = 'lxml')
+        url = res.url
     else:
         soup = BeautifulSoup(requests.get(target+query+'&xml', headers=headers).content, features='lxml')
+        url = target+query+'&xml'
         is_tag = False
         #sleep(0.5)
     
@@ -126,6 +134,8 @@ def search_zerochan(bypass, query: str):
                     
                     if not kw_filter(kw):
                         continue
+                    if not tf_scan(item.find('media:thumbnail')['url']):
+                        continue
                 
                 #print(item)
 
@@ -147,6 +157,8 @@ def search_zerochan(bypass, query: str):
                 
                 if not kw_filter(kw):
                     continue
+                if not tf_scan(item.find('media:thumbnail')['url']):
+                        continue
 
             #print(item)
 
@@ -177,7 +189,7 @@ def construct_zerochan_embed(ch, query: str):
         )
         embed.add_field(
             name = 'Tags',
-            value = '```\n' + res['keywords'] + '\n```',
+            value = '```\n' + res['keywords'][:1018] + '\n```',
             inline = False
         )
         return embed

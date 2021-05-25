@@ -14,7 +14,6 @@ class PictureSearch(commands.Cog, name='Random image finder'):
         print ('@' + ctx.message.author.name + '#' + ctx.message.author.discriminator + ' wants something random (SafeBooru)!')
         async with ctx.channel.typing():
             tags = ' '.join(args)
-            tags = tags.replace('+', ',')
             target = safebooru_random_img(tags.split('+'), ctx.channel)
             if target:
                 await ctx.send(embed=target)
@@ -32,7 +31,8 @@ class PictureSearch(commands.Cog, name='Random image finder'):
             tags = tags.replace('+', ',')
             try:
                 res = construct_zerochan_embed(ctx.channel, tags)
-            except TypeError:
+            except TypeError as e:
+                print(e)
                 await ctx.send('Your search string was too wide, or it included NSFW tags.\nNarrow the query to try again')
                 return
             if res != None:

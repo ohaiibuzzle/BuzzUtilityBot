@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from utils.AdminTools import AdminTools
 
-client = commands.Bot(command_prefix='.', owner_id=169257697345011712)
+client = commands.Bot(command_prefix='.')
 
 @client.event
 async def on_ready():

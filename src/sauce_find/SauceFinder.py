@@ -4,10 +4,6 @@ from .embeds import construct_saucenao_embed_pixiv
 from .iqdb import construct_iqdb_embed
 import discord
 
-image_format = ['.jpg', '.JPG',
-                '.png', '.PNG',
-                '.gif']
-
 class SauceFinder(commands.Cog, name='Picture Sauce Finding'):
   
     def __init__(self, client):

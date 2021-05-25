@@ -1,5 +1,5 @@
 from saucenao_api import BasicSauce
-from .saucenao import find_sauce
+from sauce_find.saucenao import find_sauce
 import json
 import discord 
 import pixivpy3 
@@ -28,7 +28,7 @@ def construct_saucenao_embed_pixiv(attachment: BasicSauce):
     embed.set_thumbnail(url=attachment.thumbnail)
     
     embed.add_field(
-        name = 'Title',
+        name = 'Title'+' ',
         value = illust.title,
         inline = False
     )

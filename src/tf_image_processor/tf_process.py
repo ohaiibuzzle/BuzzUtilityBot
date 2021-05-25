@@ -10,8 +10,6 @@ import tensorflow_hub as hub
 from PIL import Image
 import requests
 
-
-
 IMAGE_DIM = 224
 
 def load_model(model_path):
