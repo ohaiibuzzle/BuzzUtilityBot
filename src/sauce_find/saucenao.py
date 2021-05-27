@@ -3,7 +3,7 @@ from saucenao_api.errors import SauceNaoApiError, ShortLimitReachedError
 from saucenao_api.params import DB, Hide, BgColor
 
 key=''
-with open('saucenao.key', 'r') as keyfile:
+with open('runtime/saucenao.key', 'r') as keyfile:
     key = keyfile.readline()
 
 saucer = SauceNao(key, db=DB.Pixiv_Images)

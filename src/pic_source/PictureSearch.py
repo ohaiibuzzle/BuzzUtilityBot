@@ -1,6 +1,7 @@
 from discord.ext import commands
 from .safebooru import safebooru_random_img
 from .zerochan import construct_zerochan_embed
+from requests.exceptions import ConnectionError
 
 class PictureSearch(commands.Cog, name='Random image finder'):
     def __init__(self, client):
@@ -14,11 +15,15 @@ class PictureSearch(commands.Cog, name='Random image finder'):
         print ('@' + ctx.message.author.name + '#' + ctx.message.author.discriminator + ' wants something random (SafeBooru)!')
         async with ctx.channel.typing():
             tags = ' '.join(args)
-            target = safebooru_random_img(tags.split('+'), ctx.channel)
-            if target:
-                await ctx.send(embed=target)
+            try:
+                target = safebooru_random_img(tags.split('+'), ctx.channel)
+            except ConnectionError:
+                await ctx.send("Buzzle's Internet broke :(\n(Try again in a few minutes, server is under high load)")
             else:
-                await ctx.send("Your search returned no result :(")           
+                if target:
+                    await ctx.send(embed=target)
+                else:
+                    await ctx.send("Your search returned no result :(")           
     
     @commands.command(brief='Random image from ZeroChan',
                       description='Look for a random image on ZeroChan, input can be any of ZeroChan\'s tag query\n\
@@ -35,10 +40,13 @@ class PictureSearch(commands.Cog, name='Random image finder'):
                 print(e)
                 await ctx.send('Your search string was too wide, or it included NSFW tags.\nNarrow the query to try again')
                 return
-            if res != None:
-                await ctx.send(embed=res)
+            except ConnectionError:
+                await ctx.send("Buzzle's Internet broke :(\n(Try again in a few minutes, server is under high load)")
             else:
-                await ctx.send("Sorry, I can't find you anything :( \nEither check your search, or Buzzle banned a tag in the result")
+                if res != None:
+                    await ctx.send(embed=res)
+                else:
+                    await ctx.send("Sorry, I can't find you anything :( \nEither check your search, or Buzzle banned a tag in the result")
                 
 def setup(client):
     client.add_cog(PictureSearch(client))

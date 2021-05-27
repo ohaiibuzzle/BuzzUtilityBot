@@ -28,9 +28,11 @@ def tf_scan(url:str):
     return True
 
 def get_image(tags:str, bypass=False):
-    soup = BeautifulSoup(requests.get(endpoint + tags).text, "lxml")
+    soup = BeautifulSoup(requests.get(endpoint + tags, timeout=15).text, "lxml")
     count = int(soup.find('posts')['count'])
     
+    print(endpoint + tags)
+    print(count)
     try:
         position = random_gen.randint(0, count - 1)
     except ValueError:
@@ -66,12 +68,14 @@ def get_image(tags:str, bypass=False):
         else:
             page = int(position / 100)
             
-            remote_soup = BeautifulSoup(requests.get(endpoint + tags + '&pid=' + str(page)).text, "lxml")
+            remote_soup = BeautifulSoup(requests.get(endpoint + tags + '&pid=' + str(page), timeout=15).text, "lxml")
             
             position = position % remote_soup.find_all('post').__len__()
             
             post = remote_soup.find_all('post')[position]
             
+            print(page)
+            print(position)
             
             if not bypass:
                 if not tf_scan(post.get('file_url')):

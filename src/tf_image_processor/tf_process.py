@@ -28,7 +28,7 @@ def load_image_array(array, image_size):
     return image
 
 def process_url(url: str):
-    im = Image.open(requests.get(url, stream=True).raw).resize((IMAGE_DIM, IMAGE_DIM), Image.NEAREST)
+    im = Image.open(requests.get(url, stream=True, timeout=15).raw).resize((IMAGE_DIM, IMAGE_DIM), Image.NEAREST)
     #im.show()
     image = keras.preprocessing.image.img_to_array(im)
     image = image[:,:,:3]
@@ -44,7 +44,7 @@ def process_url(url: str):
         
     return preds_dict
 
-model = load_model('./src/tf_image_processor/models/mobileNet/nsfw_mobilenet2.224x224.h5')
+model = load_model('./runtime/models/mobileNet/')
 categories = ['(o･ω･o) (D)', '(o-_-o) (H)', '(ﾉ´ з `)ノ (N)', '(╬ Ò﹏Ó) (P)', '(°ㅂ°╬) (S)']
 colors = [0xD53113, 0x5B17B1, 0x2299B8, 0x6B1616, 0x1EB117]
 

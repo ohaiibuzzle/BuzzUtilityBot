@@ -40,6 +40,7 @@ def kw_filter(keywords: str):
                     
 
 def search_zerochan(bypass, query: str):
+    print(query)
     is_tag = True
     random_gen = SystemRandom()
     target = 'https://zerochan.net/search?q='
@@ -51,13 +52,13 @@ def search_zerochan(bypass, query: str):
         'referer':'https://www.zerochan.net/'
     }
 
-    res = requests.get(tag_target+query+xml_specifier, headers=headers)
+    res = requests.get(tag_target+query+xml_specifier, headers=headers, timeout=15)
     
     url = ''
     
     if not '?xml' in res.url: #Hit a tag
         is_tag = True
-        soup = BeautifulSoup(requests.get(res.url+xml_specifier, headers=headers).content, features='lxml')
+        soup = BeautifulSoup(requests.get(res.url+xml_specifier, headers=headers, timeout=15).content, features='lxml')
         url = res.url+xml_specifier
         query = res.url.split('/')[-1].replace('+', ' ')
         #print(query)
@@ -66,10 +67,13 @@ def search_zerochan(bypass, query: str):
         soup = BeautifulSoup(res.content, features = 'lxml')
         url = res.url
     else:
-        soup = BeautifulSoup(requests.get(target+query+'&xml', headers=headers).content, features='lxml')
+        soup = BeautifulSoup(requests.get(target+query+'&xml', headers=headers, timeout=15).content, features='lxml')
         url = target+query+'&xml'
         is_tag = False
         #sleep(0.5)
+    
+    print(url)
+    print(is_tag)
     
     total_amount = 0
     item_amount = len(soup.find_all('item'))
@@ -115,7 +119,7 @@ def search_zerochan(bypass, query: str):
 
             else:
                 page = int(choice / (item_amount))+1
-                page_soup = BeautifulSoup(requests.get(tag_target+query+'?xml'+pagination+str(page)).content, features='lxml')
+                page_soup = BeautifulSoup(requests.get(tag_target+query+'?xml'+pagination+str(page), timeout=15).content, features='lxml')
                 
                 if 'Some content is for members only, please' in page_soup.text:
                     continue

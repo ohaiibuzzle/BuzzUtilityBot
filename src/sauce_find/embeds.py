@@ -12,7 +12,7 @@ def construct_saucenao_embed_pixiv(attachment: BasicSauce):
     
     client = pixivpy3.AppPixivAPI()
 
-    with open('pixiv.key', 'r') as pixivkey:
+    with open('runtime/pixiv.key', 'r') as pixivkey:
         client.auth(refresh_token=pixivkey.readline())
     
     raw_json = attachment.raw

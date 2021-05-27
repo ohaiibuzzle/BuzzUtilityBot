@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 iqdb_endpoint = 'https://iqdb.org/?url='
 
 def get_sauce(url: str):
-    soup = BeautifulSoup(requests.get(iqdb_endpoint+url).text, 'html.parser')
+    soup = BeautifulSoup(requests.get(iqdb_endpoint+url, timeout=15).text, 'html.parser')
     
     result_disp = soup.find('div', id='pages')
     res = result_disp.find_all('table')
