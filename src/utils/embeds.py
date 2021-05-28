@@ -70,7 +70,7 @@ def construct_welcome_embed(member: discord.Member):
     server_msg = "Welcome to " + member.guild.name + '!'
     member_msg = "@{}#{}".format(member.name, member.discriminator)
     
-    background = Image.open('runtime/assets/bg.png', 'r')
+    background = Image.open('runtime/assets/bg.png', 'r').convert('RGBA')
     bg_w, bg_h = background.size
 
     print(member.avatar_url)
@@ -91,7 +91,7 @@ def construct_welcome_embed(member: discord.Member):
 
     blurple = Image.new('RGBA', (background.size), (54,57,63,255))
     #blurple.paste(icon, offset)
-    blurple.paste(background, (0, 0))
+    blurple.paste(background, (0, 0), background)
     draw = ImageDraw.Draw(blurple)
 
     draw.ellipse((offset[0] - 2, offset[1] - 2, 
