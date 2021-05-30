@@ -61,6 +61,8 @@ class PictureSearch(commands.Cog, name='Random image finder'):
                 target, file = construct_pixiv_embed(tags, ctx.channel)
             except ConnectionError:
                 await ctx.send("Buzzle's Internet broke :(\n(Try again in a few minutes, server is under high load)")
+            except ValueError:
+                await ctx.send("Nothing found :(\nCheck your query")
             else:
                 if target:
                     await ctx.send(embed=target, file=file)

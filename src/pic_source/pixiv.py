@@ -9,8 +9,9 @@ import re
 random_source = random.SystemRandom()
 
 def px_getamount(query: str):
-    data = requests.get('https://www.pixiv.net/ajax/search/top/' + query, timeout=10).json()
-    return data['body']['illust']['total']
+    #https://www.pixiv.net/ajax/search/artworks/hu%20tao?word=hu tao&order=date_d&mode=all&p=1&s_mode=s_tag&type=all&lang=en
+    data = requests.get('https://www.pixiv.net/ajax/search/artworks/' + query + '?s_mode=s_tag&type=all&lang=en', timeout=10).json()
+    return data['body']['illustManga']['total']
 
 def get_image(query: str, bypass=False):
     #print(query)
@@ -18,21 +19,30 @@ def get_image(query: str, bypass=False):
         total = px_getamount(query)
     except TimeoutError:
         total = 30
+        
+    if total > 5000:
+        total = 5000
+                
     global random_source
     random_source = random.SystemRandom()
-    
     client = pixivpy3.AppPixivAPI()
     
     with open('runtime/pixiv.key', 'r') as keyfile:
         client.auth(refresh_token=keyfile.readline())
         
+    #print(total)
     for _ in range(3):
-        choice = random_source.randrange(total-1)
+        choice = random_source.randrange(total) - 1
+        
+        if choice < 0:
+            choice = 0
+        
         result = client.search_illust(query, offset=choice)['illusts'][0]
-        #print(result)
+        
         if not bypass:
             if result['restrict'] != 0:
                 continue
+        #print(choice)
         image_data = io.BytesIO(client.requests_call('GET', result['image_urls']['large'], 
                                                      headers={'Referer': 'https://app-api.pixiv.net/'}, stream=True).content)
         return result, image_data
