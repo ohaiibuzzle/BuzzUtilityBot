@@ -70,12 +70,15 @@ def get_image(tags:str, bypass=False):
             
             remote_soup = BeautifulSoup(requests.get(endpoint + tags + '&pid=' + str(page), timeout=15).text, "lxml")
             
-            position = position % remote_soup.find_all('post').__len__()
+            position = position % 100 - 1
+            
+            if position < 0:
+                position = 0
             
             post = remote_soup.find_all('post')[position]
             
-            print(page)
-            print(position)
+            #print(page)
+            #print(position)
             
             if not bypass:
                 if not tf_scan(post.get('file_url')):

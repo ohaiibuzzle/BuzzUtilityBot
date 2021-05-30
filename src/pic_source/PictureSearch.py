@@ -1,6 +1,8 @@
+import re
 from discord.ext import commands
 from .safebooru import safebooru_random_img
 from .zerochan import construct_zerochan_embed
+from .pixiv import construct_pixiv_embed, get_image_by_id
 from requests.exceptions import ConnectionError
 
 class PictureSearch(commands.Cog, name='Random image finder'):
@@ -31,7 +33,7 @@ class PictureSearch(commands.Cog, name='Random image finder'):
                           aliases=['zcr'])
     async def zcrandom(self, ctx, *args):
         async with ctx.channel.typing():
-            print ('@' + ctx.message.author.name + '#' + ctx.message.author.discriminator + ' wants something random(zerochan)!')
+            print ('@' + ctx.message.author.name + '#' + ctx.message.author.discriminator + ' wants something random (zerochan)!')
             tags = ' '.join(args).strip()
             tags = tags.replace('+', ',')
             try:
@@ -48,5 +50,42 @@ class PictureSearch(commands.Cog, name='Random image finder'):
                 else:
                     await ctx.send("Sorry, I can't find you anything :( \nEither check your search, or Buzzle banned a tag in the result")
                 
+    @commands.command(brief='Look for a random image on Pixiv',
+                      description='Look for a random image on Pixiv',
+                      aliases=['pxr'])
+    async def pixivrandom(self, ctx, *args):
+        async with ctx.channel.typing():
+            print ('@' + ctx.message.author.name + '#' + ctx.message.author.discriminator + ' wants something random (Pixiv)!')
+            tags = ' '.join(args).strip()
+            try:
+                target, file = construct_pixiv_embed(tags, ctx.channel)
+            except ConnectionError:
+                await ctx.send("Buzzle's Internet broke :(\n(Try again in a few minutes, server is under high load)")
+            else:
+                if target:
+                    await ctx.send(embed=target, file=file)
+                else:
+                    await ctx.send("Your search returned no result :(")
+    
+    @commands.command(brief='Display a Pixiv post in bot\'s format',
+                      aliases=['pxs'])
+    async def pixivshow(self, ctx, *args):
+        async with ctx.channel.typing():
+            print ('@' + ctx.message.author.name + '#' + ctx.message.author.discriminator + ' wants to display Pixiv art!')
+            #print(args[0])
+            illust_id = re.findall(r'\d+', args[0])[0]
+            try:
+                target, file = get_image_by_id(illust_id)
+            except ConnectionError:
+                await ctx.send("Buzzle's Internet broke :(\n(Try again in a few minutes, server is under high load)")
+            except ValueError:
+                await ctx.send("Nothing found :(\nCheck your query")
+            else:
+                if target:
+                    await ctx.send(embed=target, file=file)
+                else:
+                    await ctx.send("Your search returned no result :(") 
+        pass
+    
 def setup(client):
     client.add_cog(PictureSearch(client))

@@ -72,8 +72,8 @@ def search_zerochan(bypass, query: str):
         is_tag = False
         #sleep(0.5)
     
-    print(url)
-    print(is_tag)
+    #print(url)
+    #print(is_tag)
     
     total_amount = 0
     item_amount = len(soup.find_all('item'))

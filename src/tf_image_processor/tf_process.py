@@ -23,7 +23,7 @@ def load_image_array(array, image_size):
     image = tf.image.resize(np.asarray(array), image_size, preserve_aspect_ratio=False).numpy()
     image /= 255
     
-    np.savetxt('test.csv', image.reshape((3,-1)), delimiter=',')
+    #np.savetxt('test.csv', image.reshape((3,-1)), delimiter=',')
     
     return image
 
@@ -34,7 +34,7 @@ def process_url(url: str):
     image = image[:,:,:3]
     image /= 255
     
-    np.savetxt('test.csv', image.reshape((3,-1)), delimiter=',')
+    #np.savetxt('test.csv', image.reshape((3,-1)), delimiter=',')
     
     preds = model.predict(np.asarray([image]))
     
