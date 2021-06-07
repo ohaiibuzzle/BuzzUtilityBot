@@ -76,7 +76,7 @@ async def get_image_by_id(illust_id: int):
         with open('runtime/pixiv.key', 'r') as keyfile:
             await aapi.login(refresh_token=keyfile.readline())
             
-        res = aapi.illust_detail(illust_id)['illust']
+        res = (await aapi.illust_detail(illust_id))['illust']
         
         print(res)
         
