@@ -74,7 +74,7 @@ async def get_image_by_id(illust_id: int):
         aapi.set_accept_language('en-us')
         
         with open('runtime/pixiv.key', 'r') as keyfile:
-            await aapi.auth(refresh_token=keyfile.readline())
+            await aapi.login(refresh_token=keyfile.readline())
             
         res = aapi.illust_detail(illust_id)['illust']
         
