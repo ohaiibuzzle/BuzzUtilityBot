@@ -41,6 +41,6 @@ class AdminTools(commands.Cog, name='Administration Tools'):
     @commands.is_owner()
     async def leaveServer(self, ctx):
         await ctx.guild.leave()
-
+        
 def setup(client):
     client.add_cog(AdminTools(client))

@@ -18,7 +18,7 @@ class PictureSearch(commands.Cog, name='Random image finder'):
         async with ctx.channel.typing():
             tags = ' '.join(args)
             try:
-                target = safebooru_random_img(tags.split('+'), ctx.channel)
+                target = await safebooru_random_img(tags.split('+'), ctx.channel)
             except ConnectionError:
                 await ctx.send("Buzzle's Internet broke :(\n(Try again in a few minutes, server is under high load)")
             else:
@@ -37,7 +37,7 @@ class PictureSearch(commands.Cog, name='Random image finder'):
             tags = ' '.join(args).strip()
             tags = tags.replace('+', ',')
             try:
-                res = construct_zerochan_embed(ctx.channel, tags)
+                res = await construct_zerochan_embed(ctx.channel, tags)
             except TypeError as e:
                 print(e)
                 await ctx.send('Your search string was too wide, or it included NSFW tags.\nNarrow the query to try again')
@@ -58,7 +58,7 @@ class PictureSearch(commands.Cog, name='Random image finder'):
             print ('@' + ctx.message.author.name + '#' + ctx.message.author.discriminator + ' wants something random (Pixiv)!')
             tags = ' '.join(args).strip()
             try:
-                target, file = construct_pixiv_embed(tags, ctx.channel)
+                target, file = await construct_pixiv_embed(tags, ctx.channel)
             except ConnectionError:
                 await ctx.send("Buzzle's Internet broke :(\n(Try again in a few minutes, server is under high load)")
             except ValueError:
@@ -77,7 +77,7 @@ class PictureSearch(commands.Cog, name='Random image finder'):
             #print(args[0])
             illust_id = re.findall(r'\d+', args[0])[0]
             try:
-                target, file = get_image_by_id(illust_id)
+                target, file = await get_image_by_id(illust_id)
             except ConnectionError:
                 await ctx.send("Buzzle's Internet broke :(\n(Try again in a few minutes, server is under high load)")
             except ValueError:

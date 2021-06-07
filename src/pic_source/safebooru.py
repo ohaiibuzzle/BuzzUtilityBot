@@ -3,10 +3,11 @@ import discord
 import requests
 import random
 import string
+import asyncio
+import aiohttp
 
 from tf_image_processor.tf_process import process_url
 
-global random_gen
 random_gen = random.SystemRandom()
 endpoint = 'https://safebooru.org/index.php?page=dapi&s=post&q=index&tags=rating:safe '
 
@@ -27,20 +28,66 @@ def tf_scan(url:str):
         return False
     return True
 
-def get_image(tags:str, bypass=False):
-    soup = BeautifulSoup(requests.get(endpoint + tags, timeout=15).text, "lxml")
-    count = int(soup.find('posts')['count'])
+async def get_image(tags:str, bypass=False):
+    global random_gen
     
-    print(endpoint + tags)
-    print(count)
-    try:
-        position = random_gen.randint(0, count - 1)
-    except ValueError:
-        return None
-    for _ in range(3):   
-        if position < 100:
-            try:         
-                post = soup.find_all('post')[position]
+    timeout = aiohttp.ClientTimeout(total=15)
+    
+    async with aiohttp.ClientSession(timeout=timeout) as session:
+        res = await session.get(endpoint + tags)
+    
+        soup = BeautifulSoup(await res.read(), "lxml")
+        count = int(soup.find('posts')['count'])
+        
+        #print(endpoint + tags)
+        #print(count)
+        try:
+            position = random_gen.randint(0, count - 1)
+        except ValueError:
+            return None
+        for _ in range(3):   
+            if position < 100:
+                try:         
+                    post = soup.find_all('post')[position]
+                    #print(position)
+                    
+                    if not bypass:
+                        if not tf_scan(post.get('file_url')):
+                            position = random_gen.randint(0, count - 1)
+                            continue
+                    
+                    embed = discord.Embed(title="Your random image!")
+                    embed.set_image(url = post.get('file_url'))
+                    embed.add_field(
+                        name='Source',
+                        value=post.get('source') + ' ',
+                        inline=False
+                    )
+                    
+                    embed.add_field(
+                        name='Tags',
+                        value = '```\n'+post.get('tags').strip()[:1018]+'\n```',
+                        inline = False
+                    )
+                    
+                    return embed
+                except IndexError:
+                    return None
+            else:
+                page = int(position / 100)
+                
+                remote_res = await session.get(endpoint + tags + '&pid=' + str(page))
+                
+                remote_soup = BeautifulSoup(await remote_res.read(), "lxml")
+                
+                position = position % 100 - 1
+                
+                if position < 0:
+                    position = 0
+                
+                post = remote_soup.find_all('post')[position]
+                
+                #print(page)
                 #print(position)
                 
                 if not bypass:
@@ -63,44 +110,7 @@ def get_image(tags:str, bypass=False):
                 )
                 
                 return embed
-            except IndexError:
-                return None
-        else:
-            page = int(position / 100)
-            
-            remote_soup = BeautifulSoup(requests.get(endpoint + tags + '&pid=' + str(page), timeout=15).text, "lxml")
-            
-            position = position % 100 - 1
-            
-            if position < 0:
-                position = 0
-            
-            post = remote_soup.find_all('post')[position]
-            
-            #print(page)
-            #print(position)
-            
-            if not bypass:
-                if not tf_scan(post.get('file_url')):
-                    position = random_gen.randint(0, count - 1)
-                    continue
-            
-            embed = discord.Embed(title="Your random image!")
-            embed.set_image(url = post.get('file_url'))
-            embed.add_field(
-                name='Source',
-                value=post.get('source') + ' ',
-                inline=False
-            )
-            
-            embed.add_field(
-                name='Tags',
-                value = '```\n'+post.get('tags').strip()[:1018]+'\n```',
-                inline = False
-            )
-            
-            return embed
-    return None
+        return None
 
 def convert_to_sb_tag(tags: str):
     new_tags = []
@@ -112,15 +122,13 @@ def convert_to_sb_tag(tags: str):
     #print(ret)
     return ret
 
-def safebooru_random_img(tags: str, ch):
-    global random_gen
-    random_gen = random.SystemRandom()
+async def safebooru_random_img(tags: str, ch):
     tags = convert_to_sb_tag(tags)
 
     if ch.type is not discord.ChannelType.private:
-        emb = get_image(tags, ch.is_nsfw())
+        emb = await get_image(tags, ch.is_nsfw())
     else:
-        emb = get_image(tags, True)
+        emb = await get_image(tags, True)
     if emb:
         return emb
     else:

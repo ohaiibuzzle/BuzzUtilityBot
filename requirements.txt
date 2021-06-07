@@ -1,9 +1,12 @@
 discord.py
-saucenao-api
-PixivPy
+pysaucenao
+pixivpy-async
 beautifulsoup4
 lxml
 pynacl
 tensorflow
 tensorflow_hub
 pillow
+aiohttp-socks
+aiohttp
+

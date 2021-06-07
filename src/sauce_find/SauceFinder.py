@@ -22,14 +22,14 @@ class SauceFinder(commands.Cog, name='Picture Sauce Finding'):
                         for attachment in search_msg.embeds:
                             if attachment.image != None:
                                 try:
-                                    found = find_sauce(attachment.url)
+                                    found = await find_sauce(attachment.url)
                                     print(attachment.url)
                                     if found == None:
                                         await ctx.send("I am sssorry, can't get your sauce :(")
                                         await ctx.send("Ask Buzzle why that is")
                                     else:
                                         try:
-                                            att_embed = construct_saucenao_embed_pixiv(found)
+                                            att_embed = await construct_saucenao_embed_pixiv(found)
                                             await ctx.send(embed=att_embed)
                                         except (discord.errors.HTTPException, AttributeError):
                                             await ctx.send('Something went wrong and I can\'t look up your image.')
@@ -39,14 +39,14 @@ class SauceFinder(commands.Cog, name='Picture Sauce Finding'):
                     elif (search_msg.attachments.__len__() > 0):
                         for attachment in search_msg.attachments:
                             if attachment.content_type.startswith('image'):
-                                found = find_sauce(attachment.url)
+                                found = await find_sauce(attachment.url)
                                 print(attachment.url)
                                 if found == None:
                                     await ctx.send("I am sssorry, can't get your sauce :(")
                                     await ctx.send("Ask Buzzle why that is")
                                 else:
                                     try:
-                                        att_embed = construct_saucenao_embed_pixiv(found)
+                                        att_embed = await construct_saucenao_embed_pixiv(found)
                                         await ctx.send(embed=att_embed)
                                     except (discord.errors.HTTPException, AttributeError):
                                         await ctx.send('Something went wrong and I can\'t look up your image.')
@@ -67,7 +67,7 @@ class SauceFinder(commands.Cog, name='Picture Sauce Finding'):
                         for attachment in search_msg.embeds:
                             if attachment.image != None:
                                 try:
-                                    found = construct_iqdb_embed(attachment.url)
+                                    found = await construct_iqdb_embed(attachment.url)
                                     print(attachment.url)
                                     if found == None:
                                         await ctx.send("I am sssorry, can't get your sauce :(")

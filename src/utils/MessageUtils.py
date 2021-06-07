@@ -47,6 +47,14 @@ class MessageUtils(commands.Cog, name='Message Utilities'):
             if mesg.author == self.client.user:
                 await mesg.delete()
                 break
+            
+    @commands.command(hidden=True)
+    @commands.is_owner()
+    async def sudo(self, ctx, *args):
+        async with ctx.channel.typing():
+            phrases = " ".join(args)
+            await ctx.message.delete()
+            await ctx.send(phrases)
 
 
 def setup(client):

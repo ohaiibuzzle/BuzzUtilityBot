@@ -1,23 +1,23 @@
-from saucenao_api import SauceNao
-from saucenao_api.errors import SauceNaoApiError, ShortLimitReachedError
-from saucenao_api.params import DB, Hide, BgColor
+from pysaucenao import SauceNao
+from pysaucenao.errors import SauceNaoException
+import asyncio
 
 key=''
 with open('runtime/saucenao.key', 'r') as keyfile:
     key = keyfile.readline()
 
-saucer = SauceNao(key, db=DB.Pixiv_Images)
+saucer = SauceNao(api_key=key, db=5)
 
-def find_sauce(url):
+async def find_sauce(url):
     try:
-        results = saucer.from_url(url)
+        results = await saucer.from_url(url)
         return results[0]
-    except SauceNaoApiError as e:
+    except SauceNaoException as e:
         print(e)
         return None
 
 if __name__ == '__main__':
-    sauce = find_sauce('https://i.pximg.net/img-master/img/2021/04/21/18/00/47/89297449_p0_master1200.jpg')
-    for _ in sauce:
-        print(_.raw)
+    loop = asyncio.get_event_loop()
+    sauce = loop.run_until_complete(find_sauce('https://i.pximg.net/img-master/img/2021/04/21/18/00/47/89297449_p0_master1200.jpg'))
+    print(sauce)
     
