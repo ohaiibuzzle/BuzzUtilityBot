@@ -39,16 +39,19 @@ def construct_save_embed_img(message: discord.Message):
         elif (message.embeds[0].url.startswith('https://media.discordapp.net/attachments')) and (message.embeds[0].url[-4:] in IMAGE_FORMAT):
             embed.set_image(url=message.embeds[0].url)
         else:
-            embedded_contents = ''
-            for _ in message.embeds:
-                embedded_contents += _.url
-                embedded_contents += '\n'
-            if (embedded_contents != ''):
-                embed.add_field(
-                    name='Embedded Content',
-                    value = embedded_contents,
-                    inline = False
-                )
+            try:
+                embedded_contents = ''
+                for _ in message.embeds:
+                    embedded_contents += _.url
+                    embedded_contents += '\n'
+                if (embedded_contents != ''):
+                    embed.add_field(
+                        name='Embedded Content',
+                        value = embedded_contents,
+                        inline = False
+                    )
+            except UnboundLocalError:
+                pass
 
     if (message.attachments.__len__() > 0):
         att_contents = ''
@@ -56,8 +59,8 @@ def construct_save_embed_img(message: discord.Message):
             if _.content_type.startswith('image'):
                 embed.set_image(url=_.url)
             else:
-                embedded_contents += _.url
-                embedded_contents += '\n'
+                att_contents += _.url
+                att_contents += '\n'
         if att_contents != '':
             embed.add_field(
                 name = 'Attached Content',

@@ -83,7 +83,7 @@ class SauceFinder(commands.Cog, name='Picture Sauce Finding'):
                     elif (search_msg.attachments.__len__() > 0):
                         for attachment in search_msg.attachments:
                             if attachment.content_type.startswith('image'):
-                                found = construct_iqdb_embed(attachment.url)
+                                found = await construct_iqdb_embed(attachment.url)
                                 if found == None:
                                     await ctx.send("I am sssorry, can't get your sauce :(")
                                     await ctx.send("Ask Buzzle why that is")

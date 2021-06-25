@@ -10,9 +10,9 @@ async def get_sauce(url: str):
     
     async with aiohttp.ClientSession(timeout=timeout) as session:
         res = await session.get(iqdb_endpoint+url)
-        soup = BeautifulSoup(res.read(), 'html.parser')
-        
+        soup = BeautifulSoup(await res.read(), 'html.parser')
         result_disp = soup.find('div', id='pages')
+        print(result_disp)
         res = result_disp.find_all('table')
         res.remove(res[0])
         for _ in res:
@@ -57,6 +57,6 @@ async def construct_iqdb_embed(url: str):
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-    res = loop.run_until_complete(construct_iqdb_embed('https://media.discordapp.net/attachments/807429230874722309/840291361931919360/874fdf4ac200e7fc4d89ba98e119f726.jpg'))
+    res = loop.run_until_complete(construct_iqdb_embed('https://cdn.discordapp.com/attachments/807450358582214666/855769795877535744/3e2c96ca.jpg'))
     print(res.to_dict())
     pass

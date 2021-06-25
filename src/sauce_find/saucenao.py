@@ -15,6 +15,8 @@ async def find_sauce(url):
     except SauceNaoException as e:
         print(e)
         return None
+    except IndexError:
+        return None
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()

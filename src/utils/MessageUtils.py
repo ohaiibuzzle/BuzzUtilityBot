@@ -1,5 +1,6 @@
 from discord.ext import commands
 import discord
+import asyncio
 from .embeds import construct_save_embed_img
 
 class MessageUtils(commands.Cog, name='Message Utilities'):
@@ -17,11 +18,31 @@ class MessageUtils(commands.Cog, name='Message Utilities'):
                 await ctx.message.author.send(embed=construct_save_embed_img(search_msg))
 
         else:
-            messages = await ctx.message.channel.history(limit=10).flatten()
+            messages = await ctx.message.channel.history(limit=20).flatten()
             for mesg in messages:
                 if mesg.attachments.__len__() > 0 or mesg.embeds.__len__() > 0:
                     await ctx.message.author.send(embed=construct_save_embed_img(mesg))
                     break
+                
+    @commands.command(brief='Save n messages to your DM', 
+                      description='Save up to n message in the current channel')
+    async def saveall(self, ctx, amount):
+        if not amount.isnumeric():
+            alert = await ctx.send('You silly, that is not a number!!')
+            await asyncio.sleep(3)
+            await alert.delete()
+            return
+        amount = int(amount)
+        if amount > 10:
+            alert = await ctx.send('You can only save up to 10 messages back in time!')
+            await asyncio.sleep(3)
+            await alert.delete()
+            return
+        messages = await ctx.message.channel.history(limit=20).flatten()
+        for mesg in messages:
+            if (mesg.attachments.__len__() > 0 or mesg.embeds.__len__() > 0) and amount > 0:
+                await ctx.message.author.send(embed=construct_save_embed_img(mesg))
+                amount = amount - 1
                 
     @commands.Cog.listener()
     async def on_message(self, message):
