@@ -1,6 +1,7 @@
 from discord.ext import commands
 import discord
 import sqlite3
+import aiosqlite
 
 from .embeds import construct_welcome_embed
 
@@ -13,14 +14,15 @@ class WelcomeMessage(commands.Cog):
         
     @commands.Cog.listener()
     async def on_member_join(self,member):
-
-        server = self.curr.execute('''SELECT GuildID, ChannelID FROM WelcomeMessage WHERE GuildID=:guildid''', {'guildid': member.guild.id})
-        server_info = server.fetchone()
-        if server_info != None:
-            channel = discord.utils.get(member.guild.channels, id=server_info[1])
-            embed, file = construct_welcome_embed(member)
-            await channel.send(file=file, embed=embed)
-        pass
+        async with aiosqlite.connect('runtime/server_data.db') as db:
+            async with db.cursor() as curr:
+                server = await curr.execute('''SELECT GuildID, ChannelID FROM WelcomeMessage WHERE GuildID=:guildid''', {'guildid': member.guild.id})
+                server_info = await server.fetchone()
+                if server_info != None:
+                    channel = discord.utils.get(member.guild.channels, id=server_info[1])
+                    embed, file = construct_welcome_embed(member)
+                    await channel.send(file=file, embed=embed)
+                pass
     
     @commands.command()
     @commands.has_permissions(administrator=True)

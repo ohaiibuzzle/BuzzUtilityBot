@@ -9,6 +9,7 @@ from tensorflow import keras
 import tensorflow_hub as hub
 from PIL import Image
 import requests
+import asyncio
 
 IMAGE_DIM = 224
 
@@ -44,17 +45,22 @@ def process_url(url: str):
         
     return preds_dict
 
+async def async_process_url(url:str):
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(None, process_url, url)
+
 model = load_model('./runtime/models/mobileNet/')
 categories = ['(o･ω･o) (D)', '(o-_-o) (H)', '(ﾉ´ з `)ノ (N)', '(╬ Ò﹏Ó) (P)', '(°ㅂ°╬) (S)']
 colors = [0xD53113, 0x5B17B1, 0x2299B8, 0x6B1616, 0x1EB117]
 
 if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
     url = 'https://s1.zerochan.net/Rosaria.600.3281202.jpg'
-    predicts = process_url(url)
+    predicts = loop.run_until_complete(async_process_url(url))
 
     print(url)
     sorted = {k: v for k, v in sorted(predicts.items(), key=lambda item: item[1], reverse=True)}
     for _ in sorted:
-        print(_ + ' --> ' + str(format(sorted[_] * 100, '.2f'))+'%')
+        print(_ + ' --> ' + str(format(sorted[_][0] * 100, '.2f'))+'%')
 
     print('==> ' + list(sorted.keys())[0].capitalize())

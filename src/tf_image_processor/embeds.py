@@ -1,8 +1,8 @@
 from discord import Embed, Color
-from .tf_process import process_url
+from .tf_process import async_process_url
 
-def tensorflow_embed(url: str):
-    result = process_url(url)
+async def tensorflow_embed(url: str):
+    result = await async_process_url(url)
     embed = Embed(title="Ai-chan reply!")
     
     embed.set_thumbnail(url=url)

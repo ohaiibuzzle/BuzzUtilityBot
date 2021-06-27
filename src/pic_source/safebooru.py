@@ -11,9 +11,9 @@ from tf_image_processor.tf_process import process_url
 random_gen = random.SystemRandom()
 endpoint = 'https://safebooru.org/index.php?page=dapi&s=post&q=index&tags=rating:safe '
 
-def tf_scan(url:str):
+async def tf_scan(url:str):
     try:
-        res = process_url(url)
+        res = await process_url(url)
     except ValueError:
         return True
     print(res)
@@ -52,7 +52,7 @@ async def get_image(tags:str, bypass=False):
                     #print(position)
                     
                     if not bypass:
-                        if not tf_scan(post.get('file_url')):
+                        if not (await tf_scan(post.get('file_url'))):
                             position = random_gen.randint(0, count - 1)
                             continue
                     
@@ -91,7 +91,7 @@ async def get_image(tags:str, bypass=False):
                 #print(position)
                 
                 if not bypass:
-                    if not tf_scan(post.get('file_url')):
+                    if not (await tf_scan(post.get('file_url'))):
                         position = random_gen.randint(0, count - 1)
                         continue
                 

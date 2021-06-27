@@ -13,7 +13,7 @@ random_gen = SystemRandom()
 
 pls_no_tags = ['Nipples'] #The AI *should* handle these, 'Bend Over', 'Panties', 'Bra', 'Underwear', 'Lingerie']
 
-def tf_scan(url:str):
+async def tf_scan(url:str):
     try:
         res = process_url(url)
     except ValueError:
@@ -111,7 +111,7 @@ async def search_zerochan(bypass, query: str):
                         if not kw_filter(kw):
                             continue
                         
-                        if not tf_scan(item.find('media:thumbnail')['url']):
+                        if not (await tf_scan(item.find('media:thumbnail')['url'])):
                             continue
                         
                     #print(item)
@@ -147,7 +147,7 @@ async def search_zerochan(bypass, query: str):
                         
                         if not kw_filter(kw):
                             continue
-                        if not tf_scan(item.find('media:thumbnail')['url']):
+                        if not (await tf_scan(item.find('media:thumbnail')['url'])):
                             continue
                     
                     #print(item)
@@ -170,7 +170,7 @@ async def search_zerochan(bypass, query: str):
                     
                     if not kw_filter(kw):
                         continue
-                    if not tf_scan(item.find('media:thumbnail')['url']):
+                    if not await (tf_scan(item.find('media:thumbnail')['url'])):
                             continue
 
                 #print(item)

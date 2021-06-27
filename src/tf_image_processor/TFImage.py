@@ -18,7 +18,7 @@ class TFImage(commands.Cog, name="AI-based image rating"):
                     if (search_msg.embeds.__len__() > 0):
                         for attachment in search_msg.embeds:
                             try:
-                                res = tensorflow_embed(attachment.url)
+                                res = await tensorflow_embed(attachment.url)
                                 await ctx.send(embed=res)
                             except UnidentifiedImageError:
                                 await ctx.send("Hey, that is not an image")                                
@@ -27,7 +27,7 @@ class TFImage(commands.Cog, name="AI-based image rating"):
                         for attachment in search_msg.attachments:
                             if attachment.content_type.startswith('image'):
                                 try:
-                                    res = tensorflow_embed(attachment.url)
+                                    res = await tensorflow_embed(attachment.url)
                                     await ctx.send(embed=res)
                                 except UnidentifiedImageError:
                                     await ctx.send("Hey, that is not an image")
