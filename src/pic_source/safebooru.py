@@ -6,14 +6,14 @@ import string
 import asyncio
 import aiohttp
 
-from tf_image_processor.tf_process import process_url
+from tf_image_processor.tf_process import async_process_url
 
 random_gen = random.SystemRandom()
 endpoint = 'https://safebooru.org/index.php?page=dapi&s=post&q=index&tags=rating:safe '
 
 async def tf_scan(url:str):
     try:
-        res = await process_url(url)
+        res = await async_process_url(url)
     except ValueError:
         return True
     print(res)

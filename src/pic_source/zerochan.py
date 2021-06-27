@@ -6,7 +6,7 @@ from random import SystemRandom, random
 from discord import Embed, ChannelType
 import aiohttp
 
-from tf_image_processor.tf_process import process_url
+from tf_image_processor.tf_process import async_process_url
 
 
 random_gen = SystemRandom()
@@ -15,7 +15,7 @@ pls_no_tags = ['Nipples'] #The AI *should* handle these, 'Bend Over', 'Panties',
 
 async def tf_scan(url:str):
     try:
-        res = process_url(url)
+        res = await async_process_url(url)
     except ValueError:
         print("AI Error")
         return True
