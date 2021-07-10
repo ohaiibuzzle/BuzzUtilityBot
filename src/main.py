@@ -26,6 +26,7 @@ client.load_extension('tf_image_processor.TFImage')
 client.load_extension('utils.MessageUtils')
 client.load_extension('utils.Welcome')
 client.load_extension('utils.Birthday')
+client.load_extension('utils.owo')
 
 key = ''
 with open('runtime/discord.key', 'r') as keyfile:

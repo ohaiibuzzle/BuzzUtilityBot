@@ -20,11 +20,11 @@ class WelcomeMessage(commands.Cog):
                 server_info = await server.fetchone()
                 if server_info != None:
                     channel = discord.utils.get(member.guild.channels, id=server_info[1])
-                    embed, file = construct_welcome_embed(member)
+                    embed, file = await construct_welcome_embed(member)
                     await channel.send(file=file, embed=embed)
                 pass
     
-    @commands.command()
+    @commands.command(brief="Use this channel for welcome messages")
     @commands.has_permissions(administrator=True)
     async def setupWelcome(self,ctx):
         if ctx.message.channel.type is discord.ChannelType.text:
@@ -36,7 +36,7 @@ class WelcomeMessage(commands.Cog):
         else:
             await ctx.send("Cannot use this channel :<")
     
-    @commands.command()
+    @commands.command(brief="Unset this channel for welcome messages")
     @commands.has_permissions(administrator=True)
     async def clearWelcome(self, ctx):
         self.curr.execute('''DELETE FROM WelcomeMessage WHERE GuildID = :guildid''', {'guildid': ctx.guild.id})

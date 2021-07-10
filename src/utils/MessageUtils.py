@@ -77,6 +77,5 @@ class MessageUtils(commands.Cog, name='Message Utilities'):
             await ctx.message.delete()
             await ctx.send(phrases)
 
-
 def setup(client):
     client.add_cog(MessageUtils(client))

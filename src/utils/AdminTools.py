@@ -24,6 +24,7 @@ class AdminTools(commands.Cog, name='Administration Tools'):
         except commands.ExtensionError as e:
             await ctx.send('Oh no it didn\'t work :(')
             await ctx.send(f'{e.__class__.__name__}: {e}')
+            await ctx.send(e.with_traceback)
         else:
             await ctx.send('Done!')
 

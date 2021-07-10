@@ -6,10 +6,11 @@ import datetime
 import pytz
 
 class Birthday(commands.Cog, name="Birthdays!"):
-    
+    RT_DATABASE = 'runtime/server_data.db'
+
     def __init__(self,client):
         self.client = client
-        db = sqlite3.connect('runtime/server_data.db')
+        db = sqlite3.connect(self.RT_DATABASE)
         curr = db.cursor()    
         curr.execute('''CREATE TABLE IF NOT EXISTS BirthdayMessage ([GuildID] INTEGER PRIMARY KEY, [ChannelID] Integer)''') 
         curr.execute('''CREATE TABLE IF NOT EXISTS Birthdays ([MemberID] INTEGER, [GuildID] INTEGER, [Birthday] TIMESTAMP, PRIMARY KEY ("MemberID","GuildID"))''') 
@@ -23,10 +24,28 @@ class Birthday(commands.Cog, name="Birthdays!"):
         # pylint: disable=no-member
         self.sendBirthdayMessages.cancel() #This is actually fine
         
+    @commands.Cog.listener()
+    async def on_member_remove(self, member):
+        async with aiosqlite.connect(self.RT_DATABASE) as db:
+            async with db.cursor() as curr:
+                await curr.execute('''DELETE FROM Birthdays WHERE GuildID=:guildID AND MemberID=:memberID''',
+                {'guildID': member.guild.id, 'memberID': member.id})
+                await db.commit()
+
+    @commands.Cog.listener()
+    async def on_guild_remove(self, guild: discord.Guild):
+        async with aiosqlite.connect(self.RT_DATABASE) as db:
+            async with db.cursor() as curr:
+                await curr.execute('''DELETE FROM Birthdays WHERE GuildID=:guildID''',
+                {'guildID': guild.id})
+                await curr.execute('''DELETE FROM BirthdayMessage WHERE GuildID=:guildID''',
+                {'guildID': guild.id})
+                await db.commit()
+
     @commands.command(brief="Setup birthday channel!")
     @commands.has_permissions(administrator=True)
     async def setupBirthday(self, ctx):
-        async with aiosqlite.connect('runtime/server_data.db') as db:
+        async with aiosqlite.connect(self.RT_DATABASE) as db:
             async with db.cursor() as curr:
                 if ctx.message.channel.type is discord.ChannelType.text:
                     await curr.execute('''DELETE FROM BirthdayMessage WHERE GuildID = :guildid''', {'guildid': ctx.guild.id})
@@ -41,7 +60,7 @@ class Birthday(commands.Cog, name="Birthdays!"):
     @commands.command(brief="Unset birthday channel")
     @commands.has_permissions(administrator=True)
     async def clearBirthday(self, ctx):
-        async with aiosqlite.connect('runtime/server_data.db') as db:
+        async with aiosqlite.connect(self.RT_DATABASE) as db:
             async with db.cursor() as curr:
                 await curr.execute('''DELETE FROM BirthdayMessage WHERE GuildID = :guildid''', {'guildid': ctx.guild.id})
                 await db.commit()
@@ -51,7 +70,7 @@ class Birthday(commands.Cog, name="Birthdays!"):
         Date follows [day] [month] [year]. Clear your birthday with "clear"')
     async def bday(self, ctx, *args):
         #print(args)
-        async with aiosqlite.connect('runtime/server_data.db') as db:
+        async with aiosqlite.connect(self.RT_DATABASE) as db:
             async with db.cursor() as curr:        
                 server = await db.execute('''SELECT GuildID, ChannelID FROM BirthdayMessage WHERE GuildID=:guildid''', {'guildid': ctx.guild.id})
                 server_info = await server.fetchone()
@@ -65,6 +84,7 @@ class Birthday(commands.Cog, name="Birthdays!"):
                     await db.commit()
                     await ctx.send("Cleared your birthday from the database!")
                     return
+
                 if args[0].isnumeric() and args[1].isnumeric() and args[2].isnumeric():
                     try:
                         await curr.execute('''DELETE FROM Birthdays WHERE MemberID=:memberID and GuildID=:guildID''',
@@ -93,7 +113,7 @@ class Birthday(commands.Cog, name="Birthdays!"):
             if today_mmdd_file == today_mmdd:   
                 return
             
-        async with aiosqlite.connect('runtime/server_data.db') as db:
+        async with aiosqlite.connect(self.RT_DATABASE) as db:
             async with db.execute('''SELECT MemberID, GuildID FROM Birthdays WHERE Birthday LIKE :currentDate''',
                                     {'currentDate': today_mmdd}) as cursor:
                 async for row in cursor:
@@ -106,7 +126,7 @@ class Birthday(commands.Cog, name="Birthdays!"):
         with open('runtime/today.status', 'w+') as today_file:
             today_file.write(today_mmdd)
             print("Done for today!")
-    
+
 def setup(client):
     client.add_cog(Birthday(client))
     
