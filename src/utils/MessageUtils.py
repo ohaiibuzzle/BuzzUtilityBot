@@ -1,7 +1,6 @@
 from discord.ext import commands
 import discord
 import asyncio
-from .embeds import construct_save_embed_img
 
 class MessageUtils(commands.Cog, name='Message Utilities'):
     def __init__(self, client):
@@ -15,13 +14,13 @@ class MessageUtils(commands.Cog, name='Message Utilities'):
         if (ctx.message.reference):
             if (ctx.message.reference.resolved != None):
                 search_msg = ctx.message.reference.resolved
-                await ctx.message.author.send(embed=construct_save_embed_img(search_msg))
+                await ctx.message.author.send(embed=self.construct_save_embed_img(search_msg))
 
         else:
             messages = await ctx.message.channel.history(limit=20).flatten()
             for mesg in messages:
                 if mesg.attachments.__len__() > 0 or mesg.embeds.__len__() > 0:
-                    await ctx.message.author.send(embed=construct_save_embed_img(mesg))
+                    await ctx.message.author.send(embed=self.construct_save_embed_img(mesg))
                     break
                 
     @commands.command(brief='Save n messages to your DM', 
@@ -41,7 +40,7 @@ class MessageUtils(commands.Cog, name='Message Utilities'):
         messages = await ctx.message.channel.history(limit=20).flatten()
         for mesg in messages:
             if (mesg.attachments.__len__() > 0 or mesg.embeds.__len__() > 0) and amount > 0:
-                await ctx.message.author.send(embed=construct_save_embed_img(mesg))
+                await ctx.message.author.send(embed=self.construct_save_embed_img(mesg))
                 amount = amount - 1
                 
     @commands.Cog.listener()
@@ -53,7 +52,7 @@ class MessageUtils(commands.Cog, name='Message Utilities'):
             messages = await message.channel.history(limit=10).flatten()
             for mesg in messages:
                 if mesg.attachments.__len__() > 0 or mesg.embeds.__len__() > 0:
-                    await message.author.send(embed=construct_save_embed_img(mesg))
+                    await message.author.send(embed=self.construct_save_embed_img(mesg))
                     break
     
     @commands.command(brief='Delete the last message the bot send',
@@ -76,6 +75,73 @@ class MessageUtils(commands.Cog, name='Message Utilities'):
             phrases = " ".join(args)
             await ctx.message.delete()
             await ctx.send(phrases)
+
+    @staticmethod
+    def construct_save_embed_img(message: discord.Message):
+            
+        IMAGE_FORMAT = ['.jpg', '.JPG',
+                        '.png', '.PNG',
+                        '.gif']
+
+        embed = discord.Embed(title = 'Saved!')
+        
+        embed.add_field(
+            name = 'From',
+            value = '@'+ message.author.name + '#' + message.author.discriminator +
+            ' in #' + message.channel.name + ' on ' + message.channel.guild.name,
+            inline = False
+        )
+        
+        embed.add_field(
+            name = 'Location',
+            value = message.jump_url,
+            inline = False
+        )
+        if message.content != '':
+            embed.add_field(
+                name = 'Content',
+                value = message.content,
+                inline = False
+            )
+        
+        if (message.embeds.__len__() > 0):
+            if (message.embeds[0].image):
+                embed.set_image(url=message.embeds[0].image.proxy_url)
+            elif (message.embeds[0].video):
+                embed.set_image(url=message.embeds[0].video.url)
+            elif (message.embeds[0].url.startswith('https://media.discordapp.net/attachments')) and (message.embeds[0].url[-4:] in IMAGE_FORMAT):
+                embed.set_image(url=message.embeds[0].url)
+            else:
+                try:
+                    embedded_contents = ''
+                    for _ in message.embeds:
+                        embedded_contents += _.url
+                        embedded_contents += '\n'
+                    if (embedded_contents != ''):
+                        embed.add_field(
+                            name='Embedded Content',
+                            value = embedded_contents,
+                            inline = False
+                        )
+                except UnboundLocalError:
+                    pass
+
+        if (message.attachments.__len__() > 0):
+            att_contents = ''
+            for _ in message.attachments:
+                if _.content_type.startswith('image'):
+                    embed.set_image(url=_.url)
+                else:
+                    att_contents += _.url
+                    att_contents += '\n'
+            if att_contents != '':
+                embed.add_field(
+                    name = 'Attached Content',
+                    value = att_contents,
+                    inline = False
+                )
+        return embed
+        
 
 def setup(client):
     client.add_cog(MessageUtils(client))

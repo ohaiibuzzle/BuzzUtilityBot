@@ -34,29 +34,3 @@ async def get_sauce(url: str):
             #print(img_elem)
         
         return None
-
-async def construct_iqdb_embed(url: str):
-    data = await get_sauce(url)
-    if not data:
-        return None
-    embed = discord.Embed(title='Sauce found!')
-    embed.url = data['link']
-    embed.set_thumbnail(url=data['thumbnail'])
-    embed.add_field(
-        name='Location',
-        value=data['link'],
-        inline=False
-    )
-    
-    embed.add_field(
-        name='Alt Text',
-        value=data['alt_text'],
-        inline=False
-    )
-    return embed
-
-if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    res = loop.run_until_complete(construct_iqdb_embed('https://cdn.discordapp.com/attachments/807450358582214666/855769795877535744/3e2c96ca.jpg'))
-    print(res.to_dict())
-    pass

@@ -1,7 +1,8 @@
 import re
 from discord.ext import commands
+import discord
 from .safebooru import safebooru_random_img
-from .zerochan import construct_zerochan_embed
+from .zerochan import search_zerochan
 from .pixiv import construct_pixiv_embed, get_image_by_id
 from requests.exceptions import ConnectionError
 
@@ -37,7 +38,7 @@ class PictureSearch(commands.Cog, name='Random image finder'):
             tags = ' '.join(args).strip()
             tags = tags.replace('+', ',')
             try:
-                res = await construct_zerochan_embed(ctx.channel, tags)
+                res = await self.construct_zerochan_embed(ctx.channel, tags)
             except TypeError as e:
                 print(e)
                 await ctx.send('Your search string was too wide, or it included NSFW tags.\nNarrow the query to try again')
@@ -88,6 +89,31 @@ class PictureSearch(commands.Cog, name='Random image finder'):
                 else:
                     await ctx.send("Your search returned no result :(") 
         pass
+
+    @staticmethod
+    async def construct_zerochan_embed(ch, query: str):
+        if ch.type is not discord.ChannelType.private:
+            res = await search_zerochan(ch.is_nsfw(), query)
+        else: 
+            res = await search_zerochan(True, query)
+        if res == None:
+            return None
+        else:
+            embed = discord.Embed(title=res['title'])
+            embed.url = res['link']
+            embed.set_image(url=res['content'])
+            
+            embed.add_field(
+                name = 'Source',
+                value = embed.url,
+                inline= False
+            )
+            embed.add_field(
+                name = 'Tags',
+                value = '```\n' + res['keywords'][:1018] + '\n```',
+                inline = False
+            )
+            return embed
     
 def setup(client):
     client.add_cog(PictureSearch(client))

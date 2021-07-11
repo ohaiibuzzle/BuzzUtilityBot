@@ -182,30 +182,6 @@ async def search_zerochan(bypass, query: str):
                     'content': item.find('media:content')['url'],
                     'keywords': item.find('media:keywords').text.replace(chr(0x09), '').replace('\r\n', ' ').strip()
                 }
-
-async def construct_zerochan_embed(ch, query: str):
-    if ch.type is not ChannelType.private:
-        res = await search_zerochan(ch.is_nsfw(), query)
-    else: 
-        res = await search_zerochan(True, query)
-    if res == None:
-        return None
-    else:
-        embed = Embed(title=res['title'])
-        embed.url = res['link']
-        embed.set_image(url=res['content'])
-        
-        embed.add_field(
-            name = 'Source',
-            value = embed.url,
-            inline= False
-        )
-        embed.add_field(
-            name = 'Tags',
-            value = '```\n' + res['keywords'][:1018] + '\n```',
-            inline = False
-        )
-        return embed
         
     
 if __name__ == '__main__':
