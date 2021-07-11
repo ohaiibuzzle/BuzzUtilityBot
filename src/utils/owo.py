@@ -135,19 +135,37 @@ class OwO(commands.Cog, name="Why? I don't even know why these exists!"):
 
     @commands.command(brief="Show your marriage certificate!")
     async def marriagecert(self, ctx):
-        async with aiosqlite.connect(RT_DATABASE, detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES) as db:
-            async with db.execute('''SELECT GuildID, FirstSide, SecondSide, StartDate FROM Marriage WHERE `GuildID` = :guildID AND (`FirstSide` = :author OR `SecondSide` = :author)''', 
-            {'guildID': ctx.guild.id, 'author': ctx.message.author.id}) as rows:
-                this_row = await rows.fetchone()
-                if (this_row):
-                    first_member = discord.utils.find(lambda m: m.id == this_row[1], ctx.guild.members)
-                    second_member = discord.utils.find(lambda m: m.id == this_row[2], ctx.guild.members)
-                    marriage_photo = await OwO.generate_marry_image(first_member, second_member)
-                    length = datetime.datetime.now()-this_row[3]
-                    await ctx.send(f"Relationship between {first_member} and {second_member}, which is {length.days} days long!", file=marriage_photo)
-                    return
-                else:
-                    await ctx.send("You are not in a marriage with anyone yet...")
+        async with ctx.channel.typing():
+            if len(ctx.message.mentions) == 0:
+                async with aiosqlite.connect(RT_DATABASE, detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES) as db:
+                    async with db.execute('''SELECT GuildID, FirstSide, SecondSide, StartDate FROM Marriage WHERE `GuildID` = :guildID AND (`FirstSide` = :author OR `SecondSide` = :author)''', 
+                    {'guildID': ctx.guild.id, 'author': ctx.message.author.id}) as rows:
+                        this_row = await rows.fetchone()
+                        if (this_row):
+                            first_member = discord.utils.find(lambda m: m.id == this_row[1], ctx.guild.members)
+                            second_member = discord.utils.find(lambda m: m.id == this_row[2], ctx.guild.members)
+                            marriage_photo = await OwO.generate_marry_image(first_member, second_member)
+                            length = datetime.datetime.now()-this_row[3]
+                            day_or_days = "day" if length.days == 1 else "days"
+                            await ctx.send(f"Relationship between {first_member} and {second_member}, which is {length.days} {day_or_days} or {length.seconds} seconds long!", file=marriage_photo)
+                            return
+                        else:
+                            await ctx.send("You are not in a marriage with anyone yet...")
+            else:
+                async with aiosqlite.connect(RT_DATABASE, detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES) as db:
+                    async with db.execute('''SELECT GuildID, FirstSide, SecondSide, StartDate FROM Marriage WHERE `GuildID` = :guildID AND (`FirstSide` = :author OR `SecondSide` = :author)''', 
+                    {'guildID': ctx.guild.id, 'author': ctx.message.mentions[0].id}) as rows:
+                        this_row = await rows.fetchone()
+                        if (this_row):
+                            first_member = discord.utils.find(lambda m: m.id == this_row[1], ctx.guild.members)
+                            second_member = discord.utils.find(lambda m: m.id == this_row[2], ctx.guild.members)
+                            marriage_photo = await OwO.generate_marry_image(first_member, second_member)
+                            length = datetime.datetime.now()-this_row[3]
+                            day_or_days = "day" if length.days == 1 else "days"
+                            await ctx.send(f"Relationship between {first_member} and {second_member}, which is {length.days} {day_or_days} or {length.seconds} seconds long!", file=marriage_photo)
+                            return
+                        else:
+                            await ctx.send("The person in question is not in a marriage with anyone yet. Go get 'em!")
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
@@ -236,6 +254,8 @@ class OwO(commands.Cog, name="Why? I don't even know why these exists!"):
             #print(first_member.avatar_url)
             #print(second_member.avatar_url)
 
+            cert_text = f"@{first_member} x @{second_member}" 
+
             first_icon = await session.get(str(first_member.avatar_url))
             first_buffer = io.BytesIO(await first_icon.read())
             first_buffer.seek(0)
@@ -254,6 +274,8 @@ class OwO(commands.Cog, name="Why? I don't even know why these exists!"):
             heart_icon = Image.open('runtime/assets/heart.png', "r").convert("RGBA")
             heart_w, heart_h = heart_icon.size
             heart_offset = ((bg_w - heart_w) // 2, (bg_h - heart_h) // 2)
+
+            text_font = ImageFont.truetype("runtime/assets/font.ttf", 40)
 
             #mask pfp ->
             mask = Image.new('L', icon.size, 255)
@@ -290,8 +312,21 @@ class OwO(commands.Cog, name="Why? I don't even know why these exists!"):
 
             blurple.paste(heart_icon, heart_offset, heart_icon)
 
+            text_layer = Image.new("RGBA",(background.size), (0,0,0,0))
+            draw = ImageDraw.Draw(text_layer)
+
+            text_w, text_h = draw.textsize(cert_text, font=text_font)
+
+            username_layer = Image.new('RGBA', (text_w,text_h), (0,0,0,200))
+            draw = ImageDraw.Draw(username_layer)
+            draw.text((0,0), cert_text, fill="white", font=text_font)
+
+            text_layer.paste(username_layer, ((bg_w-text_w)//2, bg_h-10-text_h), username_layer)
+
+            final_img = Image.alpha_composite(blurple, text_layer)
+
             with io.BytesIO() as image_bin:
-                blurple.save(image_bin, format='PNG')
+                final_img.save(image_bin, format='PNG')
                 image_bin.seek(0)
                 file = discord.File(image_bin, filename='welcome.png')
                 return file
