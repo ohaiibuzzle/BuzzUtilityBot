@@ -26,7 +26,7 @@ class OwO(commands.Cog, name="Why? I don't even know why these exists!"):
         else:
             await ctx.send(OwO.owoify(" ".join(args)))
 
-    @commands.command(brief="Ships 🛳️")
+    @commands.command(brief="Ships 🛳️",description="Ships two people together, syntax: ship @Someone and @Someone")
     async def ship(self, ctx):
         if self.app_info == None:
             self.app_info = await self.client.application_info()
@@ -37,7 +37,7 @@ class OwO(commands.Cog, name="Why? I don't even know why these exists!"):
         else:
             await ctx.send(f"Oh look {ctx.message.author.mention} ships {ctx.message.mentions[0]} and {ctx.message.mentions[1]} together \nAww... 🛳️")
     
-    @commands.command(brief="Marry 💍")
+    @commands.command(brief="Marry 💍", description="Take your ship to the next level. Mention someone to start")
     async def marry(self, ctx: commands.Context):
         async with ctx.channel.typing():
             if self.app_info == None:
@@ -147,7 +147,7 @@ class OwO(commands.Cog, name="Why? I don't even know why these exists!"):
                             marriage_photo = await OwO.generate_marry_image(first_member, second_member)
                             length = datetime.datetime.now()-this_row[3]
                             day_or_days = "day" if length.days == 1 else "days"
-                            await ctx.send(f"Relationship between {first_member} and {second_member}, which is {length.days} {day_or_days} or {length.seconds} seconds long!", file=marriage_photo)
+                            await ctx.send(f"Relationship between {first_member} and {second_member}, which is {length} long!", file=marriage_photo)
                             return
                         else:
                             await ctx.send("You are not in a marriage with anyone yet...")
@@ -162,7 +162,7 @@ class OwO(commands.Cog, name="Why? I don't even know why these exists!"):
                             marriage_photo = await OwO.generate_marry_image(first_member, second_member)
                             length = datetime.datetime.now()-this_row[3]
                             day_or_days = "day" if length.days == 1 else "days"
-                            await ctx.send(f"Relationship between {first_member} and {second_member}, which is {length.days} {day_or_days} or {length.seconds} seconds long!", file=marriage_photo)
+                            await ctx.send(f"Relationship between {first_member} and {second_member}, which is {length} long!", file=marriage_photo)
                             return
                         else:
                             await ctx.send("The person in question is not in a marriage with anyone yet. Go get 'em!")
