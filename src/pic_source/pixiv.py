@@ -7,10 +7,14 @@ import requests
 import re
 import aiohttp
 import asyncio
+import configparser
 
 random_source = random.SystemRandom()
 
 timeout = aiohttp.ClientTimeout(total=15)
+
+config = configparser.ConfigParser()
+config.read('runtime/config.cfg')
 
 async def px_getamount(query: str):
     #https://www.pixiv.net/ajax/search/artworks/hu%20tao?word=hu tao&order=date_d&mode=all&p=1&s_mode=s_tag&type=all&lang=en
@@ -73,8 +77,7 @@ async def get_image_by_id(illust_id: int):
         aapi = pixivpy_async.AppPixivAPI(client=client)
         aapi.set_accept_language('en-us')
         
-        with open('runtime/pixiv.key', 'r') as keyfile:
-            await aapi.login(refresh_token=keyfile.readline())
+        await aapi.login(config['Credentials']['pixiv_key'])
             
         res = (await aapi.illust_detail(illust_id))['illust']
         

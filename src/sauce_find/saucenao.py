@@ -1,12 +1,11 @@
 from pysaucenao import SauceNao
 from pysaucenao.errors import SauceNaoException
-import asyncio
+import asyncio, configparser
 
-key=''
-with open('runtime/saucenao.key', 'r') as keyfile:
-    key = keyfile.readline()
+config = configparser.ConfigParser()
+config.read('runtime/config.cfg')
 
-saucer = SauceNao(api_key=key, db=5)
+saucer = SauceNao(api_key=config['Credentials']['saucenao_key'], db=5)
 
 async def find_sauce(url):
     try:

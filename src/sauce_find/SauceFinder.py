@@ -3,6 +3,10 @@ from .saucenao import find_sauce
 from .iqdb import get_sauce
 import discord
 import pixivpy_async, re
+import configparser
+
+config = configparser.ConfigParser()
+config.read('runtime/config.cfg')
 
 class SauceFinder(commands.Cog, name='Picture Sauce Finding'):
   
@@ -102,8 +106,7 @@ class SauceFinder(commands.Cog, name='Picture Sauce Finding'):
             aapi = pixivpy_async.AppPixivAPI(client=client)
             aapi.set_accept_language('en-us')
             
-            with open('runtime/pixiv.key', 'r') as pixivkey:
-                await aapi.login(refresh_token=pixivkey.readline())
+            await aapi.login(refresh_token=config['Credentials']['pixiv_key'])
             
             #print(raw_json)
             

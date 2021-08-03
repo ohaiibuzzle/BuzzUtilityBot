@@ -2,13 +2,22 @@ import discord
 from discord.ext import commands
 from utils.AdminTools import AdminTools
 import os, sqlite3
+import configparser
 
 if not os.path.isdir('runtime'):
     print("Please populate the /runtime directory with your credentials!")
+    config = configparser.ConfigParser()
+    config['Credentials']={
+        'discord_key': '',
+        'pixiv_key': '',
+        'saucenao_key': ''
+    }
+    with open('runtime/config.cfg', 'w+') as configfile:
+        config.write(configfile)
     exit(0)
 
 intents = discord.Intents.default()
-intents.members = True
+intents.members = True # pylint: disable=assigning-non-slot
 
 client = commands.Bot(command_prefix='.', intents=intents)
 
@@ -28,7 +37,6 @@ client.load_extension('utils.Welcome')
 client.load_extension('utils.Birthday')
 client.load_extension('utils.owo')
 
-key = ''
-with open('runtime/discord.key', 'r') as keyfile:
-    key = keyfile.readline()
-client.run(key)
+config = configparser.ConfigParser()
+config.read('runtime/config.cfg')
+client.run(config['Credentials']['discord_key'])
