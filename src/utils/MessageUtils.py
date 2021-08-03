@@ -67,7 +67,7 @@ class MessageUtils(commands.Cog, name='Message Utilities'):
             if mesg.author == self.client.user:
                 await mesg.delete()
                 break
-            
+
     @commands.command(hidden=True)
     @commands.is_owner()
     async def sudo(self, ctx, *args):

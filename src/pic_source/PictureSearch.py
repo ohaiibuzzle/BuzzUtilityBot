@@ -5,10 +5,12 @@ from .safebooru import safebooru_random_img
 from .zerochan import search_zerochan
 from .pixiv import construct_pixiv_embed, get_image_by_id
 from requests.exceptions import ConnectionError
+import aioredis, asyncio
 
 class PictureSearch(commands.Cog, name='Random image finder'):
     def __init__(self, client):
         self.client = client
+        self.redis_pool = aioredis.from_url('redis://localhost', decode_responses=True)
     
     @commands.command(brief='Random image from SafeBooru',
                       description='Look for a random image on SafeBooru, input can be any of SafeBooru\'s tag query\n\
@@ -25,6 +27,7 @@ class PictureSearch(commands.Cog, name='Random image finder'):
             else:
                 if target:
                     await ctx.send(embed=target)
+                    await self.redis_pool.set(f'{ctx.channel.id}:{ctx.author.id}', f'SAFEBOORU {tags}', ex=10)
                 else:
                     await ctx.send("Your search returned no result :(")           
     
@@ -48,6 +51,7 @@ class PictureSearch(commands.Cog, name='Random image finder'):
             else:
                 if res != None:
                     await ctx.send(embed=res)
+                    await self.redis_pool.set(f'{ctx.channel.id}:{ctx.author.id}', f'ZEROCHAN {tags}', ex=10)
                 else:
                     await ctx.send("Sorry, I can't find you anything :( \nEither check your search, or Buzzle banned a tag in the result")
                 
@@ -67,6 +71,7 @@ class PictureSearch(commands.Cog, name='Random image finder'):
             else:
                 if target:
                     await ctx.send(embed=target, file=file)
+                    await self.redis_pool.set(f'{ctx.channel.id}:{ctx.author.id}', f'PIXIV {tags}', ex=10)
                 else:
                     await ctx.send("Your search returned no result :(")
     
@@ -89,6 +94,22 @@ class PictureSearch(commands.Cog, name='Random image finder'):
                 else:
                     await ctx.send("Your search returned no result :(") 
         pass
+
+    @commands.command(brief='Execute the last command, again!',
+                        description='Run the last command you executed, timeout is 10s\n\
+                            Only some commands are supported.')
+    async def more(self, ctx:commands.Context):
+        last_exec = await self.redis_pool.get(f'{ctx.channel.id}:{ctx.author.id}')
+        if last_exec is None:
+            await ctx.send("I can't remember what you were doing~~")
+            return
+        last_exec = str(last_exec)
+        if last_exec.startswith('ZEROCHAN'):
+            await self.zcrandom(ctx, last_exec[9:])
+        elif last_exec.startswith('SAFEBOORU'):
+            await self.sbrandom(ctx, last_exec[10:])
+        elif last_exec.startswith('PIXIV'):
+            await self.pixivrandom(ctx, last_exec[6:])
 
     @staticmethod
     async def construct_zerochan_embed(ch, query: str):
