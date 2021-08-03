@@ -3,6 +3,7 @@ import re
 from time import sleep
 from bs4 import BeautifulSoup
 from random import SystemRandom, random
+from random import choice as rchoice
 from discord import Embed, ChannelType
 import aiohttp
 
@@ -19,7 +20,6 @@ async def tf_scan(url:str):
     except ValueError:
         print("AI Error")
         return True
-    
     print(res)
     if res['(o-_-o) (H)'][0] >= 0.59:
         print('AI test failed with H content')
@@ -125,8 +125,8 @@ async def search_zerochan(bypass, query: str):
                     }
 
                 else:
-                    page = int(choice / (item_amount))+1
-                    res = await session.get(tag_target+query+'?xml&s=id'+pagination+str(page))
+                    page = int(choice / (item_amount))+1 if (choice / (item_amount))+1 < 100 else rchoice(range(100))
+                    res = await session.get(tag_target+query+'?xml'+pagination+str(page))
                     page_soup = BeautifulSoup(await res.read(), features='lxml')
                     
                     if 'Some content is for members only, please' in page_soup.text:
@@ -186,7 +186,7 @@ async def search_zerochan(bypass, query: str):
     
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    res = loop.run_until_complete(search_zerochan(True, 'Ganyu'))
+    res = loop.run_until_complete(search_zerochan(True, 'Genshin Impact'))
 
     if res != None:
         print(res)
