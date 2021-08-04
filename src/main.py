@@ -36,6 +36,7 @@ client.load_extension('utils.MessageUtils')
 client.load_extension('utils.Welcome')
 client.load_extension('utils.Birthday')
 client.load_extension('utils.owo')
+#client.load_extension('utils.nsfwRole')
 
 config = configparser.ConfigParser()
 config.read('runtime/config.cfg')

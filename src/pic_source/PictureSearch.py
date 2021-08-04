@@ -4,6 +4,7 @@ import discord
 from .safebooru import safebooru_random_img
 from .zerochan import search_zerochan
 from .pixiv import construct_pixiv_embed, get_image_by_id
+from .danbooru import search_danbooru
 from requests.exceptions import ConnectionError
 import aioredis, asyncio
 
@@ -95,6 +96,24 @@ class PictureSearch(commands.Cog, name='Random image finder'):
                     await ctx.send("Your search returned no result :(") 
         pass
 
+    @commands.command(brief="Danbooru (NSFW) search",
+                        description="Search for a random image on Danbooru.", aliases=['dbr'])
+    async def danboorurandom(self, ctx: commands.Context, *args):
+        async with ctx.channel.typing():
+            print ('@' + ctx.message.author.name + '#' + ctx.message.author.discriminator + ' wants to search danbooru!')
+            if not ctx.channel.is_nsfw():
+                await ctx.send("This command cannot be ran on channels that aren't marked NSFW!")
+                return
+            tags = ' '.join(args).strip()
+            try:
+                embed = await PictureSearch.construct_danbooru_embed(tags)
+            except ConnectionError:
+                await ctx.send("Buzzle's Internet broke :(\n(Try again in a few minutes, server is under high load)")
+            else:
+                await ctx.send(embed=embed)
+                await self.redis_pool.set(f'{ctx.channel.id}:{ctx.author.id}', f'DANBOORU {tags}', ex=10)
+
+            
     @commands.command(brief='Execute the last command, again!',
                         description='Run the last command you executed, timeout is 10s\n\
                             Only some commands are supported.')
@@ -110,9 +129,11 @@ class PictureSearch(commands.Cog, name='Random image finder'):
             await self.sbrandom(ctx, last_exec[10:])
         elif last_exec.startswith('PIXIV'):
             await self.pixivrandom(ctx, last_exec[6:])
+        elif last_exec.startswith('DANBOORU'):
+            await self.danboorurandom(ctx. last_exec[9:])
 
     @staticmethod
-    async def construct_zerochan_embed(ch, query: str):
+    async def construct_zerochan_embed(ch, query: str) -> discord.Embed:
         if ch.type is not discord.ChannelType.private:
             res = await search_zerochan(ch.is_nsfw(), query)
         else: 
@@ -135,6 +156,26 @@ class PictureSearch(commands.Cog, name='Random image finder'):
                 inline = False
             )
             return embed
+
+    @staticmethod
+    async def construct_danbooru_embed(query:str) -> discord.Embed:
+        res = await search_danbooru(query)
+        embed = discord.Embed(title=query)
+        embed.url = f"https://danbooru.donmai.us/posts/{res['id']}"
+        embed.set_image(url=res['large_file_url'])
+        
+        embed.add_field(
+            name = 'Source',
+            value = res['source'],
+            inline= False
+        )
+        embed.add_field(
+            name = 'Tags',
+            value = '```\n' + res['tag_string'][:1018] + '\n```',
+            inline = False
+        )
+        return embed
+
     
 def setup(client):
     client.add_cog(PictureSearch(client))
