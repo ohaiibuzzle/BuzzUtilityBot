@@ -101,7 +101,11 @@ class PictureSearch(commands.Cog, name='Random image finder'):
     async def danboorurandom(self, ctx: commands.Context, *args):
         async with ctx.channel.typing():
             print ('@' + ctx.message.author.name + '#' + ctx.message.author.discriminator + ' wants to search danbooru!')
-            if not ctx.channel.is_nsfw():
+            try:
+                if not ctx.channel.is_nsfw():
+                    await ctx.send("This command cannot be ran on channels that aren't marked NSFW!")
+                    return
+            except AttributeError:
                 await ctx.send("This command cannot be ran on channels that aren't marked NSFW!")
                 return
             tags = ' '.join(args).strip()
@@ -130,7 +134,7 @@ class PictureSearch(commands.Cog, name='Random image finder'):
         elif last_exec.startswith('PIXIV'):
             await self.pixivrandom(ctx, last_exec[6:])
         elif last_exec.startswith('DANBOORU'):
-            await self.danboorurandom(ctx. last_exec[9:])
+            await self.danboorurandom(ctx, last_exec[9:])
 
     @staticmethod
     async def construct_zerochan_embed(ch, query: str) -> discord.Embed:
