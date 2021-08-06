@@ -15,12 +15,16 @@ class MessageUtils(commands.Cog, name='Message Utilities'):
             if (ctx.message.reference.resolved != None):
                 search_msg = ctx.message.reference.resolved
                 await ctx.message.author.send(embed=self.construct_save_embed_img(search_msg))
+                await asyncio.sleep(5)
+                await ctx.message.delete()
 
         else:
             messages = await ctx.message.channel.history(limit=20).flatten()
             for mesg in messages:
                 if mesg.attachments.__len__() > 0 or mesg.embeds.__len__() > 0:
                     await ctx.message.author.send(embed=self.construct_save_embed_img(mesg))
+                    await asyncio.sleep(5)
+                    await ctx.message.delete()
                     break
                 
     @commands.command(brief='Save n messages to your DM', 

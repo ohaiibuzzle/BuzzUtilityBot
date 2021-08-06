@@ -1,7 +1,7 @@
 from os import listdir, environ
 from os.path import isfile, join, exists, isdir, abspath
 
-environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
+#environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 
 import numpy as np
 import tensorflow as tf
@@ -48,6 +48,7 @@ def process_url(url: str):
 async def async_process_url(url:str):
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, process_url, url)
+
 
 model = load_model('./runtime/models/mobileNet/')
 categories = ['(o･ω･o) (D)', '(o-_-o) (H)', '(ﾉ´ з `)ノ (N)', '(╬ Ò﹏Ó) (P)', '(°ㅂ°╬) (S)']
