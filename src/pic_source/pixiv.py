@@ -40,8 +40,7 @@ async def get_image(query: str, bypass=False):
                     
         global random_source
         
-        with open('runtime/pixiv.key', 'r') as keyfile:
-            await aapi.login(refresh_token=keyfile.readline())
+        await aapi.login(refresh_token=config['Credentials']['pixiv_key'])
             
         #print(total)
         for _ in range(3):
@@ -77,7 +76,7 @@ async def get_image_by_id(illust_id: int):
         aapi = pixivpy_async.AppPixivAPI(client=client)
         aapi.set_accept_language('en-us')
         
-        await aapi.login(config['Credentials']['pixiv_key'])
+        await aapi.login(refresh_token=config['Credentials']['pixiv_key'])
             
         res = (await aapi.illust_detail(illust_id))['illust']
         
