@@ -1,7 +1,7 @@
 from os import listdir, environ
 from os.path import isfile, join, exists, isdir, abspath
 
-#environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
+environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 
 import numpy as np
 import tensorflow as tf
