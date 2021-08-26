@@ -1,3 +1,5 @@
+from importlib.util import source_from_cache
+import discord
 from discord.ext import commands
 import asyncio, async_timeout
 import itertools
@@ -36,6 +38,10 @@ class PlaybackItem():
 
     def __str__(self) -> str:
         return f"{self.source.title} - {self.source.uploader}"
+    
+    def create_embed(self) -> discord.Embed:
+        return discord.Embed(title="Now Playing").add_field(name='Title', value=self.source.title, inline=False)\
+            .add_field(name='Requested By', value=self.requester, inline=False)
 
 class VoiceState:
     def __init__(self, client:commands.Bot, ctx: commands.Context) -> None:
@@ -62,7 +68,6 @@ class VoiceState:
     @loop.setter
     def loop(self, value: bool):
         self._loop = value
-
 
     @property
     def volume(self):
@@ -101,12 +106,14 @@ class VoiceState:
     def play_next_song(self, error=None):
         if error:
             raise VoiceError(str(error))
-
         self.next.set()
+
+    def skip(self):
+        if self.is_playing:
+            self.voice.stop()
 
     async def stop(self):
         self.play_queue.clear()
-
         if self.voice:
             await self.voice.disconnect()
             self.voice = None

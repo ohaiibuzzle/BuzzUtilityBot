@@ -1,10 +1,9 @@
 import asyncio
-from logging import exception
 import discord
-from discord import embeds
 from discord.ext import commands, tasks
-from music import youtube_dl_source, voice_state_manager
+from music import youtube_dl_source, voice_state_manager, spotify_yt_bridge
 import math
+from pyyoutube.error import PyYouTubeException
 
 class Music(commands.Cog):
     def __init__(self, client: commands.Bot):
@@ -35,6 +34,9 @@ class Music(commands.Cog):
 
     @commands.command()
     async def summon(self, ctx: commands.Context):
+        """
+        Connects to the user's voice channel
+        """
         if not ctx.author.voice:
             await ctx.send("Hmm? What should I join here?")
 
@@ -49,6 +51,9 @@ class Music(commands.Cog):
 
     @commands.command()
     async def disconnect(self, ctx: commands.Context):
+        """
+        Disconnect and clear queue
+        """
         if not ctx.voice_state.voice:
             return await ctx.send("Not currently connected to any channel!")
         else:
@@ -56,19 +61,30 @@ class Music(commands.Cog):
             del self.voice_states[ctx.guild.id]
 
     @commands.command()
-    async def play(self, ctx: commands.Context, *, url):
+    async def play(self, ctx: commands.Context, *, url, silent_mesg=False, has_URL=False):
+        """
+        Play **from URL**
+        """
         if not ctx.voice_state.voice:
             await ctx.invoke(self.summon)
         async with ctx.typing():
             try:
-                source = await youtube_dl_source.YouTubeDLSingleSource.from_url(url, loop=self.client.loop, stream=True, requester=ctx.author)
+                source = await youtube_dl_source.YouTubeDLSingleSource.from_url(url, loop=self.client.loop, stream=True, requester=ctx.author, channel=ctx.channel)
             except Exception as e:
                 await ctx.send(f"Something funky happened: {e}")
             else:
                 item = voice_state_manager.PlaybackItem(source=source)
 
                 await ctx.voice_state.play_queue.put(item)
-                await ctx.send(f"Added {source.title} - {source.uploader} to the queue!")
+                if not has_URL:
+                    status = await ctx.send(f"Added {source.title} - {source.uploader} to the queue!")
+                else:
+                    status = await ctx.send(f"Added {source.title} - {source.uploader} ({source.webpage}) to the queue!")    
+                if silent_mesg:
+                    await asyncio.sleep(5)
+                    await status.delete()
+
+                    
     
     @commands.command()
     async def pause(self, ctx: commands.Context):
@@ -83,7 +99,18 @@ class Music(commands.Cog):
             await ctx.message.add_reaction('🆗')
 
     @commands.command()
+    async def remove(self, ctx, *, index:int):
+        if len(ctx.voice_state.play_queue) == 0:
+            return await ctx.send('Empty queue.')
+        
+        ctx.voice_state.play_queue.remove(index - 1)
+        await ctx.invoke(self.showqueue)
+
+    @commands.command()
     async def volume(self, ctx: commands.Context, volume: float):
+        """
+        Adjust volume (0-100)
+        """
         if not ctx.voice_client:
             return await ctx.send("Hmm? Do I even have a voice?")
         elif 0 > volume > 100:
@@ -94,6 +121,9 @@ class Music(commands.Cog):
 
     @commands.command()
     async def showqueue(self, ctx, *, page: int = 1):
+        """
+        Show the playback queue
+        """
         async with ctx.typing():
             if len(ctx.voice_state.play_queue) == 0:
                 await ctx.send("Oh no queue is empty :(")
@@ -104,7 +134,7 @@ class Music(commands.Cog):
 
                 queue_str = ""
                 for number, entry in enumerate(ctx.voice_state.play_queue[first_item:first_item+10], start=first_item):
-                    queue_str += f"**{number}**. {entry.source.title} - {entry.source.uploader}"
+                    queue_str += f"**{number + 1}**. {entry.source.title} - {entry.source.uploader}\n"
 
                 this_embed = discord.Embed(title=f"Queue page {page}/{pages}",
                 description = queue_str)
@@ -113,6 +143,9 @@ class Music(commands.Cog):
 
     @commands.command()
     async def search(self, ctx: commands.Context, *, query):
+        """
+        Use youtube-dl to look up videos
+        """
         def check_requester_msg(message: discord.Message):
             return message.author == ctx.author
         async with ctx.typing():
@@ -140,6 +173,30 @@ class Music(commands.Cog):
     @commands.command(alias=['np'])
     async def nowplaying(self, ctx):
         await ctx.send(f"Currently playing {ctx.voice_state.current}")
+
+    @commands.command()
+    async def skip(self, ctx):
+        """
+        Skip one
+        """
+        if not ctx.voice_state.is_playing:
+            return await ctx.send('Not playing any music right now...')
+        else:
+            await ctx.send("Skipping this track...")
+            ctx.voice_state.skip()
+
+    @commands.command()
+    async def spotify(self, ctx, *, url:str):
+        async with ctx.typing():
+            await ctx.send("Please wait, converting your playlist. This could take a while!")
+            #print(url)
+            try:
+                this_playlist = await spotify_yt_bridge.async_spotify_to_yt(url, loop=self.client.loop, method='api')
+            except PyYouTubeException:
+                this_playlist = await spotify_yt_bridge.async_spotify_to_yt(url, loop=self.client.loop, method='alt')
+            for item in this_playlist:
+                await ctx.invoke(self.play, url=item, silent_mesg=True, has_URL=True)
+            await ctx.invoke(self.showqueue)
 
     @play.before_invoke
     async def ensure_voice(self, ctx):

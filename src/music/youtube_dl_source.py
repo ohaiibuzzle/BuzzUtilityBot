@@ -27,18 +27,20 @@ ytdl_client = youtube_dl.YoutubeDL(YTDL_OPTS)
 
 class YouTubeDLSingleSource(discord.PCMVolumeTransformer):
 
-    def __init__(self, original, *, data, volume: float = 0.5, requester):
+    def __init__(self, original, *, data, volume: float = 0.5, requester, channel):
         super().__init__(original, volume=volume)
 
         self.requester = requester
+        self.channel = channel
 
         self.data = data        
+        self.webpage = data.get('webpage_url')
         self.title = data.get('title')
         self.uploader = data.get('uploader')
         self.url = data.get('url')
     
     @classmethod
-    async def from_url(cls, url, *,loop=None, stream=False, requester):
+    async def from_url(cls, url, *,loop=None, stream=False, requester, channel):
         loop = loop or asyncio.get_event_loop()
         data = await loop.run_in_executor(None, lambda: ytdl_client.extract_info(url, download=not stream))
 
@@ -46,11 +48,11 @@ class YouTubeDLSingleSource(discord.PCMVolumeTransformer):
             data = data['entries'][0]
         
         filename = data['url'] if stream else ytdl_client.prepare_filename(data)
-        return cls(discord.FFmpegPCMAudio(filename, **FFMPEG_OPTS), data=data, requester=requester)
+        return cls(discord.FFmpegPCMAudio(filename, **FFMPEG_OPTS), data=data, requester=requester, channel=channel)
 
     @staticmethod
-    async def list_from_query(query, loop):
+    async def list_from_query(query, loop, amount:int=10):
         loop = loop or asyncio.get_event_loop()
-        data = await loop.run_in_executor(None, lambda: ytdl_client.extract_info(f"ytsearch10:{query}", download=False))
+        data = await loop.run_in_executor(None, lambda: ytdl_client.extract_info(f"ytsearch{amount}:{query}", download=False))
         if 'entries' in data:
             return data

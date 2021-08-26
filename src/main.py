@@ -10,7 +10,10 @@ if not os.path.isdir('runtime'):
     config['Credentials']={
         'discord_key': '',
         'pixiv_key': '',
-        'saucenao_key': ''
+        'saucenao_key': '',
+        'youtube_data_v3_key' : '',
+        'spotify_web_api_cid' : '',
+        'spotify_web_api_sec' : ''
     }
     with open('runtime/config.cfg', 'w+') as configfile:
         config.write(configfile)
