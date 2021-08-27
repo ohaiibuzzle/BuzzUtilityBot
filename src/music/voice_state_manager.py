@@ -4,7 +4,6 @@ from discord.ext import commands
 import asyncio, async_timeout
 import itertools
 
-from discord.ext.commands.core import Command
 from music import youtube_dl_source
 
 # Most of these is stolen from here lol
@@ -30,6 +29,10 @@ class PlayQueue(asyncio.Queue):
     
     def remove(self, index):
         del self._queue[index]
+
+    def chop(self, amount: int):
+        for _ in range(amount-1):
+            self.remove(0)
 
 class PlaybackItem():
     __slots__ = ('source', 'requester')
@@ -111,9 +114,12 @@ class VoiceState:
             raise VoiceError(str(error))
         self.next.set()
 
-    def skip(self):
+    def skip(self, amount: int = 1):
+        if amount != 1:
+            self.play_queue.chop(amount)
         if self.is_playing:
             self.voice.stop()
+
 
     async def stop(self):
         self.play_queue.clear()

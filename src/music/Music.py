@@ -181,18 +181,23 @@ class Music(commands.Cog):
         await ctx.send(embed=ctx.voice_state.current.create_embed())
 
     @commands.command()
-    async def skip(self, ctx):
+    async def skip(self, ctx, *, n:int=1):
         """
-        Skip one
+        Skip n items
         """
         if not ctx.voice_state.is_playing:
             return await ctx.send('Not playing any music right now...')
         else:
-            await ctx.send("Skipping this track...")
-            ctx.voice_state.skip()
+            if n > len(ctx.voice_state.play_queue):
+                await ctx.voice_state.stop()
+            await ctx.send(f"Skipping {n} track...")
+            ctx.voice_state.skip(n)
 
     @commands.command()
-    async def spotify(self, ctx, silent, *, url:str):
+    async def spotify(self, ctx, *, url:str, silent:bool = False):
+        """
+        Plays a Spotify Playlist
+        """
         if not ctx.voice_state.voice:
             await ctx.invoke(self.summon)
         async with ctx.typing():
@@ -209,7 +214,7 @@ class Music(commands.Cog):
                         await ctx.send(f"Something funky happened. Stopping")
                         break
                     else:
-                        if silent != 'silent':
+                        if not silent:
                             await ctx.invoke(self.play, url=track_link, silent_mesg=True, has_URL=True)
                         else:
                             await ctx.invoke(self.play, url=track_link, hidden=True)
@@ -230,7 +235,6 @@ class Music(commands.Cog):
                 tmp_queue.seek(0)
                 file = discord.File(tmp_queue, filename=f'queue-{ctx.guild}.txt')
                 await ctx.send("Here's the current queue!", file=file)
-
 
     @play.before_invoke
     async def ensure_voice(self, ctx):
