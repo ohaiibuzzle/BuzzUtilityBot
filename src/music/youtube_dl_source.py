@@ -20,6 +20,7 @@ YTDL_OPTS = {
 }
 
 FFMPEG_OPTS = {
+    'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
     'options': '-vn',
 }
 
@@ -42,7 +43,7 @@ class YouTubeDLSingleSource(discord.PCMVolumeTransformer):
     @classmethod
     async def from_url(cls, url, *,loop=None, stream=False, requester, channel):
         loop = loop or asyncio.get_event_loop()
-        data = await loop.run_in_executor(None, lambda: ytdl_client.extract_info(url, download=not stream))
+        data = await loop.run_in_executor(None, lambda: ytdl_client.extract_info(url, download=not stream,))
 
         if 'entries' in data:
             data = data['entries'][0]
