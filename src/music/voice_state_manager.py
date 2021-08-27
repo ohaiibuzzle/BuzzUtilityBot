@@ -7,6 +7,8 @@ import itertools
 from discord.ext.commands.core import Command
 from music import youtube_dl_source
 
+# Most of these is stolen from here lol
+# https://gist.github.com/vbe0201/ade9b80f2d3b64643d854938d40a0a2d
 class VoiceError(Exception):
     pass
 
@@ -105,6 +107,7 @@ class VoiceState:
 
     def play_next_song(self, error=None):
         if error:
+            print(error)
             raise VoiceError(str(error))
         self.next.set()
 

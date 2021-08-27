@@ -108,7 +108,8 @@ class Music(commands.Cog):
             return await ctx.send('Empty queue.')
         
         ctx.voice_state.play_queue.remove(index - 1)
-        await ctx.invoke(self.showqueue)
+        await ctx.message.add_reaction('🆗')
+        await ctx.invoke(self.queue)
 
     @commands.command()
     async def volume(self, ctx: commands.Context, volume: float):
@@ -191,6 +192,8 @@ class Music(commands.Cog):
 
     @commands.command()
     async def spotify(self, ctx, *, url:str):
+        if not ctx.voice_state.voice:
+            await ctx.invoke(self.summon)
         async with ctx.typing():
             await ctx.send("Please wait, converting your playlist. This could take a while!")
             try:
