@@ -52,7 +52,7 @@ class Music(commands.Cog):
         ctx.voice_state.voice = await destination.connect()
         
 
-    @commands.command(alias=['dc'])
+    @commands.command(aliases=['dc'])
     async def disconnect(self, ctx: commands.Context):
         """
         Disconnect and clear queue
@@ -176,9 +176,21 @@ class Music(commands.Cog):
                 else:
                     return await ctx.send("That was not a valid selection!")
 
-    @commands.command(alias=['np'])
+    @commands.command(aliases=['np'])
     async def nowplaying(self, ctx):
         await ctx.send(embed=ctx.voice_state.current.create_embed())
+
+    @commands.command(name='loop')
+    async def _loop(self, ctx: commands.Context):
+        """Loops/Unloops whatever is currently being played
+
+        Args:
+            ctx (commands.Context): Context
+        """
+        if not ctx.voice_state.is_playing:
+            return await ctx.send('Nothing being played at the moment.')
+        ctx.voice_state.loop = not ctx.voice_state.loop
+        await ctx.message.add_reaction('✅')
 
     @commands.command()
     async def skip(self, ctx, *, n:int=1):
