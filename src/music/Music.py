@@ -64,7 +64,7 @@ class Music(commands.Cog):
             del self.voice_states[ctx.guild.id]
 
     @commands.command()
-    async def play(self, ctx: commands.Context, *, url, silent_mesg=False, has_URL=False):
+    async def play(self, ctx: commands.Context, *, url, silent_mesg=False, has_URL=False, hidden=False):
         """
         Play **from URL**
         """
@@ -80,15 +80,16 @@ class Music(commands.Cog):
                 item = voice_state_manager.PlaybackItem(source=source)
 
                 await ctx.voice_state.play_queue.put(item)
-                if not has_URL:
-                    status = await ctx.send(f"Added {source.title} - {source.uploader} to the queue!")
+                if not hidden:
+                    if not has_URL:
+                        status = await ctx.send(f"Added {source.title} - {source.uploader} to the queue!")
+                    else:
+                        status = await ctx.send(f"Added {source.title} - {source.uploader} ({source.webpage}) to the queue!")    
+                    if silent_mesg:
+                        await asyncio.sleep(8)
+                        await status.delete()
                 else:
-                    status = await ctx.send(f"Added {source.title} - {source.uploader} ({source.webpage}) to the queue!")    
-                if silent_mesg:
                     await asyncio.sleep(8)
-                    await status.delete()
-
-                    
     
     @commands.command()
     async def pause(self, ctx: commands.Context):
@@ -191,7 +192,7 @@ class Music(commands.Cog):
             ctx.voice_state.skip()
 
     @commands.command()
-    async def spotify(self, ctx, *, url:str):
+    async def spotify(self, ctx, silent, *, url:str):
         if not ctx.voice_state.voice:
             await ctx.invoke(self.summon)
         async with ctx.typing():
@@ -208,7 +209,10 @@ class Music(commands.Cog):
                         await ctx.send(f"Something funky happened: {e}")
                         break
                     else:
-                        await ctx.invoke(self.play, url=track_link, silent_mesg=True, has_URL=True)
+                        if silent != 'silent':
+                            await ctx.invoke(self.play, url=track_link, silent_mesg=True, has_URL=True)
+                        else:
+                            await ctx.invoke(self.play, url=track_link, hidden=True)
                         await asyncio.sleep(2)
                 
                 await ctx.invoke(self.queue)
