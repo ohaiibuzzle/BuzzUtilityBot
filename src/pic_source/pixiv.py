@@ -17,12 +17,25 @@ config = configparser.ConfigParser()
 config.read('runtime/config.cfg')
 
 async def px_getamount(query: str):
+    """
+    Get an (approximate) amount of pics from Pixiv
+    """
     #https://www.pixiv.net/ajax/search/artworks/hu%20tao?word=hu tao&order=date_d&mode=all&p=1&s_mode=s_tag&type=all&lang=en
     async with aiohttp.ClientSession(timeout=timeout) as session:
         data = await (await session.get('https://www.pixiv.net/ajax/search/artworks/' + query + '?s_mode=s_tag&type=all&lang=en')).json()
         return data['body']['illustManga']['total']
 
 async def get_image(query: str, bypass=False):
+    """Get an image from Pixiv
+
+    Args:
+        query (str): The query to search for
+        bypass (bool, optional): Bypass. Defaults to False.
+
+    Returns:
+        result: PixivPy illustration info
+        image_data: the image, in a bytesIO format
+    """
     async with pixivpy_async.PixivClient() as client:
         aapi = pixivpy_async.AppPixivAPI(client=client)
         aapi.set_accept_language('en-us')
@@ -72,6 +85,11 @@ async def get_image(query: str, bypass=False):
         return None
     
 async def get_image_by_id(illust_id: int):
+    """
+    Get a Pixiv embed from a Pixiv Illustration ID
+    :param illust_id: ID of a Pixiv illustration
+    :return: a Pixiv Embed ready to be sent
+    """
     async with pixivpy_async.PixivClient() as client:
         aapi = pixivpy_async.AppPixivAPI(client=client)
         aapi.set_accept_language('en-us')
@@ -130,6 +148,12 @@ async def get_image_by_id(illust_id: int):
     
     
 async def construct_pixiv_embed(query, channel):
+    """
+    Creates an embed for Pixiv
+    :param query: A query string
+    :param ch: The Discord channel (So we can decide if it's SFW)
+    :return: An embed ready to be sent
+    """
     if channel.type == discord.ChannelType.private:
         res, img = await get_image(query)
     else:

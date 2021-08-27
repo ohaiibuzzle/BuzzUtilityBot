@@ -81,8 +81,15 @@ class MessageUtils(commands.Cog, name='Message Utilities'):
             await ctx.send(phrases)
 
     @staticmethod
-    def construct_save_embed_img(message: discord.Message):
-            
+    def construct_save_embed_img(message: discord.Message) -> discord.Embed:
+        """Creates an embed for the save
+
+        Args:
+            message (discord.Message): A Discord message to save
+
+        Returns:
+            discord.Embed: The embed
+        """
         IMAGE_FORMAT = ['.jpg', '.JPG',
                         '.png', '.PNG',
                         '.gif']

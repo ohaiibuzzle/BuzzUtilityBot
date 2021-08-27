@@ -46,6 +46,10 @@ class WelcomeMessage(commands.Cog):
 
     @staticmethod
     async def construct_welcome_embed(member: discord.Member):   
+        """
+        Creates a welcome embed for a member
+        :param member: A Discord Member
+        """
         AVATAR_SIZE = 192 
         server_msg = "Welcome to " + member.guild.name + '!'
         member_msg = "@{}#{}".format(member.name, member.discriminator)

@@ -52,6 +52,9 @@ class YouTubeDLSingleSource(discord.PCMVolumeTransformer):
 
     @staticmethod
     async def list_from_query(query, loop, amount:int=10):
+        """
+        Search for songs using youtube-dl
+        """
         loop = loop or asyncio.get_event_loop()
         data = await loop.run_in_executor(None, lambda: ytdl_client.extract_info(f"ytsearch{amount}:{query}", download=False))
         if 'entries' in data:

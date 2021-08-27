@@ -5,7 +5,14 @@ from bs4 import BeautifulSoup
 iqdb_endpoint = 'https://iqdb.org/?url='
 
 async def get_sauce(url: str):
-    
+    """Lookup IQDB for an image by URL
+
+    Args:
+        url (str): The URL to the image
+
+    Returns:
+        object: A description of the result
+    """
     timeout = aiohttp.ClientTimeout(total=15)
     
     async with aiohttp.ClientSession(timeout=timeout) as session:

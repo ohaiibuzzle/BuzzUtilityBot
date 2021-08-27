@@ -8,6 +8,14 @@ config.read('runtime/config.cfg')
 saucer = SauceNao(api_key=config['Credentials']['saucenao_key'], db=5)
 
 async def find_sauce(url):
+    """Look up image on SauceNao
+
+    Args:
+        url (str): The URL of the image
+
+    Returns:
+        BasicSauce: The first search result
+    """
     try:
         results = await saucer.from_url(url)
         return results[0]

@@ -11,7 +11,12 @@ from tf_image_processor.tf_process import async_process_url
 random_gen = random.SystemRandom()
 endpoint = 'https://safebooru.org/index.php?page=dapi&s=post&q=index&tags=rating:safe '
 
-async def tf_scan(url:str):
+async def tf_scan(url:str) -> discord.Embed:
+    """
+    Use TensorFlow to scan the image against an ML model.
+    Warning: If TF fails, it is ignored, so make sure either the tag filter is on or you may end up with things in your SFW channels
+    :param url: an URL to scan
+    """
     try:
         res = await async_process_url(url)
     except ValueError:
@@ -29,6 +34,11 @@ async def tf_scan(url:str):
     return True
 
 async def get_image(tags:str, bypass=False):
+    """
+    Search SafeBooru for images
+    :param bypass: Bypass filters
+    :param query: What to look for
+    """
     global random_gen
     
     timeout = aiohttp.ClientTimeout(total=15)
@@ -112,7 +122,12 @@ async def get_image(tags:str, bypass=False):
                 return embed
         return None
 
-def convert_to_sb_tag(tags: str):
+def convert_to_sb_tag(tags: list):
+    """
+    Convert a string to safebooru compatible tags
+    :param tags: a list of tags
+    :return: A string of safebooru tags
+    """
     new_tags = []
     for tag in tags:
         tag = tag.lower().strip()
@@ -122,7 +137,13 @@ def convert_to_sb_tag(tags: str):
     #print(ret)
     return ret
 
-async def safebooru_random_img(tags: str, ch):
+async def safebooru_random_img(tags: list, ch) -> discord.Embed:
+    """
+    Randomly get an image from specified tags
+    :param tags: A list of tags
+    :param ch: The Discord channel (So we can decide if it's SFW)
+    :return: An embed ready to be sent
+    """
     tags = convert_to_sb_tag(tags)
 
     if ch.type is not discord.ChannelType.private:

@@ -14,6 +14,17 @@ import asyncio
 IMAGE_DIM = 224
 
 def load_model(model_path):
+    """Loads a TensorFlow model
+
+    Args:
+        model_path (str): Path to the .h5 model
+
+    Raises:
+        ValueError: If the path does not exist
+
+    Returns:
+        Any: The TensorFlow model
+    """
     if model_path is None or not exists(model_path):
         raise ValueError("saved_model_path must be the valid directory of a saved model to load.")
     
@@ -21,6 +32,15 @@ def load_model(model_path):
     return model
 
 def load_image_array(array, image_size):
+    """Resizes an image to the model's size
+
+    Args:
+        array (np.array): The array
+        image_size (tuple): The tuple with the size
+
+    Returns:
+        np.array: The image array
+    """
     image = tf.image.resize(np.asarray(array), image_size, preserve_aspect_ratio=False).numpy()
     image /= 255
     
@@ -29,6 +49,14 @@ def load_image_array(array, image_size):
     return image
 
 def process_url(url: str):
+    """Analyzes an image from an URL using a model
+
+    Args:
+        url (str): The URL to the image
+
+    Returns:
+        dict: A dictionary describing the results
+    """
     im = Image.open(requests.get(url, stream=True, timeout=15).raw).resize((IMAGE_DIM, IMAGE_DIM), Image.NEAREST)
     #im.show()
     image = keras.preprocessing.image.img_to_array(im)

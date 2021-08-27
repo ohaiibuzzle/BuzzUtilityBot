@@ -6,6 +6,11 @@ import random
 global_random = random.SystemRandom()
 
 async def search_danbooru(query:str) -> dict:
+    """
+    Search Danbooru for images
+    :param query: The query string
+    :return: a dictionary of the image chosen
+    """
     timeout = aiohttp.ClientTimeout(total=15)
     async with aiohttp.ClientSession(timeout=timeout) as client:
         res_tag_search = await client.get(f'https://danbooru.donmai.us/tags.json?search[name_or_alias_matches]={query}')

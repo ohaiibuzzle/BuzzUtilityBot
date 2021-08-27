@@ -37,7 +37,15 @@ class TFImage(commands.Cog, name="AI-based image rating"):
                 await ctx.send("Hey, at least send me something! :(")
 
     @staticmethod
-    async def tensorflow_embed(url: str):
+    async def tensorflow_embed(url: str) -> discord.Embed:
+        """Creates an embed representing the TensorFlow result
+
+        Args:
+            url (str): The URL of an image
+
+        Returns:
+            discord.Embed: The embed describing the TensorFlow result
+        """
         result = await async_process_url(url)
         embed = discord.Embed(title="Ai-chan reply!")
         

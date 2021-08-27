@@ -146,7 +146,7 @@ class OwO(commands.Cog, name="Why? I don't even know why these exists!"):
                             second_member = discord.utils.find(lambda m: m.id == this_row[2], ctx.guild.members)
                             marriage_photo = await OwO.generate_marry_image(first_member, second_member)
                             length = datetime.datetime.now()-this_row[3]
-                            day_or_days = "day" if length.days == 1 else "days"
+                            #day_or_days = "day" if length.days == 1 else "days"
                             await ctx.send(f"Relationship between {first_member} and {second_member}, which is {length} long!", file=marriage_photo)
                             return
                         else:
@@ -161,7 +161,7 @@ class OwO(commands.Cog, name="Why? I don't even know why these exists!"):
                             second_member = discord.utils.find(lambda m: m.id == this_row[2], ctx.guild.members)
                             marriage_photo = await OwO.generate_marry_image(first_member, second_member)
                             length = datetime.datetime.now()-this_row[3]
-                            day_or_days = "day" if length.days == 1 else "days"
+                            #day_or_days = "day" if length.days == 1 else "days"
                             await ctx.send(f"Relationship between {first_member} and {second_member}, which is {length} long!", file=marriage_photo)
                             return
                         else:
@@ -248,6 +248,9 @@ class OwO(commands.Cog, name="Why? I don't even know why these exists!"):
 
     @staticmethod
     async def generate_marry_image(first_member: discord.Member, second_member: discord.Member) -> discord.File:
+        """
+        Generates a marriage "certificate" image
+        """
         async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=15)) as session:
             background = Image.open('runtime/assets/bg.png', 'r')
             bg_w, bg_h = background.size
@@ -333,6 +336,9 @@ class OwO(commands.Cog, name="Why? I don't even know why these exists!"):
 
     @staticmethod
     def construct_marriage_proposal(first_member: discord.Member, second_member: discord.Member) -> discord.Embed:
+        """
+        Create a marriage proposal embed
+        """
         embed = discord.Embed(title = "Marriage Proposal!")
         embed.set_thumbnail(url="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/ring_1f48d.png")
         embed.add_field(

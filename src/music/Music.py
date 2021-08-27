@@ -206,7 +206,7 @@ class Music(commands.Cog):
                     try:
                         track_link = await spotify_yt_bridge.async_single_track_to_yt_alt(track, self.client.loop)
                     except:
-                        await ctx.send(f"Something funky happened: {e}")
+                        await ctx.send(f"Something funky happened. Stopping")
                         break
                     else:
                         if silent != 'silent':

@@ -15,6 +15,11 @@ random_gen = SystemRandom()
 pls_no_tags = ['Nipples'] #The AI *should* handle these, 'Bend Over', 'Panties', 'Bra', 'Underwear', 'Lingerie']
 
 async def tf_scan(url:str):
+    """
+    Use TensorFlow to scan the image against an ML model.
+    Warning: If TF fails, it is ignored, so make sure either the tag filter is on or you may end up with things in your SFW channels
+    :param url: an URL to scan
+    """
     try:
         res = await async_process_url(url)
     except ValueError:
@@ -41,6 +46,11 @@ def kw_filter(keywords: str):
                     
 
 async def search_zerochan(bypass, query: str):
+    """
+    Search Zerochan for images
+    :param bypass: Bypass filters
+    :param query: What to look for
+    """
     global random_gen
     print(query)
     is_tag = True

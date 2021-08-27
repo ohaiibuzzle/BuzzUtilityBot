@@ -10,11 +10,15 @@ class NSFWRoleManagement(commands.Cog):
         self.client = client
         db = sqlite3.connect(self.RT_DATABASE)
         db.execute('''CREATE TABLE IF NOT EXISTS `NSFWRoles` ([GuildID] INTEGER PRIMARY KEY, [RoleID] INTEGER)''')
+        db.execute('''CREATE TABLE IF NOT EXISTS `NSFWBans` ([GuildID] INTEGER, [MemberID] INTEGER, [BanReason] TIMESTAMP, PRIMARY KEY ("GuildID", "MemberID"))''')
         db.commit()
     
-    @commands.command(brief='Set NSFW role.')
+    @commands.command()
     @commands.has_permissions(administrator=True)
     async def setNSFWRole(self, ctx: commands.Context):
+        """
+        Set NSFW Role and enable NSFW support features on this server
+        """
         def verify_nsfw_set(msg):
             return (msg.author.id == ctx.author.id and msg.content == 'Yes')
         if not ctx.message.role_mentions:
@@ -36,9 +40,12 @@ class NSFWRoleManagement(commands.Cog):
                     await db.commit()
                     await ctx.send("Done")
     
-    @commands.command(brief='Remove NSFW role.')
+    @commands.command()
     @commands.has_permissions(administrator=True)
     async def delNSFWRole(self, ctx: commands.Context):
+        """
+        Remove NSFW role and clear all bans from this server
+        """
         def verify_nsfw_set(msg):
             return (msg.author.id == ctx.author.id and msg.content == 'Yes')
         await ctx.send(f"I am going to remove the server's NSFW role. Confirm? [Yes/No]")
@@ -51,15 +58,26 @@ class NSFWRoleManagement(commands.Cog):
             async with aiosqlite.connect(self.RT_DATABASE) as db:
                 await db.execute('''DELETE FROM NSFWRoles WHERE GuildID = :guildID''', 
                 {'guildID': ctx.guild.id})
+                await db.execute('''DELETE FROM NSFWBans WHERE GuildID = :guildID''', 
+                {'guildID': ctx.guild.id})
                 await db.commit()
                 await ctx.send("Done")
 
-    @commands.command(brief='Request NSFW role')
+    @commands.command
     async def requestNSFW(self, ctx):
+        """
+        Request NSFW features
+        """
         def validate_opt_in(msg: discord.Message):
             return (msg.author == ctx.author and msg.content == "I agree" and msg.channel.type == discord.ChannelType.private)
 
         async with aiosqlite.connect(self.RT_DATABASE) as db:
+            async with db.execute('''SELECT * FROM NSFWBans WHERE GuildID=:guildID AND MemberID=:memberID''',
+            {'guildID': ctx.guild.id, 'memberID': ctx.author.id}) as query:
+                rows = await query.fetchall()
+                if rows.__len__() != 0:
+                    return await ctx.send(f"You have been banned from getting NSFW on this server due to: {rows[0][2]}")
+
             async with db.execute('''SELECT GuildID, RoleID from NSFWRoles WHERE GuildID = :guildID''', {'guildID': ctx.guild.id}) as cursor:
                 rows = await cursor.fetchall()
                 if rows.__len__() == 0:
@@ -86,6 +104,9 @@ class NSFWRoleManagement(commands.Cog):
 
     @commands.command(brief='Request NSFW role')
     async def unNSFW(self, ctx):
+        """
+        Remove NSFW features
+        """
         async with aiosqlite.connect(self.RT_DATABASE) as db:
             async with db.execute('''SELECT GuildID, RoleID from NSFWRoles WHERE GuildID = :guildID''', {'guildID': ctx.guild.id}) as cursor:
                 rows = await cursor.fetchall()
@@ -97,6 +118,37 @@ class NSFWRoleManagement(commands.Cog):
                     nsfw_role = discord.utils.get(ctx.guild.roles, id=role_id)
                     await ctx.author.remove_roles(nsfw_role)
                     await ctx.author.send("Done.")
+
+    @commands.command()
+    async def nsfwban(self, ctx: commands.Context, *, reason:str):
+        """
+        Ban member from getting NSFW roles
+        """
+        async with aiosqlite.connect(self.RT_DATABASE) as db:
+            await db.execute('''INSERT INTO NSFWBans (GuildID, MemberID, BanReason) VALUES(:guildID, :memberID, :banReason)''', 
+                {'guildID': ctx.guild.id, 'memberID': ctx.message.mentions[0].id, 'banReason': reason})
+
+            async with db.execute('''SELECT GuildID, RoleID from NSFWRoles WHERE GuildID = :guildID''', {'guildID': ctx.guild.id}) as cursor:
+                rows = await cursor.fetchall()
+                if rows.__len__() == 0:
+                    await ctx.send("This server does not have a NSFW role set up.")
+                    return
+                else:
+                    role_id = rows[0][1]
+                    nsfw_role = discord.utils.get(ctx.guild.roles, id=role_id)
+                    await ctx.message.mentions[0].remove_roles(nsfw_role)
+            await ctx.send("User have been banned from NSFW")
+
+    @commands.command()
+    async def nsfwunban(self, ctx: commands.Context):
+        """
+        Unban member from NSFW
+        """
+        async with aiosqlite.connect(self.RT_DATABASE) as db:
+            await db.execute('''DELETE FROM NSFWBans WHERE GuildID = :guildID AND MemberID = :memberID''', 
+                {'guildID': ctx.guild.id, 'memberID': ctx.message.mentions[0].id})
+            await ctx.send("Done.")
+        
 
 def setup(client: commands.Bot):
     client.add_cog(NSFWRoleManagement(client))
