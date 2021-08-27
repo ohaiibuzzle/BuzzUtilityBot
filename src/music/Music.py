@@ -99,7 +99,7 @@ class Music(commands.Cog):
 
     @commands.command()
     async def resume(self, ctx: commands.Context):
-        if not ctx.voice_state.is_playing and ctx.voice_state.voice.is_playing():
+        if not ctx.voice_state.is_playing and ctx.voice_state.voice.is_paused():
             ctx.voice_state.voice.resume()
             await ctx.message.add_reaction('🆗')
 
@@ -189,7 +189,7 @@ class Music(commands.Cog):
             return await ctx.send('Not playing any music right now...')
         else:
             if n > len(ctx.voice_state.play_queue):
-                await ctx.voice_state.stop()
+                await ctx.invoke(self.disconnect)
             await ctx.send(f"Skipping {n} track...")
             ctx.voice_state.skip(n)
 
@@ -208,6 +208,8 @@ class Music(commands.Cog):
                 await ctx.send(f"Something funky happened: {e}")
             else:    
                 for track in track_list:
+                    if not self.voice_states[ctx.guild.id]:
+                        return
                     try:
                         track_link = await spotify_yt_bridge.async_single_track_to_yt_alt(track, self.client.loop)
                     except:
