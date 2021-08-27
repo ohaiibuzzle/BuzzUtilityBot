@@ -75,6 +75,7 @@ class Music(commands.Cog):
                 source = await youtube_dl_source.YouTubeDLSingleSource.from_url(url, loop=self.client.loop, stream=True, requester=ctx.author, channel=ctx.channel)
             except Exception as e:
                 await ctx.send(f"Something funky happened: {e}")
+                raise e
             else:
                 item = voice_state_manager.PlaybackItem(source=source)
 
@@ -202,6 +203,7 @@ class Music(commands.Cog):
                         track_link = await spotify_yt_bridge.async_single_track_to_yt_alt(track, self.client.loop)
                     except:
                         await ctx.send(f"Something funky happened: {e}")
+                        break
                     else:
                         await ctx.invoke(self.play, url=track_link, silent_mesg=True, has_URL=True)
                         await asyncio.sleep(2)
