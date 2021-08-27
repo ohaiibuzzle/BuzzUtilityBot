@@ -1,9 +1,12 @@
 import asyncio
 import discord
+from discord import embeds
 from discord.ext import commands, tasks
 from music import youtube_dl_source, voice_state_manager, spotify_yt_bridge
 import math
 from pyyoutube.error import PyYouTubeException
+from spotipy.exceptions import SpotifyException
+import io
 
 class Music(commands.Cog):
     def __init__(self, client: commands.Bot):
@@ -49,7 +52,7 @@ class Music(commands.Cog):
         ctx.voice_state.voice = await destination.connect()
         
 
-    @commands.command()
+    @commands.command(alias=['dc'])
     async def disconnect(self, ctx: commands.Context):
         """
         Disconnect and clear queue
@@ -81,7 +84,7 @@ class Music(commands.Cog):
                 else:
                     status = await ctx.send(f"Added {source.title} - {source.uploader} ({source.webpage}) to the queue!")    
                 if silent_mesg:
-                    await asyncio.sleep(5)
+                    await asyncio.sleep(8)
                     await status.delete()
 
                     
@@ -120,7 +123,7 @@ class Music(commands.Cog):
             return await ctx.send(f"Done! The volume is now {volume}%")
 
     @commands.command()
-    async def showqueue(self, ctx, *, page: int = 1):
+    async def queue(self, ctx, *, page: int = 1):
         """
         Show the playback queue
         """
@@ -166,13 +169,13 @@ class Music(commands.Cog):
             else:
                 if msg.content.isdigit():
                     await search_res.delete()
-                    return await ctx.invoke(self.play, url=result[int(msg.content)-1]['webpage_url'])
+                    return await ctx.invoke(self.play, url=result[int(msg.content)-1]['webpage_url'], silent_mesg=True, has_URL=True)
                 else:
                     return await ctx.send("That was not a valid selection!")
 
     @commands.command(alias=['np'])
     async def nowplaying(self, ctx):
-        await ctx.send(f"Currently playing {ctx.voice_state.current}")
+        await ctx.send(embed=ctx.voice_state.current.create_embed())
 
     @commands.command()
     async def skip(self, ctx):
@@ -189,14 +192,36 @@ class Music(commands.Cog):
     async def spotify(self, ctx, *, url:str):
         async with ctx.typing():
             await ctx.send("Please wait, converting your playlist. This could take a while!")
-            #print(url)
             try:
-                this_playlist = await spotify_yt_bridge.async_spotify_to_yt(url, loop=self.client.loop, method='api')
-            except PyYouTubeException:
-                this_playlist = await spotify_yt_bridge.async_spotify_to_yt(url, loop=self.client.loop, method='alt')
-            for item in this_playlist:
-                await ctx.invoke(self.play, url=item, silent_mesg=True, has_URL=True)
-            await ctx.invoke(self.showqueue)
+                track_list = await spotify_yt_bridge.async_spotify_to_track_list(url, self.client.loop)
+            except SpotifyException as e:
+                await ctx.send(f"Something funky happened: {e}")
+            else:    
+                for track in track_list:
+                    try:
+                        track_link = await spotify_yt_bridge.async_single_track_to_yt_alt(track, self.client.loop)
+                    except:
+                        await ctx.send(f"Something funky happened: {e}")
+                    else:
+                        await ctx.invoke(self.play, url=track_link, silent_mesg=True, has_URL=True)
+                        await asyncio.sleep(2)
+                
+                await ctx.invoke(self.queue)
+                await ctx.send("Done! Tip: You can also use `exportqueue` to get the queue exported and use it with other bots!")
+
+    @commands.command()
+    async def exportqueue(self, ctx: commands.Context):
+        """
+        Export the current queue to file
+        """
+        async with ctx.typing():
+            with io.StringIO() as tmp_queue:
+                for i, item in enumerate(ctx.voice_state.play_queue):
+                    tmp_queue.write(f"{i+1}. {item.source.webpage} - {item.source.title} - {item.source.uploader}\n")
+                tmp_queue.seek(0)
+                file = discord.File(tmp_queue, filename=f'queue-{ctx.guild}.txt')
+                await ctx.send("Here's the current queue!", file=file)
+
 
     @play.before_invoke
     async def ensure_voice(self, ctx):

@@ -35,6 +35,10 @@ def track_names_to_yt_api(tracks: list):
 
     return yt_tracks
 
+async def async_spotify_to_track_list(playlist_url: str, loop):
+    loop = loop or asyncio.get_event_loop()
+    return await loop.run_in_executor(None, spotify_to_track_name, playlist_url)
+
 async def track_names_to_yt_alt(tracks:list, loop):
     yt_tracks = []
     
@@ -44,14 +48,25 @@ async def track_names_to_yt_alt(tracks:list, loop):
     
     return yt_tracks
 
-async def async_spotify_to_yt(playlist_url: str, loop = None, method:str = 'api'):
+async def async_spotify_to_yt(playlist_url: str, loop = None):
     loop = loop or asyncio.get_event_loop()
     track_list = await loop.run_in_executor(None, spotify_to_track_name, playlist_url)
-    if method == 'api':
-        return await loop.run_in_executor(None, track_names_to_yt_api, track_list)
-    elif method == 'alt':
-        return await track_names_to_yt_alt(track_list, loop)
+    return await loop.run_in_executor(None, track_names_to_yt_api, track_list)
 
+def single_track_to_yt_url(track_name:str) -> str:
+    youtube_api = pyyoutube.Api(api_key=config['Credentials']['youtube_data_v3_key'])
+    this_video_id = youtube_api.search_by_keywords(q=track_name, search_type='video').items[0].to_dict()['id']['videoId']
+    return 'https://youtu.be/'+this_video_id
+
+async def async_single_track_to_yt(track_name:str, loop=None):
+    loop = loop or asyncio.get_event_loop()
+    return await loop.run_in_executor(None, single_track_to_yt_url, track_name=track_name)
+
+
+async def async_single_track_to_yt_alt(track: str, loop=None):
+    loop = loop or asyncio.get_event_loop()
+    result = await YouTubeDLSingleSource.list_from_query(track, loop=loop, amount=1)
+    return result['entries'][0]['webpage_url']
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
