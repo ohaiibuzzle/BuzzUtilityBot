@@ -8,6 +8,12 @@ import pytz
 class Birthday(commands.Cog, name="Birthdays!"):
     RT_DATABASE = 'runtime/server_data.db'
 
+    def cog_command_error(self, ctx, error):
+        if error is AttributeError or error is commands.errors.MissingRequiredArgument:
+            return ctx.send(f"There was an error processing your request (Perhaps checks your command?) \n Details:{error}")
+        else:
+            return ctx.send(f"There was an error processing your request \nDetails: {error}")
+
     def __init__(self,client):
         self.client = client
         db = sqlite3.connect(self.RT_DATABASE)

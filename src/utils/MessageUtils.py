@@ -5,6 +5,12 @@ import asyncio
 class MessageUtils(commands.Cog, name='Message Utilities'):
     def __init__(self, client):
         self.client = client
+
+    def cog_command_error(self, ctx, error):
+        if error is AttributeError or error is commands.errors.MissingRequiredArgument:
+            return ctx.send(f"There was an error processing your request (Perhaps checks your command?) \n Details:{error}")
+        else:
+            return ctx.send(f"There was an error processing your request \nDetails: {error}")
         
     @commands.command(brief='Save a message to your DM', 
                       description='Save whatever message you mention when this command is ran. \

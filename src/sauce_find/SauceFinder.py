@@ -12,6 +12,12 @@ class SauceFinder(commands.Cog, name='Picture Sauce Finding'):
   
     def __init__(self, client):
         self.client = client
+
+    def cog_command_error(self, ctx, error):
+        if error is AttributeError or error is commands.errors.MissingRequiredArgument:
+            return ctx.send(f"There was an error processing your request (Perhaps checks your command?) \n Details:{error}")
+        else:
+            return ctx.send(f"There was an error processing your request \nDetails: {error}")
         
     @commands.command(brief='Search for picture on SauceNAO, using Pixiv Database',
                       description='Search for a picture in an embed or attachment, using the SauceNAO engine.\n\

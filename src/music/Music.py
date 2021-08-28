@@ -21,6 +21,12 @@ class Music(commands.Cog):
             self.voice_states[ctx.guild.id] = state
 
         return state
+
+    def cog_command_error(self, ctx, error):
+        if error is AttributeError:
+            return ctx.send(f"There was an error processing your request (Perhaps checks your command?) \n Details:{error}")
+        else:
+            return ctx.send(f"There was an error processing your request \n Details:{error}")
     
     def cog_unload(self):
         for state in self.voice_states.values():
