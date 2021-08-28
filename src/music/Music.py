@@ -206,7 +206,7 @@ class Music(commands.Cog):
             ctx.voice_state.skip(n)
 
     @commands.command()
-    async def spotify(self, ctx, silent:bool = False, *, url:str):
+    async def spotify(self, ctx, *, url:str, silent:bool = None):
         """
         Plays a Spotify Playlist
         """
