@@ -23,10 +23,10 @@ class Music(commands.Cog):
         return state
 
     def cog_command_error(self, ctx, error):
-        if error is AttributeError:
+        if error is AttributeError or error is commands.errors.MissingRequiredArgument:
             return ctx.send(f"There was an error processing your request (Perhaps checks your command?) \n Details:{error}")
         else:
-            return ctx.send(f"There was an error processing your request \n Details:{error}")
+            return ctx.send(f"There was an error processing your request \nDetails: {error}")
     
     def cog_unload(self):
         for state in self.voice_states.values():
@@ -155,6 +155,7 @@ class Music(commands.Cog):
 
     @commands.command()
     async def search(self, ctx: commands.Context, *, query):
+        print(f"@{ctx.author.name}#{ctx.author.discriminator} searches something on YouTube")
         """
         Use youtube-dl to look up videos
         """
@@ -213,6 +214,7 @@ class Music(commands.Cog):
 
     @commands.command()
     async def spotify(self, ctx, *, url:str, silent:bool = None):
+        print(f"@{ctx.author.name}#{ctx.author.discriminator} played a Spotify Playlist")
         """
         Plays a Spotify Playlist
         """

@@ -45,7 +45,7 @@ class SauceFinder(commands.Cog, name='Picture Sauce Finding'):
                                             await ctx.send('Something went wrong and I can\'t look up your image.')
                                             await ctx.send('Either it has been deleted or hidden by the author, or it isn\'t on Pixiv')
                                 except TypeError:
-                                    ctx.send("I couldn't find anything :(")
+                                    await ctx.send("I couldn't find anything :(")
                     elif (search_msg.attachments.__len__() > 0):
                         for attachment in search_msg.attachments:
                             if attachment.content_type.startswith('image'):

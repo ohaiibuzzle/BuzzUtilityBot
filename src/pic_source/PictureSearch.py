@@ -23,10 +23,9 @@ class PictureSearch(commands.Cog, name='Random image finder'):
                       description='Look for a random image on SafeBooru, input can be any of SafeBooru\'s tag query\n\
                           Combine tags using "+"',
                           aliases=['sbr'])
-    async def sbrandom(self, ctx, *args):
+    async def sbrandom(self, ctx, *, tags):
         print ('@' + ctx.message.author.name + '#' + ctx.message.author.discriminator + ' wants something random (SafeBooru)!')
         async with ctx.channel.typing():
-            tags = ' '.join(args)
             try:
                 target = await safebooru_random_img(tags.split('+'), ctx.channel)
             except ConnectionError:
@@ -42,10 +41,9 @@ class PictureSearch(commands.Cog, name='Random image finder'):
                       description='Look for a random image on ZeroChan, input can be any of ZeroChan\'s tag query\n\
                           Combine tags using "+"',
                           aliases=['zcr'])
-    async def zcrandom(self, ctx, *args):
+    async def zcrandom(self, ctx, *, tags):
         async with ctx.channel.typing():
             print ('@' + ctx.message.author.name + '#' + ctx.message.author.discriminator + ' wants something random (zerochan)!')
-            tags = ' '.join(args).strip()
             tags = tags.replace('+', ',')
             try:
                 res = await self.construct_zerochan_embed(ctx.channel, tags)
@@ -65,10 +63,9 @@ class PictureSearch(commands.Cog, name='Random image finder'):
     @commands.command(brief='Look for a random image on Pixiv',
                       description='Look for a random image on Pixiv',
                       aliases=['pxr'])
-    async def pixivrandom(self, ctx, *args):
+    async def pixivrandom(self, ctx, *, tags):
         async with ctx.channel.typing():
             print ('@' + ctx.message.author.name + '#' + ctx.message.author.discriminator + ' wants something random (Pixiv)!')
-            tags = ' '.join(args).strip()
             try:
                 target, file = await construct_pixiv_embed(tags, ctx.channel)
             except ConnectionError:
@@ -84,11 +81,11 @@ class PictureSearch(commands.Cog, name='Random image finder'):
     
     @commands.command(brief='Display a Pixiv post in bot\'s format',
                       aliases=['pxs'])
-    async def pixivshow(self, ctx, *args):
+    async def pixivshow(self, ctx, *, url):
         async with ctx.channel.typing():
             print ('@' + ctx.message.author.name + '#' + ctx.message.author.discriminator + ' wants to display Pixiv art!')
             #print(args[0])
-            illust_id = re.findall(r'\d+', args[0])[0]
+            illust_id = re.findall(r'\d+', url[0])[0]
             try:
                 target, file = await get_image_by_id(illust_id)
             except ConnectionError:
@@ -104,7 +101,7 @@ class PictureSearch(commands.Cog, name='Random image finder'):
 
     @commands.command(brief="Danbooru (NSFW) search",
                         description="Search for a random image on Danbooru.", aliases=['dbr'])
-    async def danboorurandom(self, ctx: commands.Context, *args):
+    async def danboorurandom(self, ctx: commands.Context, *, tags):
         async with ctx.channel.typing():
             print ('@' + ctx.message.author.name + '#' + ctx.message.author.discriminator + ' wants to search danbooru!')
             try:
@@ -114,7 +111,6 @@ class PictureSearch(commands.Cog, name='Random image finder'):
             except AttributeError:
                 await ctx.send("This command cannot be ran on channels that aren't marked NSFW!")
                 return
-            tags = ' '.join(args).strip()
             try:
                 embed = await PictureSearch.construct_danbooru_embed(tags)
             except ConnectionError:
@@ -134,16 +130,25 @@ class PictureSearch(commands.Cog, name='Random image finder'):
             return
         last_exec = str(last_exec)
         if last_exec.startswith('ZEROCHAN'):
-            await self.zcrandom(ctx, last_exec[9:])
+            await self.zcrandom(ctx, tags=last_exec[9:])
         elif last_exec.startswith('SAFEBOORU'):
-            await self.sbrandom(ctx, last_exec[10:])
+            await self.sbrandom(ctx, tags=last_exec[10:])
         elif last_exec.startswith('PIXIV'):
-            await self.pixivrandom(ctx, last_exec[6:])
+            await self.pixivrandom(ctx, tags=last_exec[6:])
         elif last_exec.startswith('DANBOORU'):
-            await self.danboorurandom(ctx, last_exec[9:])
+            await self.danboorurandom(ctx, tags=last_exec[9:])
 
     @staticmethod
     async def construct_zerochan_embed(ch, query: str) -> discord.Embed:
+        """Make a Zerochan embed 
+
+        Args:
+            ch (discord.Channel): A Discord channel (to check whether it is NSFW)
+            query (str): The query
+
+        Returns:
+            discord.Embed: The embed with the picture
+        """
         if ch.type is not discord.ChannelType.private:
             res = await search_zerochan(ch.is_nsfw(), query)
         else: 
@@ -169,6 +174,14 @@ class PictureSearch(commands.Cog, name='Random image finder'):
 
     @staticmethod
     async def construct_danbooru_embed(query:str) -> discord.Embed:
+        """Make a Danbooru embed with a random image from query
+
+        Args:
+            query (str): The query to look for
+
+        Returns:
+            discord.Embed: The embed
+        """
         res = await search_danbooru(query)
         embed = discord.Embed(title=query)
         embed.url = f"https://danbooru.donmai.us/posts/{res['id']}"
