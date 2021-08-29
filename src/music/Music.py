@@ -16,7 +16,7 @@ class Music(commands.Cog):
 
     def get_voice_state(self, ctx: commands.Context) -> voice_state_manager.VoiceState:
         state = self.voice_states.get(ctx.guild.id)
-        if not state:
+        if not state or state.has_timed_out:
             state = voice_state_manager.VoiceState(self.client, ctx)
             self.voice_states[ctx.guild.id] = state
 
@@ -97,15 +97,15 @@ class Music(commands.Cog):
                 else:
                     await asyncio.sleep(8)
     
-    @commands.command()
-    async def pause(self, ctx: commands.Context):
-        if not ctx.voice_state.is_playing and ctx.voice_state.voice.is_playing():
+    @commands.command(name='pause')
+    async def _pause(self, ctx: commands.Context):
+        if ctx.voice_state.is_playing and ctx.voice_state.voice.is_playing():
             ctx.voice_state.voice.pause()
             await ctx.message.add_reaction('🆗')
 
-    @commands.command()
-    async def resume(self, ctx: commands.Context):
-        if not ctx.voice_state.is_playing and ctx.voice_state.voice.is_paused():
+    @commands.command(name='resume')
+    async def _resume(self, ctx: commands.Context):
+        if ctx.voice_state.is_playing and ctx.voice_state.voice.is_paused():
             ctx.voice_state.voice.resume()
             await ctx.message.add_reaction('🆗')
 

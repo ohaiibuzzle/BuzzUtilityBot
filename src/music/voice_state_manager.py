@@ -61,6 +61,8 @@ class VoiceState:
         self._loop = False
         self._volume = 0.5
 
+        self.has_timed_out = False
+
         self.audio_player = client.loop.create_task(self.audio_player_task())
         
     def __del__(self):
@@ -100,11 +102,15 @@ class VoiceState:
                         self.current = await self.play_queue.get()
                 except asyncio.TimeoutError:
                     self.client.loop.create_task(self.stop())
+                    self.has_timed_out = True
                     return
 
-            self.current.source.volume = self._volume
-            self.voice.play(self.current.source, after=self.play_next_song)
-            await self.current.source.channel.send(embed=self.current.create_embed())
+                self.current.source.volume = self._volume
+                self.voice.play(self.current.source, after=self.play_next_song)
+                await self.current.source.channel.send(embed=self.current.create_embed())
+            elif self.loop:
+                looped = discord.FFmpegPCMAudio(self.current.source.url, options=youtube_dl_source.FFMPEG_OPTS)
+                self.voice.play(looped, after=self.play_next_song)
 
             await self.next.wait()
 
