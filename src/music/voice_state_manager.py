@@ -61,6 +61,7 @@ class VoiceState:
         self.play_queue = PlayQueue()
 
         self._loop = False
+        self._queueloop = False
         self._volume = 0.5
 
         self.has_timed_out = False
@@ -79,6 +80,14 @@ class VoiceState:
         self._loop = value
 
     @property
+    def queueloop(self):
+        return self._queueloop
+
+    @queueloop.setter
+    def queueloop(self, value: bool):
+        self._queueloop = value
+
+    @property
     def volume(self):
         return self._volume
 
@@ -95,6 +104,10 @@ class VoiceState:
             self.next.clear()
 
             if not self.loop:
+                if self.queueloop:
+                    await self.play_queue.put(PlaybackItem(await youtube_dl_source.YouTubeDLSingleSource.from_url(self.current.source.webpage, stream=True,\
+                        requester=self.current.source.requester, channel=self.current.source.channel)))
+
                 # Try to get the next song within 3 minutes.
                 # If no song will be added to the queue in time,
                 # the player will disconnect due to performance

@@ -197,7 +197,26 @@ class Music(commands.Cog):
         if not ctx.voice_state.is_playing:
             return await ctx.send('Nothing being played at the moment.')
         ctx.voice_state.loop = not ctx.voice_state.loop
+        if ctx.voice_state.loop:
+            msg = await ctx.send("Looping this track")
+        else:
+            msg = await ctx.send("Unlooped")
+        await asyncio.sleep(5)
+        await msg.delete()
         await ctx.message.add_reaction('✅')
+
+    @commands.command(name='queueloop')
+    async def _queueloop(self, ctx: commands.Context):
+        if not ctx.voice_state.is_playing:
+            return await ctx.send('Nothing being played at the moment')
+        ctx.voice_state.queueloop = not ctx.voice_state.queueloop
+        if ctx.voice_state.queueloop:
+            msg = await ctx.send("Looping this queue")
+        else:
+            msg = await ctx.send("Unlooped")
+        await asyncio.sleep(5)
+        await msg.delete()
+        return await ctx.message.add_reaction('✅')
 
     @commands.command()
     async def skip(self, ctx, *, n:int=1):
