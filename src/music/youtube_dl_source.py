@@ -72,13 +72,13 @@ class YouTubeDLSingleSource(discord.PCMVolumeTransformer):
 
         duration = []
         if days > 0:
-            duration.append(f"{days}")
+            duration.append(str(f"{days}"))
         if hours > 0:
-            duration.append(f"{hours}")
+            duration.append(str(f"{hours:02}"))
         if minutes > 0:
-            duration.append(f"{minutes}")
+            duration.append(str(f"{minutes:02}"))
         if seconds > 0:
-            duration.append(f"{seconds}")
+            duration.append(str(f"{seconds:02}"))
 
         return ':'.join(duration)
 
