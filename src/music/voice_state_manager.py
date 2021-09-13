@@ -46,7 +46,9 @@ class PlaybackItem():
     
     def create_embed(self) -> discord.Embed:
         return discord.Embed(title="Now Playing").add_field(name='Title', value=self.source.title, inline=False)\
-            .add_field(name='Requested By', value=self.requester, inline=False)
+            .add_field(name='Requested By', value=self.requester, inline=False)\
+            .add_field(name='Duration', value=self.source.duration, inline=False)\
+            .set_thumbnail(url=self.source.thumbnail)
 
 class VoiceState:
     def __init__(self, client:commands.Bot, ctx: commands.Context) -> None:

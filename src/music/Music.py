@@ -26,7 +26,8 @@ class Music(commands.Cog):
         if error is AttributeError or error is commands.errors.MissingRequiredArgument:
             return ctx.send(f"There was an error processing your request (Perhaps checks your command?) \n Details:{error}")
         else:
-            return ctx.send(f"There was an error processing your request \nDetails: {error}")
+            print(error)
+            return ctx.send(f"There was an error processing your request :(")
     
     def cog_unload(self):
         for state in self.voice_states.values():
@@ -80,7 +81,6 @@ class Music(commands.Cog):
             try:
                 source = await youtube_dl_source.YouTubeDLSingleSource.from_url(url, loop=self.client.loop, stream=True, requester=ctx.author, channel=ctx.channel)
             except Exception as e:
-                await ctx.send(f"Something funky happened: {e}")
                 raise e
             else:
                 item = voice_state_manager.PlaybackItem(source=source)

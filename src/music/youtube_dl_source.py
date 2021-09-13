@@ -1,4 +1,5 @@
 import asyncio
+from collections import deque
 from os import stat
 import re
 import youtube_dl
@@ -36,6 +37,8 @@ class YouTubeDLSingleSource(discord.PCMVolumeTransformer):
 
         self.data = data        
         self.webpage = data.get('webpage_url')
+        self.duration = self.parse_duration(int(data.get('duration')))
+        self.thumbnail = data.get('thumbnail')
         self.title = data.get('title')
         self.uploader = data.get('uploader')
         self.url = data.get('url')
@@ -60,3 +63,22 @@ class YouTubeDLSingleSource(discord.PCMVolumeTransformer):
         data = await loop.run_in_executor(None, lambda: ytdl_client.extract_info(f"ytsearch{amount}:{query}", download=False))
         if 'entries' in data:
             return data
+
+    @staticmethod
+    def parse_duration(duration: int):
+        minutes, seconds = divmod(duration, 60)
+        hours, minutes = divmod(minutes, 60)
+        days, hours = divmod(hours, 24)
+
+        duration = []
+        if days > 0:
+            duration.append(f"{days}")
+        if hours > 0:
+            duration.append(f"{hours}")
+        if minutes > 0:
+            duration.append(f"{minutes}")
+        if seconds > 0:
+            duration.append(f"{seconds}")
+
+        return ':'.join(duration)
+

@@ -5,7 +5,6 @@ from .safebooru import safebooru_random_img
 from .zerochan import search_zerochan
 from .pixiv import construct_pixiv_embed, get_image_by_id
 from .danbooru import search_danbooru
-from requests.exceptions import ConnectionError
 import aioredis, asyncio
 
 class PictureSearch(commands.Cog, name='Random image finder'):
@@ -33,7 +32,12 @@ class PictureSearch(commands.Cog, name='Random image finder'):
             else:
                 if target:
                     await ctx.send(embed=target)
-                    await self.redis_pool.set(f'{ctx.channel.id}:{ctx.author.id}', f'SAFEBOORU {tags}', ex=10)
+                    try:
+                        await self.redis_pool.set(f'{ctx.channel.id}:{ctx.author.id}', f'SAFEBOORU {tags}', ex=15)
+                    except:
+                        msg = await ctx.send("Buzzle forgot to start Redis, so I won't remember your command :(")
+                        await asyncio.sleep(5)
+                        await msg.delete()
                 else:
                     await ctx.send("Your search returned no result :(")           
     
@@ -56,7 +60,12 @@ class PictureSearch(commands.Cog, name='Random image finder'):
             else:
                 if res != None:
                     await ctx.send(embed=res)
-                    await self.redis_pool.set(f'{ctx.channel.id}:{ctx.author.id}', f'ZEROCHAN {tags}', ex=10)
+                    try:
+                        await self.redis_pool.set(f'{ctx.channel.id}:{ctx.author.id}', f'ZEROCHAN {tags}', ex=15)
+                    except:
+                        msg = await ctx.send("Buzzle forgot to start Redis, so I won't remember your command :(")
+                        await asyncio.sleep(5)
+                        await msg.delete()
                 else:
                     await ctx.send("Sorry, I can't find you anything :( \nEither check your search, or Buzzle banned a tag in the result")
                 
@@ -75,7 +84,12 @@ class PictureSearch(commands.Cog, name='Random image finder'):
             else:
                 if target:
                     await ctx.send(embed=target, file=file)
-                    await self.redis_pool.set(f'{ctx.channel.id}:{ctx.author.id}', f'PIXIV {tags}', ex=10)
+                    try:
+                        await self.redis_pool.set(f'{ctx.channel.id}:{ctx.author.id}', f'PIXIV {tags}', ex=15)
+                    except:
+                        msg = await ctx.send("Buzzle forgot to start Redis, so I won't remember your command :(")
+                        await asyncio.sleep(5)
+                        await msg.delete()
                 else:
                     await ctx.send("Your search returned no result :(")
     
@@ -117,8 +131,12 @@ class PictureSearch(commands.Cog, name='Random image finder'):
                 await ctx.send("Buzzle's Internet broke :(\n(Try again in a few minutes, server is under high load)")
             else:
                 await ctx.send(embed=embed)
-                await self.redis_pool.set(f'{ctx.channel.id}:{ctx.author.id}', f'DANBOORU {tags}', ex=10)
-
+                try:
+                    await self.redis_pool.set(f'{ctx.channel.id}:{ctx.author.id}', f'DANBOORU {tags}', ex=15)
+                except:
+                    msg = await ctx.send("Buzzle forgot to start Redis, so I won't remember your command :(")
+                    await asyncio.sleep(5)
+                    await msg.delete()
             
     @commands.command(brief='Execute the last command, again!',
                         description='Run the last command you executed, timeout is 10s\n\

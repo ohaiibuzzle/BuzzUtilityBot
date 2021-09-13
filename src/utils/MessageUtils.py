@@ -10,7 +10,8 @@ class MessageUtils(commands.Cog, name='Message Utilities'):
         if error is AttributeError or error is commands.errors.MissingRequiredArgument:
             return ctx.send(f"There was an error processing your request (Perhaps checks your command?) \n Details:{error}")
         else:
-            return ctx.send(f"There was an error processing your request \nDetails: {error}")
+            print(error)
+            return ctx.send(f"There was an error processing your request")
         
     @commands.command(brief='Save a message to your DM', 
                       description='Save whatever message you mention when this command is ran. \
