@@ -4,6 +4,8 @@ from utils.AdminTools import AdminTools
 import os, sqlite3
 import configparser
 
+print("Starting up. This could take a while on slower devices while TensorFlow loads")
+
 if not os.path.isdir('runtime'):
     os.mkdir('runtime')
     print("Please populate the /runtime directory with your credentials!")
