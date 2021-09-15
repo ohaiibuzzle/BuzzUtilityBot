@@ -2,6 +2,8 @@ import asyncio
 import discord
 from discord import embeds
 from discord.ext import commands, tasks
+from discord.ext.commands.core import Command
+from discord.ext.commands.errors import CommandError
 from music import youtube_dl_source, voice_state_manager, spotify_yt_bridge
 import math
 from pyyoutube.error import PyYouTubeException
@@ -49,12 +51,12 @@ class Music(commands.Cog):
         Connects to the user's voice channel
         """
         if not ctx.author.voice:
-            await ctx.send("Hmm? What should I join here?")
+            return await ctx.send("Hmm? What should I join here?")
 
         destination = ctx.author.voice.channel
 
         if ctx.voice_state.voice:
-            await ctx.voice_state.voice.move_to(destination)
+            return await ctx.voice_state.voice.move_to(destination)
             return
 
         ctx.voice_state.voice = await destination.connect()
@@ -291,10 +293,12 @@ class Music(commands.Cog):
     @play.before_invoke
     async def ensure_voice(self, ctx):
         if not ctx.author.voice or not ctx.author.voice.channel:
-            raise commands.CommandError('You are not connected to any voice channel.')
+            await ctx.send('You are not connected to any voice channel.')
+            raise commands.CommandError('User is not connected to any voice channel.')
 
         if ctx.voice_client:
             if ctx.voice_client.channel != ctx.author.voice.channel:
+                await ctx.send("I am already in another channel")
                 raise commands.CommandError('Bot is already in a voice channel.')
 
     @tasks.loop(seconds=180.0)
