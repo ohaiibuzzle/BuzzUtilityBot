@@ -2,7 +2,7 @@ import pyyoutube
 import spotipy
 import configparser
 import asyncio
-from music.youtube_dl_source import YouTubeDLSingleSource
+from .youtube_dl_source import YouTubeDLSingleSource
 
 config = configparser.ConfigParser()
 config.read('runtime/config.cfg')
@@ -42,7 +42,7 @@ def track_names_to_yt_api(tracks: list):
 
     return yt_tracks
 
-async def async_spotify_to_track_list(playlist_url: str, loop):
+async def async_spotify_playlist_to_track_list(playlist_url: str, loop):
     """Convert a Spotify playlist to a list of track name, asynchronously
 
     Args:
@@ -99,7 +99,7 @@ async def async_single_track_to_yt(track_name:str, loop=None):
     :return: A YouTube Link
     """
     loop = loop or asyncio.get_event_loop()
-    return await loop.run_in_executor(None, single_track_to_yt_url, track_name=track_name)
+    return await loop.run_in_executor(None, single_track_to_yt_url, track_name)
 
 
 async def async_single_track_to_yt_alt(track: str, loop=None):
@@ -113,6 +113,57 @@ async def async_single_track_to_yt_alt(track: str, loop=None):
     result = await YouTubeDLSingleSource.list_from_query(track, loop=loop, amount=1)
     return result['entries'][0]['webpage_url']
 
+def single_spotify_track_to_track_name(spotify_track_url: str) -> str:
+    """
+    Extract the track info from a single Spotify track link 
+
+    Args:
+        spotify_track_url (str): Spotify URI
+
+    Returns:
+        str: Track Name + Artist
+    """
+    spotify_api = spotipy.Spotify(client_credentials_manager=spotify_creds_manager)
+    this_track = spotify_api.track(spotify_track_url)
+    name = this_track['name']
+    for artist in this_track['artists']:
+        name += f" {artist['name']}"
+    return name
+
+async def async_single_spotify_track_to_yt(spotify_track_url: str, loop = None) -> str:
+    loop = loop or asyncio.get_event_loop()
+    track_name = await loop.run_in_executor(None, single_spotify_track_to_track_name, spotify_track_url)
+    return await async_single_track_to_yt(track_name=track_name, loop=loop)
+
+def spotify_album_to_track_names(spotify_album_url: str) -> list:
+    """
+    Convert a Spotify Playlist to track names
+
+    Args:
+        spotify_album_url (str): Spotify Album Url
+
+    Returns:
+        list: List of track names
+    """
+    spotify_api = spotipy.Spotify(client_credentials_manager=spotify_creds_manager)
+    album = spotify_api.album(spotify_album_url)
+
+    tracks = []
+    
+    for track in album['tracks']['items']:
+        search_name = track['name']
+        for artist in track['artists']:
+            search_name += f" {artist['name']}"
+
+        tracks.append(search_name)
+
+    return tracks
+
+async def async_spotify_album_to_track_names(spotify_album_url: str, loop=None) -> list:
+    loop = loop or asyncio.get_event_loop()
+    return await loop.run_in_executor(None, spotify_album_to_track_names, spotify_album_url)
+
+
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    print(loop.run_until_complete(async_spotify_to_yt('https://open.spotify.com/playlist/2iGYq73qSNQ5TzexyOSdby?go=1&sp_cid=c63921177755024fc6285a0fe8478d91&utm_source=embed_player_m&utm_medium=desktop&dl_branch=1&nd=1')))
+    ## UNIT TEST HERE

@@ -7,6 +7,7 @@ import math
 from pyyoutube.error import PyYouTubeException
 from spotipy.exceptions import SpotifyException
 import io
+import re
 
 class Music(commands.Cog):
     def __init__(self, client: commands.Bot):
@@ -78,6 +79,9 @@ class Music(commands.Cog):
         if not ctx.voice_state.voice:
             await ctx.invoke(self.summon)
         async with ctx.typing():
+            # Handle Spotify stuff separately
+            if re.match(r'https?://open\.spotify\.com/(track|album|playlist)/(?P<id>[^/?&#]+)', url):
+                return await ctx.invoke(self.spotify, url=url) #Regex stolen from youtube-dl. Not dealing with that haha.
             try:
                 source = await youtube_dl_source.YouTubeDLSingleSource.from_url(url, loop=self.client.loop, stream=True, requester=ctx.author, channel=ctx.channel)
             except Exception as e:
@@ -240,29 +244,36 @@ class Music(commands.Cog):
         if not ctx.voice_state.voice:
             await ctx.invoke(self.summon)
         async with ctx.typing():
-            await ctx.send("Please wait, converting your playlist. This could take a while!")
-            try:
-                track_list = await spotify_yt_bridge.async_spotify_to_track_list(url, self.client.loop)
-            except SpotifyException as e:
-                await ctx.send(f"Something funky happened: {e}")
-            else:    
-                for track in track_list:
-                    if not self.voice_states[ctx.guild.id]:
-                        return
-                    try:
-                        track_link = await spotify_yt_bridge.async_single_track_to_yt_alt(track, self.client.loop)
-                    except:
-                        await ctx.send(f"Something funky happened. Stopping")
-                        break
-                    else:
-                        if not silent:
-                            await ctx.invoke(self.play, url=track_link, silent_mesg=True, has_URL=True)
+            if re.match(r'https?://open\.spotify\.com/(playlist|album)/(?P<id>[^/?&#]+)', url):
+                await ctx.send("Please wait, converting your playlist. This could take a while!")
+                try:
+                    if re.match(r'https?://open\.spotify\.com/album/(?P<id>[^/?&#]+)', url):
+                        track_list = await spotify_yt_bridge.async_spotify_album_to_track_names(url, self.client.loop)
+                    elif re.match(r'https?://open\.spotify\.com/playlist/(?P<id>[^/?&#]+)', url):
+                        track_list = await spotify_yt_bridge.async_spotify_playlist_to_track_list(url, self.client.loop)
+                except SpotifyException as e:
+                    await ctx.send(f"Something funky happened: {e}")
+                else:    
+                    for track in track_list:
+                        if not self.voice_states[ctx.guild.id]:
+                            return
+                        try:
+                            track_link = await spotify_yt_bridge.async_single_track_to_yt_alt(track, self.client.loop)
+                        except:
+                            await ctx.send(f"Something funky happened. Stopping")
+                            break
                         else:
-                            await ctx.invoke(self.play, url=track_link, hidden=True)
-                        await asyncio.sleep(2)
-                
-                await ctx.invoke(self.queue)
-                await ctx.send("Done! Tip: You can also use `exportqueue` to get the queue exported and use it with other bots!")
+                            if not silent:
+                                await ctx.invoke(self.play, url=track_link, silent_mesg=True, has_URL=True)
+                            else:
+                                await ctx.invoke(self.play, url=track_link, hidden=True)
+                            await asyncio.sleep(2)
+                    
+                    await ctx.invoke(self.queue)
+                    await ctx.send("Done! Tip: You can also use `exportqueue` to get the queue exported and use it with other bots!")
+            elif re.match(r'https?://open\.spotify\.com/track/(?P<id>[^/?&#]+)', url):
+                yt_url = await spotify_yt_bridge.async_single_spotify_track_to_yt(url, loop=self.client.loop)
+                return await ctx.invoke(self.play, url=yt_url, silent_mesg=False, has_URL=True)
 
     @commands.command()
     async def exportqueue(self, ctx: commands.Context):
