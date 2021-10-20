@@ -37,9 +37,17 @@ class YouTubeDLSingleSource(discord.PCMVolumeTransformer):
 
         self.data = data
         self.webpage = data.get("webpage_url")
-        self.raw_duration = int(data.get("duration"))
-        self.duration = self.parse_duration(int(data.get("duration")))
-        self.thumbnail = data.get("thumbnail")
+        try:
+            self.raw_duration = int(data.get("duration"))
+            self.duration = self.parse_duration(int(data.get("duration")))
+        except TypeError:
+            self.raw_duration = 0
+            self.duration = "Unavailable"
+        self.thumbnail = (
+            data.get("thumbnail")
+            if data.get("thumbnail")
+            else "https://source.boringavatars.com/beam/160/Daisy%20Gatson.svg?colors=A8E6CE,DCEDC2,FFD3B5,FFAAA6,FF8C94"
+        )
         self.title = data.get("title")
         self.uploader = data.get("uploader")
         self.url = data.get("url")
