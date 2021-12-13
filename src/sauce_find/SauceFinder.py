@@ -4,6 +4,7 @@ from .iqdb import get_sauce
 import discord
 import pixivpy_async, re
 import configparser
+from pysaucenao.saucenao import SauceNaoResults
 
 config = configparser.ConfigParser()
 config.read("runtime/config.cfg")
@@ -13,15 +14,15 @@ class SauceFinder(commands.Cog, name="Picture Sauce Finding"):
     def __init__(self, client):
         self.client = client
 
-    def cog_command_error(self, ctx, error):
-        if error is AttributeError or error is commands.errors.MissingRequiredArgument:
-            return ctx.send(
-                f"There was an error processing your request (Perhaps checks your command?) \n Details:{error}"
-            )
-        else:
-            return ctx.send(
-                f"There was an error processing your request \nDetails: {error}"
-            )
+    #    def cog_command_error(self, ctx, error):
+    #        if error is AttributeError or error is commands.errors.MissingRequiredArgument:
+    #            return ctx.send(
+    #                f"There was an error processing your request (Perhaps checks your command?) \n Details:{error}"
+    #            )
+    #        else:
+    #            return ctx.send(
+    #                f"There was an error processing your request \nDetails: {error}"
+    #            )
 
     @commands.command(
         brief="Search for picture on SauceNAO, using Pixiv Database",
@@ -60,7 +61,8 @@ class SauceFinder(commands.Cog, name="Picture Sauce Finding"):
                                         except (
                                             discord.errors.HTTPException,
                                             AttributeError,
-                                        ):
+                                        ) as e:
+                                            print(e)
                                             await ctx.send(
                                                 "Something went wrong and I can't look up your image."
                                             )
@@ -90,7 +92,8 @@ class SauceFinder(commands.Cog, name="Picture Sauce Finding"):
                                     except (
                                         discord.errors.HTTPException,
                                         AttributeError,
-                                    ):
+                                    ) as e:
+                                        print(e)
                                         await ctx.send(
                                             "Something went wrong and I can't look up your image."
                                         )
@@ -136,13 +139,15 @@ class SauceFinder(commands.Cog, name="Picture Sauce Finding"):
                                         except (
                                             discord.errors.HTTPException,
                                             AttributeError,
-                                        ):
+                                        ) as e:
+                                            print(e)
                                             await ctx.send(
                                                 "Something went wrong and I can't look up your image."
                                             )
                                             await ctx.send(
                                                 "Either it has been deleted or hidden by the author, or it isn't on Pixiv"
                                             )
+                                        pass
                                 except TypeError:
                                     await ctx.send("I couldn't find anything :(")
                     elif search_msg.attachments.__len__() > 0:
@@ -160,7 +165,8 @@ class SauceFinder(commands.Cog, name="Picture Sauce Finding"):
                                     except (
                                         discord.errors.HTTPException,
                                         AttributeError,
-                                    ):
+                                    ) as e:
+                                        print(e)
                                         await ctx.send(
                                             "Something went wrong and I can't look up your image."
                                         )
@@ -171,60 +177,29 @@ class SauceFinder(commands.Cog, name="Picture Sauce Finding"):
                 await ctx.send("Please mention a message containing pasta!")
 
     @staticmethod
-    async def construct_saucenao_embed_pixiv(attachment):
-        async with pixivpy_async.PixivClient() as client:
-            aapi = pixivpy_async.AppPixivAPI(client=client)
-            aapi.set_accept_language("en-us")
-
-            await aapi.login(refresh_token=config["Credentials"]["pixiv_key"])
-
-            # print(raw_json)
-
-            pixiv_id = re.search(r"\d+", attachment.url)[0]
-
-            illust = (await aapi.illust_detail(pixiv_id)).illust
-            # print(illust)
-
-            embed = discord.Embed(title="Sauce found!")
-            embed.type = "rich"
-            embed.url = attachment.urls[0]
-
-            embed.set_thumbnail(url=attachment.thumbnail)
-
-            embed.add_field(name="Title" + " ", value=illust.title, inline=False)
-
-            embed.add_field(name="Type", value=illust.type.capitalize(), inline=False)
-
-            embed.add_field(
-                name="Similarity", value=str(attachment.similarity) + "%", inline=False
-            )
-
+    async def construct_saucenao_embed_pixiv(attachment: SauceNaoResults):
+        embed = discord.Embed(title="Sauce found!")
+        embed.add_field(
+            name="Similarity", value=f"{attachment.similarity}%", inline=False
+        )
+        if attachment.title:
+            embed.add_field(name="Title", value=attachment.title, inline=False)
+        if attachment.author_name:
             embed.add_field(
                 name="Author",
-                value="{}, Pixiv ID: {}".format(illust.user.name, illust.user.id),
+                value=f"{attachment.author_name} - {attachment.author_url}",
                 inline=False,
             )
-
-            tag_str = ""
-            if illust.tags.__len__() > 0:
-                for tag in illust.tags:
-                    if tag.translated_name != None:
-                        tag_str += tag.translated_name
-                        tag_str += ", "
-                    else:
-                        tag_str += tag.name
-                        tag_str += ", "
-                tag_str = tag_str[:-2]
-            else:
-                tag_str = None
-
-            embed.add_field(name="Tags", value=tag_str, inline=False)
-
-            embed.set_footer(
-                icon_url="https://policies.pixiv.net/pixiv.a2954ee2.png", text="Pixiv"
-            )
-
-            return embed
+        if attachment.source_url:
+            embed.add_field(name="Source", value=attachment.source_url, inline=False)
+        if attachment.index_name:
+            embed.add_field(name="Index", value=attachment.index_name, inline=False)
+        embed.set_thumbnail(url=attachment.thumbnail)
+        if attachment.url:
+            embed.url = attachment.url
+        if attachment.urls:
+            embed.url = attachment.urls[0]
+        return embed
 
     @staticmethod
     async def construct_iqdb_embed(url: str):

@@ -112,6 +112,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+pyvenv.cfg
 
 # Spyder project settings
 .spyderproject
@@ -137,5 +138,18 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+# virtualenv binaries (why)
+bin/
+
 # TF Models
 src/tf_image_processor/models
+
+# Runtime data (contains secrets)
+runtime/
+
+# youtube-dl
+share/
+etc/
+
+# VSCode
+.vscode/

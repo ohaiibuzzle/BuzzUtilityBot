@@ -5,7 +5,12 @@ import asyncio, configparser
 config = configparser.ConfigParser()
 config.read("runtime/config.cfg")
 
-saucer = SauceNao(api_key=config["Credentials"]["saucenao_key"], db=5)
+saucer = SauceNao(
+    api_key=config["Credentials"]["saucenao_key"],
+    db_mask=1443126841888,
+    db=None,
+    results_limit=1,
+)
 
 
 async def find_sauce(url):
@@ -19,6 +24,7 @@ async def find_sauce(url):
     """
     try:
         results = await saucer.from_url(url)
+        print(results)
         return results[0]
     except SauceNaoException as e:
         print(e)
