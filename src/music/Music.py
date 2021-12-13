@@ -60,6 +60,7 @@ class Music(commands.Cog):
         ctx.voice_state.voice = await destination.connect()
 
     @commands.command(aliases=["dc"])
+    @commands.has_permissions(manage_channels=True)
     async def disconnect(self, ctx: commands.Context):
         """
         Disconnect and clear queue
