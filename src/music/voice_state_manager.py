@@ -67,6 +67,7 @@ class VoiceState:
         self.current = None
         self.voice = None
         self.voice_channel = None
+        self.summon_user = None
         self.next = asyncio.Event()
         self.play_queue = PlayQueue()
 

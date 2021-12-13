@@ -59,6 +59,7 @@ class Music(commands.Cog):
 
         ctx.voice_state.voice = await destination.connect()
         ctx.voice_state.voice_channel = destination
+        ctx.voice_state.summon_user = ctx.author
 
     @commands.command(aliases=["dc"])
     async def disconnect(self, ctx: commands.Context):
@@ -78,9 +79,9 @@ class Music(commands.Cog):
                             "You are not in the voice channel that I am currently in."
                         )
                     else:
-                        if ctx.voice_state.voice_channel.members.__len__() > 2:
+                        if ctx.voice_state.summon_user != ctx.author and ctx.voice_state.voice_channel.members.__len__() > 2:
                             return await ctx.send(
-                                "There are others using this channel right now. Only an admin can disconnect"
+                                "There are others using this channel right now. \nOnly an admin or the user who summoned the bot can disconnect"
                             )
                         await ctx.voice_state.stop()
                         del self.voice_states[ctx.guild.id]
