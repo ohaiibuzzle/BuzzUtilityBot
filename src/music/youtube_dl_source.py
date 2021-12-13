@@ -2,9 +2,9 @@ import asyncio
 from collections import deque
 from os import stat
 import re
-import youtube_dl
+import yt_dlp
 import discord
-from youtube_dl import options
+from yt_dlp import options
 
 YTDL_OPTS = {
     "format": "bestaudio/best",
@@ -25,7 +25,7 @@ FFMPEG_OPTS = {
     "options": "-vn",
 }
 
-ytdl_client = youtube_dl.YoutubeDL(YTDL_OPTS)
+ytdl_client = yt_dlp.YoutubeDL(YTDL_OPTS)
 
 
 class YouTubeDLSingleSource(discord.PCMVolumeTransformer):
