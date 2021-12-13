@@ -24,7 +24,7 @@ async def find_sauce(url):
     """
     try:
         results = await saucer.from_url(url)
-        print(results)
+        # print(results)
         return results[0]
     except SauceNaoException as e:
         print(e)

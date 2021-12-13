@@ -58,9 +58,9 @@ class Music(commands.Cog):
             return await ctx.voice_state.voice.move_to(destination)
 
         ctx.voice_state.voice = await destination.connect()
+        ctx.voice_state.voice_channel = destination
 
     @commands.command(aliases=["dc"])
-    @commands.has_permissions(manage_channels=True)
     async def disconnect(self, ctx: commands.Context):
         """
         Disconnect and clear queue
@@ -68,8 +68,22 @@ class Music(commands.Cog):
         if not ctx.voice_state.voice:
             return await ctx.send("Not currently connected to any channel!")
         else:
-            await ctx.voice_state.stop()
-            del self.voice_states[ctx.guild.id]
+            if ctx.author.guild_permissions.manage_channels:
+                await ctx.voice_state.stop()
+                del self.voice_states[ctx.guild.id]
+            else:
+                if ctx.author.voice:
+                    if ctx.author.voice.channel != ctx.voice_state.voice_channel:
+                        return await ctx.send(
+                            "You are not in the voice channel that I am currently in."
+                        )
+                    else:
+                        if ctx.voice_state.voice_channel.members.__len__() > 2:
+                            return await ctx.send(
+                                "There are others using this channel right now. Only an admin can disconnect"
+                            )
+                        await ctx.voice_state.stop()
+                        del self.voice_states[ctx.guild.id]
 
     @commands.command()
     async def play(
