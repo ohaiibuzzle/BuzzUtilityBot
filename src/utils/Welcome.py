@@ -139,13 +139,15 @@ class WelcomeMessage(commands.Cog):
 
             final_img = Image.alpha_composite(blurple, text_layer)
 
-            embed = discord.Embed(title="Ding dong!")
+            embed = discord.Embed(title="Ding dong! 🔔")
 
             embed.add_field(name="Member", value=member_msg, inline=False)
 
             embed.add_field(
                 name="Account Creation Date", value=member.created_at, inline=False
             )
+
+            embed.add_field(name="Enjoy your stay!", value="👋", inline=False)
 
             file = None
             with io.BytesIO() as image_bin:
