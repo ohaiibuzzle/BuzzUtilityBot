@@ -1,3 +1,5 @@
+from curses import raw
+from pickletools import read_bytes1
 import pixivpy_async
 import datetime
 import random
@@ -85,13 +87,14 @@ async def get_image(query: str, bypass=False):
                 if result["sanity_level"] > 5:
                     continue
             # print(choice)
-            image_data = io.BytesIO(
-                (
-                    await aapi.down(
-                        result["image_urls"]["large"], "https://app-api.pixiv.net/"
-                    )
-                )[0]
-            )
+            raw_data = [
+                x
+                async for x in await aapi.down(
+                    result["image_urls"]["large"], "https://app-api.pixiv.net/"
+                )
+            ]
+
+            image_data = io.BytesIO(raw_data[0])
             return result, image_data
 
         return None
@@ -118,11 +121,14 @@ async def get_image_by_id(illust_id: int):
         if res["sanity_level"] > 5:
             return None
 
-        image_data = io.BytesIO(
-            (await aapi.down(res["image_urls"]["large"], "https://app-api.pixiv.net/"))[
-                0
-            ]
-        )
+        raw_data = [
+            x
+            async for x in await aapi.down(
+                res["image_urls"]["large"], "https://app-api.pixiv.net/"
+            )
+        ]
+
+        image_data = io.BytesIO(raw_data[0])
 
         embed = discord.Embed(
             title=res["title"],
