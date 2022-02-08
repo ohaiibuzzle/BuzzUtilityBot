@@ -164,7 +164,7 @@ class Birthday(commands.Cog, name="Birthdays!"):
     @tasks.loop(seconds=30.0)
     async def sendBirthdayMessages(self):
         tz = pytz.timezone("Asia/Tokyo")
-        today_mmdd = "%{}%".format(datetime.datetime.now(tz).strftime("%m-%d"))
+        today_mmdd = "%{} %".format(datetime.datetime.now(tz).strftime("%m-%d"))
         # print(today_mmdd)
         with open("runtime/today.status", "r") as today_file:
             today_mmdd_file = today_file.readline()
