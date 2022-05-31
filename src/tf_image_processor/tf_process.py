@@ -90,7 +90,7 @@ async def async_process_url(url: str):
     return await loop.run_in_executor(None, process_url, url)
 
 
-print("Loading NSFW Model. This may take a while...")
+print("TF: Loading NSFW Model. This may take a while...")
 model = load_model("./runtime/models/mobileNet/")
 categories = [
     "(o･ω･o) (D)",
