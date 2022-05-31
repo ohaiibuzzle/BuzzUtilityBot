@@ -1,7 +1,6 @@
 from discord.ext import commands
 import discord
 from PIL import UnidentifiedImageError
-from .tf_process import async_process_url
 
 
 class TFImage(commands.Cog, name="AI-based image rating"):
@@ -78,4 +77,11 @@ class TFImage(commands.Cog, name="AI-based image rating"):
 
 
 def setup(client):
-    client.add_cog(TFImage(client))
+    try:
+        from .tf_process import async_process_url
+    except (ValueError, ModuleNotFoundError) as e:
+        print("Model Error: " + str(e))
+        print("ML features will be disabled")
+        return
+    else:
+        client.add_cog(TFImage(client))

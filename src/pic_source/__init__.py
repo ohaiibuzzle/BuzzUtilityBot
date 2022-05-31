@@ -4,7 +4,7 @@ except (ValueError, ModuleNotFoundError) as e:
     print("Model Error: " + str(e))
     print("ML features will be disabled")
 
-    async def async_process_url(url: str):
+    async def tf_scan(url: str):
         return True
 
 else:
@@ -20,7 +20,7 @@ else:
         except ValueError:
             print("Model Error")
             return True
-        print(res)
+        # print(res)
         if res["(o-_-o) (H)"][0] >= 0.59:
             print("Model detected Hentai content")
             return False

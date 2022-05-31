@@ -5,8 +5,7 @@ import random
 import string
 import asyncio
 import aiohttp
-
-from tf_image_processor.tf_process import async_process_url
+from . import tf_scan
 
 random_gen = random.SystemRandom()
 endpoint = "https://safebooru.org/index.php?page=dapi&s=post&q=index&tags=rating:safe "
