@@ -12,29 +12,6 @@ random_gen = random.SystemRandom()
 endpoint = "https://safebooru.org/index.php?page=dapi&s=post&q=index&tags=rating:safe "
 
 
-async def tf_scan(url: str) -> discord.Embed:
-    """
-    Use TensorFlow to scan the image against an ML model.
-    Warning: If TF fails, it is ignored, so make sure either the tag filter is on or you may end up with things in your SFW channels
-    :param url: an URL to scan
-    """
-    try:
-        res = await async_process_url(url)
-    except ValueError:
-        return True
-    print(res)
-    if res["(o-_-o) (H)"][0] >= 0.45:
-        print("AI test failed with H content")
-        return False
-    if res["(╬ Ò﹏Ó) (P)"][0] >= 0.5:
-        print("AI test failed with P content")
-        return False
-    if res["(°ㅂ°╬) (S)"][0] >= 0.5:
-        print("AI test failed with S content")
-        return False
-    return True
-
-
 async def get_image(tags: str, bypass=False):
     """
     Search SafeBooru for images
