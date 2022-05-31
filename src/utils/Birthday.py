@@ -195,7 +195,11 @@ class Birthday(commands.Cog, name="Birthdays!"):
 
         with open("runtime/today.status", "w+") as today_file:
             today_file.write(today_mmdd)
-            print("Done for today!")
+            print("Birthdays: Done for today!")
+
+    @sendBirthdayMessages.before_loop
+    async def before_sendBirthdayMessages(self):
+        await self.client.wait_until_ready()
 
 
 def setup(client):
