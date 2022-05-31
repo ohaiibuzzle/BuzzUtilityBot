@@ -1,10 +1,13 @@
+from ctypes import cast
+from warnings import catch_warnings
 import discord
 from discord.ext import commands
 from utils.AdminTools import AdminTools
 import os, sqlite3
 import configparser
+import asyncio, uvloop
 
-print("Starting up. This could take a while on slower devices while TensorFlow loads")
+print("Starting up...")
 
 if not os.path.isdir("runtime"):
     os.mkdir("runtime")
@@ -21,6 +24,15 @@ if not os.path.isdir("runtime"):
     with open("runtime/config.cfg", "w+") as configfile:
         config.write(configfile)
     exit(0)
+
+try:
+    import uvloop
+except ModuleNotFoundError:
+    pass
+else:
+    print("Installing UVLoop...")
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+
 
 intents = discord.Intents.default()
 intents.members = True  # pylint: disable=assigning-non-slot
