@@ -46,7 +46,7 @@ class SauceFinder(commands.Cog, name="Picture Sauce Finding"):
                             if attachment.image != None:
                                 try:
                                     found = await find_sauce(attachment.url)
-                                    print(attachment.url)
+                                    # print(attachment.url)
                                     if found == None:
                                         await ctx.send(
                                             "I am sssorry, can't get your sauce :("
@@ -75,7 +75,7 @@ class SauceFinder(commands.Cog, name="Picture Sauce Finding"):
                         for attachment in search_msg.attachments:
                             if attachment.content_type.startswith("image"):
                                 found = await find_sauce(attachment.url)
-                                print(attachment.url)
+                                # print(attachment.url)
                                 if found == None:
                                     await ctx.send(
                                         "I am sssorry, can't get your sauce :("
@@ -127,7 +127,7 @@ class SauceFinder(commands.Cog, name="Picture Sauce Finding"):
                                     found = await self.construct_iqdb_embed(
                                         attachment.url
                                     )
-                                    print(attachment.url)
+                                    # print(attachment.url)
                                     if found == None:
                                         await ctx.send(
                                             "I am sssorry, can't get your sauce :("

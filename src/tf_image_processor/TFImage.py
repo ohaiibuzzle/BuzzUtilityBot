@@ -1,6 +1,7 @@
 from discord.ext import commands
 import discord
 from PIL import UnidentifiedImageError
+from . import async_process_url
 
 
 class TFImage(commands.Cog, name="AI-based image rating"):
