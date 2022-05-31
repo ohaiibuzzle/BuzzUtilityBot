@@ -14,13 +14,13 @@ async def get_sauce(url: str):
     Returns:
         object: A description of the result
     """
-    timeout = aiohttp.ClientTimeout(total=15)
+    timeout = aiohttp.ClientTimeout(total=30)
 
     async with aiohttp.ClientSession(timeout=timeout) as session:
         res = await session.get(iqdb_endpoint + url)
         soup = BeautifulSoup(await res.read(), "html.parser")
         result_disp = soup.find("div", id="pages")
-        print(result_disp)
+        # print(result_disp)
         res = result_disp.find_all("table")
         res.remove(res[0])
         for _ in res:
@@ -28,17 +28,22 @@ async def get_sauce(url: str):
             if img_link.startswith("//"):
                 img_link = "https:" + img_link
             img_info = _.find("a").find("img")
-            try:
-                if "Rating: s" not in img_info["alt"]:
-                    continue
-            except TypeError:
-                return None
-            return {
-                "link": img_link,
-                "alt_text": img_info["alt"],
-                "thumbnail": "https://iqdb.org" + img_info["src"],
-            }
-            # img_elem = _.find('a').find('img')
-            # print(img_elem)
 
+            tds = _.find_all("td")
+            # print(tds)
+            for td in tds:
+                if "Safe" in td.text:
+                    return {
+                        "link": img_link,
+                        "alt_text": img_info["alt"],
+                        "thumbnail": "https://iqdb.org" + img_info["src"],
+                    }
         return None
+
+
+if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
+    sauce = loop.run_until_complete(
+        get_sauce("https://s1.zerochan.net/600/47/21/3166097.jpg")
+    )
+    print(sauce)
