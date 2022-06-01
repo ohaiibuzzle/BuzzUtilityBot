@@ -60,6 +60,10 @@ class Music(commands.Cog):
             return await ctx.voice_state.voice.move_to(destination)
 
         ctx.voice_state.voice = await destination.connect()
+        # Automatically deafen the bot (We don't use voice features, save bandwidth)
+        await ctx.voice_state.voice.guild.change_voice_state(
+            channel=destination, self_mute=False, self_deaf=True
+        )
         ctx.voice_state.voice_channel = destination
         ctx.voice_state.summon_user = ctx.author
 
