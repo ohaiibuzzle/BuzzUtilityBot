@@ -11,6 +11,12 @@ from PIL import Image
 import requests
 import asyncio
 
+# Read the runtime config
+import configparser
+config = configparser.ConfigParser()
+config.read("runtime/config.cfg")
+model_path = config["Credentials"]["nsfw_model_path"]
+
 IMAGE_DIM = 224
 
 
@@ -91,7 +97,7 @@ async def async_process_url(url: str):
 
 
 print("TF: Loading NSFW Model. This may take a while...")
-model = load_model("./runtime/models/mobileNet/")
+model = load_model(model_path)
 categories = [
     "(o･ω･o) (D)",
     "(o-_-o) (H)",

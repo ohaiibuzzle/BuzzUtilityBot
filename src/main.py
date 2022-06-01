@@ -20,6 +20,7 @@ if not os.path.isdir("runtime"):
         "youtube_data_v3_key": "",
         "spotify_web_api_cid": "",
         "spotify_web_api_sec": "",
+        "nsfw_model_path": "",
     }
     with open("runtime/config.cfg", "w+") as configfile:
         config.write(configfile)
