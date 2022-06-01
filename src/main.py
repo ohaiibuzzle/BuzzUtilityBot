@@ -11,6 +11,7 @@ print("Starting up...")
 
 if not os.path.isdir("runtime"):
     os.mkdir("runtime")
+    os.mkdir("runtime/model")
     print("Please populate the /runtime directory with your credentials!")
     config = configparser.ConfigParser()
     config["Credentials"] = {
@@ -20,8 +21,13 @@ if not os.path.isdir("runtime"):
         "youtube_data_v3_key": "",
         "spotify_web_api_cid": "",
         "spotify_web_api_sec": "",
-        "nsfw_model_path": "",
     }
+
+    config["Dependancies"] = {
+        "nsfw_model_path": "./runtime/model",
+        "redis_host": "redis://localhost",
+    }
+
     with open("runtime/config.cfg", "w+") as configfile:
         config.write(configfile)
     exit(0)
