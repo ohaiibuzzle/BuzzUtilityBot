@@ -16,7 +16,7 @@ from tensorflow import keras
 # Read the runtime config
 config = configparser.ConfigParser()
 config.read("runtime/config.cfg")
-model_path = config["Credentials"]["nsfw_model_path"]
+model_path = config["Dependancies"]["nsfw_model_path"]
 
 IMAGE_DIM = 224
 
