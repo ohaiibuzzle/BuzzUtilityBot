@@ -52,7 +52,7 @@ async def get_image(query: str, bypass=False):
         except TimeoutError:
             total = 30
 
-        print(total)
+        # print(total)
 
         if total > 1450:
             total = 1450
@@ -68,7 +68,7 @@ async def get_image(query: str, bypass=False):
             if choice < 0:
                 choice = 0
 
-            print(choice)
+            # print(choice)
 
             # res = await aapi.search_illust(query, offset=1450)
 
@@ -107,10 +107,9 @@ async def get_image_by_id(illust_id: int):
         aapi.set_accept_language("en-us")
 
         await aapi.login(refresh_token=config["Credentials"]["pixiv_key"])
-
         res = (await aapi.illust_detail(illust_id))["illust"]
 
-        print(res)
+        #print(res)
 
         if res["x_restrict"] != 0:
             return None

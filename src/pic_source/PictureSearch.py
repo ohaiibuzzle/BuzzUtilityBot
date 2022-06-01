@@ -157,7 +157,7 @@ class PictureSearch(commands.Cog, name="Random image finder"):
                     await ctx.send("Your search returned no result :(")
 
     @commands.command(brief="Display a Pixiv post in bot's format", aliases=["pxs"])
-    async def pixivshow(self, ctx, *, url):
+    async def pixivshow(self, ctx, *, url_or_illustid):
         async with ctx.channel.typing():
             print(
                 "@"
@@ -168,10 +168,10 @@ class PictureSearch(commands.Cog, name="Random image finder"):
             )
             # print(args[0])
             # if the url is just the illust id
-            if url.isdigit():
-                illust_id = url
+            if url_or_illustid.isdigit():
+                illust_id = url_or_illustid
             else:
-                illust_id = re.findall(r"\d+", url[0])[0]
+                illust_id = re.findall(r"\d+", url_or_illustid)[0]
             try:
                 target, file = await get_image_by_id(illust_id)
             except ConnectionError:
