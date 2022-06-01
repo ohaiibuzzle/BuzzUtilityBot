@@ -1,11 +1,11 @@
 import asyncio
 import re
-from time import sleep
-from bs4 import BeautifulSoup
-from random import SystemRandom, random
+from random import SystemRandom
 from random import choice as rchoice
-from discord import Embed, ChannelType
+
 import aiohttp
+from bs4 import BeautifulSoup
+
 from . import tf_scan
 
 random_gen = SystemRandom()

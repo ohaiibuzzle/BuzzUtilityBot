@@ -1,11 +1,15 @@
-from discord.ext import commands
-import discord
-import aiosqlite, sqlite3
-import re, random
 import asyncio
-from PIL import Image, ImageDraw, ImageFont, ImageOps
-import aiohttp, io
 import datetime
+import io
+import random
+import re
+import sqlite3
+
+import aiohttp
+import aiosqlite
+import discord
+from discord.ext import commands
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 RT_DATABASE = "runtime/server_data.db"
 AVATAR_SIZE = 192

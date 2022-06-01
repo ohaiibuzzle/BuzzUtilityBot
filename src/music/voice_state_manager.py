@@ -1,9 +1,9 @@
-from importlib.util import source_from_cache
+import asyncio
+import itertools
+
+import async_timeout
 import discord
 from discord.ext import commands
-import asyncio
-import async_timeout
-import itertools
 
 from music import youtube_dl_source
 

@@ -1,18 +1,19 @@
-from os import listdir, environ
-from os.path import isfile, join, exists, isdir, abspath
+from os import environ
+from os.path import exists
 
 environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
+import asyncio
+import configparser
+
 import numpy as np
+import requests
 import tensorflow as tf
-from tensorflow import keras
 import tensorflow_hub as hub
 from PIL import Image
-import requests
-import asyncio
+from tensorflow import keras
 
 # Read the runtime config
-import configparser
 config = configparser.ConfigParser()
 config.read("runtime/config.cfg")
 model_path = config["Credentials"]["nsfw_model_path"]

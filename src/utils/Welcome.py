@@ -1,9 +1,10 @@
-from discord.ext import commands
-import discord
-import sqlite3
-import aiosqlite, aiohttp
 import io
+import sqlite3
 
+import aiohttp
+import aiosqlite
+import discord
+from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 

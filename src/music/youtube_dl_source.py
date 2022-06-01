@@ -1,10 +1,8 @@
 import asyncio
 from collections import deque
-from os import stat
-import re
-import yt_dlp
+
 import discord
-from yt_dlp import options
+import yt_dlp
 
 YTDL_OPTS = {
     "format": "bestaudio/best",

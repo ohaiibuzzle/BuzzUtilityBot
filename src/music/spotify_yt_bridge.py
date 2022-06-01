@@ -1,7 +1,9 @@
+import asyncio
+import configparser
+
 import pyyoutube
 import spotipy
-import configparser
-import asyncio
+
 from .youtube_dl_source import YouTubeDLSingleSource
 
 config = configparser.ConfigParser()

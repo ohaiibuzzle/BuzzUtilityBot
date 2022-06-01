@@ -1,15 +1,11 @@
-from curses import raw
-from pickletools import read_bytes1
-import pixivpy_async
-import datetime
-import random
-import discord
-import io
-import requests
-import re
-import aiohttp
 import asyncio
 import configparser
+import io
+import random
+
+import aiohttp
+import discord
+import pixivpy_async
 
 random_source = random.SystemRandom()
 

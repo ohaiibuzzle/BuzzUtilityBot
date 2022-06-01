@@ -1,11 +1,14 @@
+import asyncio
 import re
-from discord.ext import commands
+
+import aioredis
 import discord
+from discord.ext import commands
+
+from .danbooru import search_danbooru
+from .pixiv import construct_pixiv_embed, get_image_by_id
 from .safebooru import safebooru_random_img
 from .zerochan import search_zerochan
-from .pixiv import construct_pixiv_embed, get_image_by_id
-from .danbooru import search_danbooru
-import aioredis, asyncio
 
 
 class PictureSearch(commands.Cog, name="Random image finder"):

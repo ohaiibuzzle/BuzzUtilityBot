@@ -1,10 +1,9 @@
-from bs4 import BeautifulSoup
-import discord
-import requests
 import random
-import string
-import asyncio
+
 import aiohttp
+import discord
+from bs4 import BeautifulSoup
+
 from . import tf_scan
 
 random_gen = random.SystemRandom()

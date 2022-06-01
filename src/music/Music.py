@@ -1,11 +1,13 @@
 import asyncio
+import io
+import math
+import re
+
 import discord
 from discord.ext import commands, tasks
-from music import youtube_dl_source, voice_state_manager, spotify_yt_bridge
-import math
 from spotipy.exceptions import SpotifyException
-import io
-import re
+
+from music import spotify_yt_bridge, voice_state_manager, youtube_dl_source
 
 
 class Music(commands.Cog):
