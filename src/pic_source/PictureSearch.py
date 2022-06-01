@@ -1,5 +1,6 @@
 import asyncio
 import re
+import configparser
 
 import aioredis
 import discord
@@ -10,11 +11,15 @@ from .pixiv import construct_pixiv_embed, get_image_by_id
 from .safebooru import safebooru_random_img
 from .zerochan import search_zerochan
 
+# load config for redis
+config = configparser.ConfigParser()
+config.read("runtime/config.cfg")
+redis_host = config["Dependancies"]["redis_host"]
 
 class PictureSearch(commands.Cog, name="Random image finder"):
     def __init__(self, client):
         self.client = client
-        self.redis_pool = aioredis.from_url("redis://localhost", decode_responses=True)
+        self.redis_pool = aioredis.from_url(redis_host, decode_responses=True)
 
     def cog_command_error(self, ctx, error):
         if error is AttributeError or error is commands.errors.MissingRequiredArgument:
