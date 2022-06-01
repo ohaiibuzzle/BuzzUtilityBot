@@ -167,7 +167,11 @@ class PictureSearch(commands.Cog, name="Random image finder"):
                 + " wants to display Pixiv art!"
             )
             # print(args[0])
-            illust_id = re.findall(r"\d+", url[0])[0]
+            # if the url is just the illust id
+            if url.isdigit():
+                illust_id = url
+            else:
+                illust_id = re.findall(r"\d+", url[0])[0]
             try:
                 target, file = await get_image_by_id(illust_id)
             except ConnectionError:
