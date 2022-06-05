@@ -114,7 +114,7 @@ async def search_zerochan(bypass, query: str):
                         "content": item.find("media:content")["url"],
                         "keywords": item.find("media:keywords")
                         .text.replace(chr(0x09), "")
-                        .replace("\r\n", " ")
+                        .replace("\n", " ")
                         .strip(),
                     }
 
@@ -159,7 +159,7 @@ async def search_zerochan(bypass, query: str):
                         "content": item.find("media:content")["url"],
                         "keywords": item.find("media:keywords")
                         .text.replace(chr(0x09), "")
-                        .replace("\r\n", " ")
+                        .replace("\n", " ")
                         .strip(),
                     }
         else:
@@ -185,7 +185,7 @@ async def search_zerochan(bypass, query: str):
                     "content": item.find("media:content")["url"],
                     "keywords": item.find("media:keywords")
                     .text.replace(chr(0x09), "")
-                    .replace("\r\n", " ")
+                    .replace("\n", " ")
                     .strip(),
                 }
 
