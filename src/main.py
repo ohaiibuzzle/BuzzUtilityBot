@@ -1,11 +1,9 @@
-from ctypes import cast
-from warnings import catch_warnings
 import discord
 from discord.ext import commands
 from utils.AdminTools import AdminTools
-import os, sqlite3
+import os
 import configparser
-import asyncio, uvloop
+import asyncio
 
 print("Starting up...")
 

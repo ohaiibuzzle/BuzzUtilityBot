@@ -1,5 +1,4 @@
 import aiohttp, asyncio
-import discord
 from bs4 import BeautifulSoup
 
 iqdb_endpoint = "https://iqdb.org/?url="

@@ -2,7 +2,6 @@ from discord.ext import commands
 from .saucenao import find_sauce
 from .iqdb import get_sauce
 import discord
-import pixivpy_async, re
 import configparser
 from pysaucenao.saucenao import SauceNaoResults
 

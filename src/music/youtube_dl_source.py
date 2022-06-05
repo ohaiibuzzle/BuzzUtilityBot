@@ -1,5 +1,4 @@
 import asyncio
-from collections import deque
 
 import discord
 import yt_dlp
