@@ -9,7 +9,7 @@ print("Starting up...")
 
 if not os.path.isdir("runtime"):
     os.mkdir("runtime")
-    os.mkdir("runtime/model")
+    os.mkdir("runtime/models")
     print("Please populate the /runtime directory with your credentials!")
     config = configparser.ConfigParser()
     config["Credentials"] = {
@@ -22,7 +22,7 @@ if not os.path.isdir("runtime"):
     }
 
     config["Dependancies"] = {
-        "nsfw_model_path": "./runtime/model",
+        "nsfw_model_path": "runtime/models/mobileNet.tflite",
         "redis_host": "redis://localhost",
     }
 

@@ -8,7 +8,7 @@ import configparser
 
 import numpy as np
 import requests
-import tensorflow as tf
+import tflite_runtime.interpreter as tflite
 from PIL import Image
 
 # Read the runtime config
@@ -19,7 +19,7 @@ model_path = config["Dependancies"]["nsfw_model_path"]
 IMAGE_DIM = 224
 
 print("TF: Loading NSFW Model. This may take a while...")
-model_interpreter = tf.lite.Interpreter(model_path=model_path)
+model_interpreter = tflite.Interpreter(model_path=model_path)
 model_interpreter.allocate_tensors()
 input_details = model_interpreter.get_input_details()
 output_details = model_interpreter.get_output_details()
@@ -33,24 +33,23 @@ categories = [
 colors = [0xD53113, 0x5B17B1, 0x2299B8, 0x6B1616, 0x1EB117]
 
 
-def load_image_array(array, image_size):
-    """Resizes an image to the model's size
-
-    Args:
-        array (np.array): The array
-        image_size (tuple): The tuple with the size
-
-    Returns:
-        np.array: The image array
+def img_to_array(img):
     """
-    image = tf.image.resize(
-        np.asarray(array), image_size, preserve_aspect_ratio=False
-    ).numpy()
-    image /= 255
-
-    # np.savetxt('test.csv', image.reshape((3,-1)), delimiter=',')
-
-    return image
+    Converts a PIL Image instance to a Numpy array.
+    (Yes, this is, as you might have suspected, stolen from Keras. Thanks, Keras!)
+    Args:
+        img (PIL.Image): PIL Image instance.
+    Returns:
+        np.array: Numpy array.
+    """
+    x = np.asarray(img, dtype="float32")
+    if len(x.shape) == 3:
+        pass
+    elif len(x.shape) == 2:
+        x = x.reshape((x.shape[0], x.shape[1], 1))
+    else:
+        raise ValueError("Unsupported image shape: %s" % (x.shape,))
+    return x
 
 
 def process_url(url: str):
@@ -66,7 +65,7 @@ def process_url(url: str):
         (IMAGE_DIM, IMAGE_DIM), Image.Resampling.NEAREST
     )
     # im.show()
-    image = tf.keras.preprocessing.image.img_to_array(im)
+    image = img_to_array(im)
     image = image[:, :, :3]
     image /= 255
 
