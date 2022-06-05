@@ -20,7 +20,7 @@ else:
         except ValueError:
             print("Model Error")
             return True
-        print(res)
+        # print(res)
         if res["(o-_-o) (H)"][0] >= 0.59:
             print("Model detected Hentai content")
             return False
