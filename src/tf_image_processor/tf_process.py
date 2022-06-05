@@ -9,9 +9,7 @@ import configparser
 import numpy as np
 import requests
 import tensorflow as tf
-import tensorflow_hub as hub
 from PIL import Image
-from tensorflow import keras
 
 # Read the runtime config
 config = configparser.ConfigParser()
@@ -20,28 +18,19 @@ model_path = config["Dependancies"]["nsfw_model_path"]
 
 IMAGE_DIM = 224
 
-
-def load_model(model_path):
-    """Loads a TensorFlow model
-
-    Args:
-        model_path (str): Path to the .h5 model
-
-    Raises:
-        ValueError: If the path does not exist
-
-    Returns:
-        Any: The TensorFlow model
-    """
-    if model_path is None or not exists(model_path):
-        raise ValueError(
-            "saved_model_path must be the valid directory of a saved model to load."
-        )
-
-    model = tf.keras.models.load_model(
-        model_path, custom_objects={"KerasLayer": hub.KerasLayer}
-    )
-    return model
+print("TF: Loading NSFW Model. This may take a while...")
+model_interpreter = tf.lite.Interpreter(model_path=model_path)
+model_interpreter.allocate_tensors()
+input_details = model_interpreter.get_input_details()
+output_details = model_interpreter.get_output_details()
+categories = [
+    "(o･ω･o) (D)",
+    "(o-_-o) (H)",
+    "(ﾉ´ з `)ノ (N)",
+    "(╬ Ò﹏Ó) (P)",
+    "(°ㅂ°╬) (S)",
+]
+colors = [0xD53113, 0x5B17B1, 0x2299B8, 0x6B1616, 0x1EB117]
 
 
 def load_image_array(array, image_size):
@@ -74,16 +63,18 @@ def process_url(url: str):
         dict: A dictionary describing the results
     """
     im = Image.open(requests.get(url, stream=True, timeout=15).raw).resize(
-        (IMAGE_DIM, IMAGE_DIM), Image.NEAREST
+        (IMAGE_DIM, IMAGE_DIM), Image.Resampling.NEAREST
     )
     # im.show()
-    image = keras.preprocessing.image.img_to_array(im)
+    image = tf.keras.preprocessing.image.img_to_array(im)
     image = image[:, :, :3]
     image /= 255
 
     # np.savetxt('test.csv', image.reshape((3,-1)), delimiter=',')
 
-    preds = model.predict(np.asarray([image]))
+    model_interpreter.set_tensor(input_details[0]["index"], np.asarray([image]))
+    model_interpreter.invoke()
+    preds = model_interpreter.get_tensor(output_details[0]["index"])
 
     preds_dict = {}
     for _, value in enumerate(preds[0]):
@@ -96,17 +87,6 @@ async def async_process_url(url: str):
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, process_url, url)
 
-
-print("TF: Loading NSFW Model. This may take a while...")
-model = load_model(model_path)
-categories = [
-    "(o･ω･o) (D)",
-    "(o-_-o) (H)",
-    "(ﾉ´ з `)ノ (N)",
-    "(╬ Ò﹏Ó) (P)",
-    "(°ㅂ°╬) (S)",
-]
-colors = [0xD53113, 0x5B17B1, 0x2299B8, 0x6B1616, 0x1EB117]
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
