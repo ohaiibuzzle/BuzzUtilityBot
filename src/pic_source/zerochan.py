@@ -50,17 +50,17 @@ async def search_zerochan(bypass, query: str):
         if not "?xml" in str(res.url):  # Hit a tag
             is_tag = True
             res = await session.get(str(res.url) + xml_specifier, headers=headers)
-            soup = BeautifulSoup(await res.read(), features="lxml")
+            soup = BeautifulSoup(await res.read(), features="xml")
             # url = res.url+xml_specifier
             query = str(res.url).split("/")[-1].replace("+", " ")
             # print(query)
         elif "application/rss+xml" in str(await res.read()):
             is_tag = True
-            soup = BeautifulSoup(await res.read(), features="lxml")
+            soup = BeautifulSoup(await res.read(), features="xml")
             # url = res.url
         else:
             res = await session.get(target + query + "&xml&s=id", headers=headers)
-            soup = BeautifulSoup(await res.read(), features="lxml")
+            soup = BeautifulSoup(await res.read(), features="xml")
             # url = target+query+'&xml'
             is_tag = False
             # sleep(0.5)
@@ -127,7 +127,7 @@ async def search_zerochan(bypass, query: str):
                     res = await session.get(
                         tag_target + query + "?xml" + pagination + str(page)
                     )
-                    page_soup = BeautifulSoup(await res.read(), features="lxml")
+                    page_soup = BeautifulSoup(await res.read(), features="xml")
 
                     if "Some content is for members only, please" in page_soup.text:
                         continue

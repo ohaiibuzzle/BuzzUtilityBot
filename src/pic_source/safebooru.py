@@ -23,7 +23,7 @@ async def get_image(tags: str, bypass=False):
     async with aiohttp.ClientSession(timeout=timeout) as session:
         res = await session.get(endpoint + tags)
 
-        soup = BeautifulSoup(await res.read(), "lxml")
+        soup = BeautifulSoup(await res.read(), features="xml")
         count = int(soup.find("posts")["count"])
 
         # print(endpoint + tags)
@@ -63,7 +63,7 @@ async def get_image(tags: str, bypass=False):
 
                 remote_res = await session.get(endpoint + tags + "&pid=" + str(page))
 
-                remote_soup = BeautifulSoup(await remote_res.read(), "lxml")
+                remote_soup = BeautifulSoup(await remote_res.read(), features="xml")
 
                 position = position % 100 - 1
 
