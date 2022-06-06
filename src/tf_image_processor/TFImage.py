@@ -1,3 +1,4 @@
+from email import message
 import discord
 from discord.ext import commands
 from PIL import UnidentifiedImageError
@@ -27,22 +28,30 @@ class TFImage(commands.Cog, name="AI-based image rating"):
                 if ctx.message.reference.resolved != None:
                     search_msg = ctx.message.reference.resolved
                     if search_msg.embeds.__len__() > 0:
-                        for attachment in search_msg.embeds:
-                            try:
-                                res = await self.tensorflow_embed(attachment.url)
-                                await ctx.send(embed=res)
-                            except UnidentifiedImageError:
-                                await ctx.send("Hey, that is not an image")
-                            pass
+                        for embed in search_msg.embeds:
+                            if embed.image.url is not discord.Embed.Empty:
+                                try:
+                                    res = await self.tensorflow_embed(embed.image.url)
+                                    return await ctx.send(embed=res)
+                                except UnidentifiedImageError:
+                                    await ctx.send("Hey, that is not an image")
+                            elif embed.url is not discord.Embed.Empty:
+                                try:
+                                    res = await self.tensorflow_embed(embed.url)
+                                    return await ctx.send(embed=res)
+                                except UnidentifiedImageError:
+                                    await ctx.send("Hey, that is not an image")
                     elif search_msg.attachments.__len__() > 0:
                         for attachment in search_msg.attachments:
                             if attachment.content_type.startswith("image"):
                                 try:
                                     res = await self.tensorflow_embed(attachment.url)
-                                    await ctx.send(embed=res)
+                                    return await ctx.send(embed=res)
                                 except UnidentifiedImageError:
+                                    print(search_msg.attachments)
                                     await ctx.send("Hey, that is not an image")
-                                pass
+                    # Catch if we can't process it at all
+                    await ctx.send("Hey, that is not an image")
             else:
                 await ctx.send("Hey, at least send me something! :(")
 
