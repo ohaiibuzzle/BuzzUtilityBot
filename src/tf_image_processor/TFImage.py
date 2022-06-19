@@ -24,44 +24,50 @@ class TFImage(commands.Cog, name="AI-based image rating"):
             + " wants to rate an image!"
         )
         async with ctx.channel.typing():
+            msg = None
             if ctx.message.reference:
-                if ctx.message.reference.resolved != None:
-                    search_msg = ctx.message.reference.resolved
-                    if search_msg.embeds.__len__() > 0:
-                        for embed in search_msg.embeds:
-                            if embed.image.url is not discord.Embed.Empty:
-                                try:
-                                    res = await self.tensorflow_embed(embed.image.url)
-                                    return await ctx.send(embed=res)
-                                except UnidentifiedImageError:
-                                    await ctx.send("Hey, that is not an image")
-                            elif embed.thumbnail.url is not discord.Embed.Empty:
-                                try:
-                                    res = await self.tensorflow_embed(
-                                        embed.thumbnail.url
-                                    )
-                                    return await ctx.send(embed=res)
-                                except UnidentifiedImageError:
-                                    await ctx.send("Hey, that is not an image")
-                            elif embed.url is not discord.Embed.Empty:
-                                try:
-                                    res = await self.tensorflow_embed(embed.url)
-                                    return await ctx.send(embed=res)
-                                except UnidentifiedImageError:
-                                    await ctx.send("Hey, that is not an image")
-                    elif search_msg.attachments.__len__() > 0:
-                        for attachment in search_msg.attachments:
-                            if attachment.content_type.startswith("image"):
-                                try:
-                                    res = await self.tensorflow_embed(attachment.url)
-                                    return await ctx.send(embed=res)
-                                except UnidentifiedImageError:
-                                    print(search_msg.attachments)
-                                    await ctx.send("Hey, that is not an image")
-                    # Catch if we can't process it at all
-                    await ctx.send("Hey, that is not an image")
+                msg = ctx.message.reference.resolved
             else:
-                await ctx.send("Hey, at least send me something! :(")
+                messages = await ctx.message.channel.history(limit=5).flatten()
+                for mesg in messages:
+                    if mesg.attachments.__len__() > 0 or mesg.embeds.__len__() > 0:
+                        msg = mesg
+                        break
+
+            if msg != None:
+                if msg.embeds.__len__() > 0:
+                    for embed in msg.embeds:
+                        if embed.image.url is not discord.Embed.Empty:
+                            try:
+                                res = await self.tensorflow_embed(embed.image.url)
+                                return await ctx.send(embed=res)
+                            except UnidentifiedImageError:
+                                await ctx.send("Hey, that is not an image")
+                        elif embed.thumbnail.url is not discord.Embed.Empty:
+                            try:
+                                res = await self.tensorflow_embed(embed.thumbnail.url)
+                                return await ctx.send(embed=res)
+                            except UnidentifiedImageError:
+                                await ctx.send("Hey, that is not an image")
+                        elif embed.url is not discord.Embed.Empty:
+                            try:
+                                res = await self.tensorflow_embed(embed.url)
+                                return await ctx.send(embed=res)
+                            except UnidentifiedImageError:
+                                await ctx.send("Hey, that is not an image")
+                elif msg.attachments.__len__() > 0:
+                    for attachment in msg.attachments:
+                        if attachment.content_type.startswith("image"):
+                            try:
+                                res = await self.tensorflow_embed(attachment.url)
+                                return await ctx.send(embed=res)
+                            except UnidentifiedImageError:
+                                print(msg.attachments)
+                                await ctx.send("Hey, that is not an image")
+                # Catch if we can't process it at all
+                await ctx.send("Hey, that is not an image")
+            else:
+                await ctx.send("Hey, at least give me something to work with!")
 
     @staticmethod
     async def tensorflow_embed(url: str) -> discord.Embed:
