@@ -187,6 +187,9 @@ class PictureSearch(commands.Cog, name="Random image finder"):
                 await ctx.send("This image is restricted :(")
             else:
                 if target:
+                    await ctx.send(
+                        f"Image fetched for {ctx.message.author.name}", file=file
+                    )
                     await ctx.send(embed=target, file=file)
                 else:
                     await ctx.send("Your search returned no result :(")
