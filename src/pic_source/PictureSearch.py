@@ -16,6 +16,7 @@ config = configparser.ConfigParser()
 config.read("runtime/config.cfg")
 redis_host = config["Dependancies"]["redis_host"]
 
+
 class PictureSearch(commands.Cog, name="Random image finder"):
     def __init__(self, client):
         self.client = client
@@ -91,7 +92,7 @@ class PictureSearch(commands.Cog, name="Random image finder"):
             except TypeError as e:
                 print(e)
                 await ctx.send(
-                    "Your search string was too wide, or it included NSFW tags.\nNarrow the query to try again"
+                    "Your search string was wonky, or it included NSFW tags.\nTry again"
                 )
                 return
             except ConnectionError:
@@ -172,6 +173,7 @@ class PictureSearch(commands.Cog, name="Random image finder"):
                 illust_id = url_or_illustid
             else:
                 illust_id = re.findall(r"\d+", url_or_illustid)[0]
+                await ctx.message.delete()  # this is a url, so we wipe it to get rid of duped
             try:
                 target, file = await get_image_by_id(illust_id)
             except ConnectionError:
@@ -180,6 +182,9 @@ class PictureSearch(commands.Cog, name="Random image finder"):
                 )
             except ValueError:
                 await ctx.send("Nothing found :(\nCheck your query")
+            except TypeError:
+                # Most likely because it returns None, which signifies that the image is restricted
+                await ctx.send("This image is restricted :(")
             else:
                 if target:
                     await ctx.send(embed=target, file=file)
