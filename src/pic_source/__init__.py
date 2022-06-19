@@ -21,7 +21,7 @@ else:
             print("Model Error")
             return True
         # print(res)
-        if res["(o-_-o) (Hentai)"][0] >= 0.59:
+        if res["(o-_-o) (Hentai)"][0] >= 0.5:
             print("Model detected Hentai content")
             return False
         if res["(╬ Ò﹏Ó) (Porn)"][0] >= 0.5:
