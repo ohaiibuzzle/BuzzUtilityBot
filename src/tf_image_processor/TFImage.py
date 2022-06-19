@@ -35,6 +35,14 @@ class TFImage(commands.Cog, name="AI-based image rating"):
                                     return await ctx.send(embed=res)
                                 except UnidentifiedImageError:
                                     await ctx.send("Hey, that is not an image")
+                            elif embed.thumbnail.url is not discord.Embed.Empty:
+                                try:
+                                    res = await self.tensorflow_embed(
+                                        embed.thumbnail.url
+                                    )
+                                    return await ctx.send(embed=res)
+                                except UnidentifiedImageError:
+                                    await ctx.send("Hey, that is not an image")
                             elif embed.url is not discord.Embed.Empty:
                                 try:
                                     res = await self.tensorflow_embed(embed.url)
