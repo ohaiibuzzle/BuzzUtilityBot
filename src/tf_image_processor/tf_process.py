@@ -24,11 +24,11 @@ model_interpreter.allocate_tensors()
 input_details = model_interpreter.get_input_details()
 output_details = model_interpreter.get_output_details()
 categories = [
-    "(o･ω･o) (D)",
-    "(o-_-o) (H)",
-    "(ﾉ´ з `)ノ (N)",
-    "(╬ Ò﹏Ó) (P)",
-    "(°ㅂ°╬) (S)",
+    "(o･ω･o) (Drawing)",
+    "(o-_-o) (Hentai)",
+    "(ﾉ´ з `)ノ (Neutral)",
+    "(╬ Ò﹏Ó) (Porn)",
+    "(°ㅂ°╬) (Sexy)",
 ]
 colors = [0xD53113, 0x5B17B1, 0x2299B8, 0x6B1616, 0x1EB117]
 
