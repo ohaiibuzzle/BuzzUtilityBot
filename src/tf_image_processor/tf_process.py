@@ -16,7 +16,7 @@ config = configparser.ConfigParser()
 config.read("runtime/config.cfg")
 model_path = config["Dependancies"]["nsfw_model_path"]
 
-IMAGE_DIM = 224
+IMAGE_DIM = int(config["Dependancies"]["nsfw_image_dim"])
 
 print("TF: Loading NSFW Model. This may take a while...")
 model_interpreter = tflite.Interpreter(model_path=model_path)
