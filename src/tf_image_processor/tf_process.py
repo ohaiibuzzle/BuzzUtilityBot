@@ -64,9 +64,11 @@ def process_url(url: str):
     im = Image.open(requests.get(url, stream=True, timeout=15).raw).resize(
         (IMAGE_DIM, IMAGE_DIM), Image.Resampling.NEAREST
     )
+    if im.mode != "RGB":
+        im = im.convert("RGB")
+
     # im.show()
     image = img_to_array(im)
-    image = image[:, :, :3]
     image /= 255
 
     # np.savetxt('test.csv', image.reshape((3,-1)), delimiter=',')
