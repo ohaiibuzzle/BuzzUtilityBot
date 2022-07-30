@@ -4,7 +4,7 @@ import configparser
 
 import aioredis
 import discord
-from discord.ext import commands
+from discord.ext import commands, bridge
 
 from .danbooru import search_danbooru
 from .pixiv import construct_pixiv_embed, get_image_by_id
@@ -24,228 +24,241 @@ class PictureSearch(commands.Cog, name="Random image finder"):
 
     def cog_command_error(self, ctx, error):
         if error is AttributeError or error is commands.errors.MissingRequiredArgument:
-            return ctx.send(
+            return ctx.respond(
                 f"There was an error processing your request (Perhaps checks your command?) \n Details:{error}"
             )
         else:
-            return ctx.send(
+            return ctx.respond(
                 f"There was an error processing your request \nDetails: {error}"
             )
 
-    @commands.command(
+    @bridge.bridge_command(
         brief="Random image from SafeBooru",
-        description='Look for a random image on SafeBooru, input can be any of SafeBooru\'s tag query\n\
-                          Combine tags using "+"',
         aliases=["sbr"],
     )
     async def sbrandom(self, ctx, *, tags):
+        """
+        Look for a random image on SafeBooru, input can be any of SafeBooru's tag query
+        
+        Combine tags using "+"
+        """
         print(
             "@"
-            + ctx.message.author.name
+            + ctx.author.name
             + "#"
-            + ctx.message.author.discriminator
+            + ctx.author.discriminator
             + " wants something random (SafeBooru)!"
         )
-        async with ctx.channel.typing():
-            try:
-                target = await safebooru_random_img(tags.split("+"), ctx.channel)
-            except ConnectionError:
-                await ctx.send(
-                    "Buzzle's Internet broke :(\n(Try again in a few minutes, server is under high load)"
-                )
-            else:
-                if target:
-                    await ctx.send(embed=target)
-                    try:
-                        await self.redis_pool.set(
-                            f"{ctx.channel.id}:{ctx.author.id}",
-                            f"SAFEBOORU {tags}",
-                            ex=15,
-                        )
-                    except:
-                        msg = await ctx.send(
-                            "Buzzle forgot to start Redis, so I won't remember your command :("
-                        )
-                        await asyncio.sleep(5)
-                        await msg.delete()
-                else:
-                    await ctx.send("Your search returned no result :(")
-
-    @commands.command(
-        brief="Random image from ZeroChan",
-        description='Look for a random image on ZeroChan, input can be any of ZeroChan\'s tag query\n\
-                          Combine tags using "+"',
-        aliases=["zcr"],
-    )
-    async def zcrandom(self, ctx, *, tags):
-        async with ctx.channel.typing():
-            print(
-                "@"
-                + ctx.message.author.name
-                + "#"
-                + ctx.message.author.discriminator
-                + " wants something random (zerochan)!"
+        await ctx.defer()
+        try:
+            target = await safebooru_random_img(tags.split("+"), ctx.channel)
+        except ConnectionError:
+            await ctx.respond(
+                "Buzzle's Internet broke :(\n(Try again in a few minutes, server is under high load)"
             )
-            tags = tags.replace("+", ",")
-            try:
-                res = await self.construct_zerochan_embed(ctx.channel, tags)
-            except TypeError as e:
-                print(e)
-                await ctx.send(
-                    "Your search string was wonky, or it included NSFW tags.\nTry again"
-                )
-                return
-            except ConnectionError:
-                await ctx.send(
-                    "Buzzle's Internet broke :(\n(Try again in a few minutes, server is under high load)"
-                )
-            else:
-                if res != None:
-                    await ctx.send(embed=res)
-                    try:
-                        await self.redis_pool.set(
-                            f"{ctx.channel.id}:{ctx.author.id}",
-                            f"ZEROCHAN {tags}",
-                            ex=15,
-                        )
-                    except:
-                        msg = await ctx.send(
-                            "Buzzle forgot to start Redis, so I won't remember your command :("
-                        )
-                        await asyncio.sleep(5)
-                        await msg.delete()
-                else:
-                    await ctx.send(
-                        "Sorry, I can't find you anything :( \nEither check your search, or Buzzle banned a tag in the result"
-                    )
-
-    @commands.command(
-        brief="Look for a random image on Pixiv",
-        description="Look for a random image on Pixiv",
-        aliases=["pxr"],
-    )
-    async def pixivrandom(self, ctx, *, tags):
-        async with ctx.channel.typing():
-            print(
-                "@"
-                + ctx.message.author.name
-                + "#"
-                + ctx.message.author.discriminator
-                + " wants something random (Pixiv)!"
-            )
-            try:
-                target, file = await construct_pixiv_embed(tags, ctx.channel)
-            except ConnectionError:
-                await ctx.send(
-                    "Buzzle's Internet broke :(\n(Try again in a few minutes, server is under high load)"
-                )
-            except ValueError:
-                await ctx.send("Nothing found :(\nCheck your query")
-            else:
-                if target:
-                    await ctx.send(embed=target, file=file)
-                    try:
-                        await self.redis_pool.set(
-                            f"{ctx.channel.id}:{ctx.author.id}", f"PIXIV {tags}", ex=15
-                        )
-                    except:
-                        msg = await ctx.send(
-                            "Buzzle forgot to start Redis, so I won't remember your command :("
-                        )
-                        await asyncio.sleep(5)
-                        await msg.delete()
-                else:
-                    await ctx.send("Your search returned no result :(")
-
-    @commands.command(brief="Display a Pixiv post in bot's format", aliases=["pxs"])
-    async def pixivshow(self, ctx, *, url_or_illustid):
-        async with ctx.channel.typing():
-            print(
-                "@"
-                + ctx.message.author.name
-                + "#"
-                + ctx.message.author.discriminator
-                + " wants to display Pixiv art!"
-            )
-            # print(args[0])
-            # if the url is just the illust id
-            if url_or_illustid.isdigit():
-                illust_id = url_or_illustid
-            else:
-                illust_id = re.findall(r"\d+", url_or_illustid)[0]
-                await ctx.message.delete()  # this is a url, so we wipe it to get rid of duped
-            try:
-                target, file = await get_image_by_id(illust_id)
-            except ConnectionError:
-                await ctx.send(
-                    "Buzzle's Internet broke :(\n(Try again in a few minutes, server is under high load)"
-                )
-            except ValueError:
-                await ctx.send("Nothing found :(\nCheck your query")
-            except TypeError:
-                # Most likely because it returns None, which signifies that the image is restricted
-                await ctx.send("This image is restricted :(")
-            else:
-                if target:
-                    await ctx.send(f"Image fetched for {ctx.message.author.name}")
-                    await ctx.send(embed=target, file=file)
-                else:
-                    await ctx.send("Your search returned no result :(")
-        pass
-
-    @commands.command(
-        brief="Danbooru (NSFW) search",
-        description="Search for a random image on Danbooru.",
-        aliases=["dbr"],
-    )
-    async def danboorurandom(self, ctx: commands.Context, *, tags):
-        async with ctx.channel.typing():
-            print(
-                "@"
-                + ctx.message.author.name
-                + "#"
-                + ctx.message.author.discriminator
-                + " wants to search danbooru!"
-            )
-            try:
-                if not ctx.channel.is_nsfw():
-                    await ctx.send(
-                        "This command cannot be ran on channels that aren't marked NSFW!"
-                    )
-                    return
-            except AttributeError:
-                await ctx.send(
-                    "This command cannot be ran on channels that aren't marked NSFW!"
-                )
-                return
-            try:
-                embed = await PictureSearch.construct_danbooru_embed(tags)
-            except ConnectionError:
-                await ctx.send(
-                    "Buzzle's Internet broke :(\n(Try again in a few minutes, server is under high load)"
-                )
-            else:
-                await ctx.send(embed=embed)
+        else:
+            if target:
+                await ctx.respond(embed=target)
                 try:
                     await self.redis_pool.set(
-                        f"{ctx.channel.id}:{ctx.author.id}", f"DANBOORU {tags}", ex=15
+                        f"{ctx.channel.id}:{ctx.author.id}",
+                        f"SAFEBOORU {tags}",
+                        ex=15,
                     )
                 except:
-                    msg = await ctx.send(
+                    msg = await ctx.respond(
                         "Buzzle forgot to start Redis, so I won't remember your command :("
                     )
                     await asyncio.sleep(5)
                     await msg.delete()
+            else:
+                await ctx.respond("Your search returned no result :(")
 
-    @commands.command(
+    @bridge.bridge_command(
+        brief="Random image from ZeroChan",
+        aliases=["zcr"],
+    )
+    async def zcrandom(self, ctx, *, tags):
+        """
+        Look for a random image on ZeroChan, input can be any of ZeroChan's tag query
+
+        Combine tags using "+"
+        """
+        await ctx.defer()
+        print(
+            "@"
+            + ctx.author.name
+            + "#"
+            + ctx.author.discriminator
+            + " wants something random (zerochan)!"
+        )
+        tags = tags.replace("+", ",")
+        try:
+            res = await self.construct_zerochan_embed(ctx.channel, tags)
+        except TypeError as e:
+            print(e)
+            await ctx.respond(
+                "Your search string was wonky, or it included NSFW tags.\nTry again"
+            )
+            return
+        except ConnectionError:
+            await ctx.respond(
+                "Buzzle's Internet broke :(\n(Try again in a few minutes, server is under high load)"
+            )
+        else:
+            if res != None:
+                await ctx.respond(embed=res)
+                try:
+                    await self.redis_pool.set(
+                        f"{ctx.channel.id}:{ctx.author.id}",
+                        f"ZEROCHAN {tags}",
+                        ex=15,
+                    )
+                except:
+                    msg = await ctx.respond(
+                        "Buzzle forgot to start Redis, so I won't remember your command :("
+                    )
+                    await asyncio.sleep(5)
+                    await msg.delete()
+            else:
+                await ctx.respond(
+                    "Sorry, I can't find you anything :( \nEither check your search, or Buzzle banned a tag in the result"
+                )
+
+    @bridge.bridge_command(
+        brief="Look for a random image on Pixiv",
+        aliases=["pxr"],
+    )
+    async def pixivrandom(self, ctx, *, tags):
+        """
+        Look for a random image on Pixiv
+        """
+        await ctx.defer()
+        print(
+            "@"
+            + ctx.author.name
+            + "#"
+            + ctx.author.discriminator
+            + " wants something random (Pixiv)!"
+        )
+        try:
+            target, file = await construct_pixiv_embed(tags, ctx.channel)
+        except ConnectionError:
+            await ctx.respond(
+                "Buzzle's Internet broke :(\n(Try again in a few minutes, server is under high load)"
+            )
+        except ValueError:
+            await ctx.respond("Nothing found :(\nCheck your query")
+        else:
+            if target:
+                await ctx.respond(embed=target, file=file)
+                try:
+                    await self.redis_pool.set(
+                        f"{ctx.channel.id}:{ctx.author.id}", f"PIXIV {tags}", ex=15
+                    )
+                except:
+                    msg = await ctx.respond(
+                        "Buzzle forgot to start Redis, so I won't remember your command :("
+                    )
+                    await asyncio.sleep(5)
+                    await msg.delete()
+            else:
+                await ctx.respond("Your search returned no result :(")
+
+    @bridge.bridge_command(brief="Display a Pixiv post in bot's format", aliases=["pxs"])
+    async def pixivshow(self, ctx, *, url_or_illustid):
+        await ctx.defer()
+        print(
+            "@"
+            + ctx.author.name
+            + "#"
+            + ctx.author.discriminator
+            + " wants to display Pixiv art!"
+        )
+        # print(args[0])
+        # if the url is just the illust id
+        if url_or_illustid.isdigit():
+            illust_id = url_or_illustid
+        else:
+            illust_id = re.findall(r"\d+", url_or_illustid)[0]
+            await ctx.message.delete()  # this is a url, so we wipe it to get rid of duped
+        try:
+            target, file = await get_image_by_id(illust_id)
+        except ConnectionError:
+            await ctx.respond(
+                "Buzzle's Internet broke :(\n(Try again in a few minutes, server is under high load)"
+            )
+        except ValueError:
+            await ctx.respond("Nothing found :(\nCheck your query")
+        except TypeError:
+            # Most likely because it returns None, which signifies that the image is restricted
+            await ctx.respond("This image is restricted :(")
+        else:
+            if target:
+                await ctx.respond(f"Image fetched for {ctx.author.name}")
+                await ctx.respond(embed=target, file=file)
+            else:
+                await ctx.respond("Your search returned no result :(")
+    pass
+
+    @bridge.bridge_command(
+        brief="Danbooru (NSFW) search",
+        aliases=["dbr"],
+    )
+    async def danboorurandom(self, ctx: commands.Context, *, tags):
+        """
+        Search for a random image on Danbooru."
+        """
+        await ctx.defer()
+        print(
+            "@"
+            + ctx.author.name
+            + "#"
+            + ctx.author.discriminator
+            + " wants to search danbooru!"
+        )
+        try:
+            if not ctx.channel.is_nsfw():
+                await ctx.respond(
+                    "This command cannot be ran on channels that aren't marked NSFW!"
+                )
+                return
+        except AttributeError:
+            await ctx.respond(
+                "This command cannot be ran on channels that aren't marked NSFW!"
+            )
+            return
+        try:
+            embed = await PictureSearch.construct_danbooru_embed(tags)
+        except ConnectionError:
+            await ctx.respond(
+                "Buzzle's Internet broke :(\n(Try again in a few minutes, server is under high load)"
+            )
+        else:
+            await ctx.respond(embed=embed)
+            try:
+                await self.redis_pool.set(
+                    f"{ctx.channel.id}:{ctx.author.id}", f"DANBOORU {tags}", ex=15
+                )
+            except:
+                msg = await ctx.respond(
+                    "Buzzle forgot to start Redis, so I won't remember your command :("
+                )
+                await asyncio.sleep(5)
+                await msg.delete()
+
+    @bridge.bridge_command(
         brief="Execute the last command, again!",
-        description="Run the last command you executed, timeout is 10s\n\
-                            Only some commands are supported.",
     )
     async def more(self, ctx: commands.Context):
+        """
+        Run the last command you executed, timeout is 15s
+
+        Only some commands are supported.
+        """
         last_exec = await self.redis_pool.get(f"{ctx.channel.id}:{ctx.author.id}")
         if last_exec is None:
-            await ctx.send("I can't remember what you were doing~~")
+            await ctx.respond("I can't remember what you were doing~~")
             return
         last_exec = str(last_exec)
         if last_exec.startswith("ZEROCHAN"):

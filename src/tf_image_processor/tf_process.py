@@ -1,5 +1,7 @@
+from contextlib import redirect_stderr
 from os import environ
 from os.path import exists
+from traceback import print_tb
 
 environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
@@ -61,9 +63,8 @@ def process_url(url: str):
     Returns:
         dict: A dictionary describing the results
     """
-    im = Image.open(requests.get(url, stream=True, timeout=15).raw).resize(
-        (IMAGE_DIM, IMAGE_DIM), Image.Resampling.NEAREST
-    )
+    im = Image.open(requests.get(url, stream=True, timeout=15).raw)
+    im = im.resize((IMAGE_DIM, IMAGE_DIM))
     if im.mode != "RGB":
         im = im.convert("RGB")
 
@@ -91,7 +92,7 @@ async def async_process_url(url: str):
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-    url = "https://s1.zerochan.net/Rosaria.600.3281202.jpg"
+    url = "https://media.discordapp.net/attachments/807448656763944960/991395165153546400/FB_IMG_1656166673189.jpg"
     predicts = loop.run_until_complete(async_process_url(url))
 
     print(url)

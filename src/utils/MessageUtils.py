@@ -1,4 +1,4 @@
-from discord.ext import commands
+from discord.ext import commands, bridge
 import discord
 import asyncio
 
@@ -16,61 +16,72 @@ class MessageUtils(commands.Cog, name="Message Utilities"):
             print(error)
             return ctx.send(f"There was an error processing your request")
 
-    @commands.command(
+    @bridge.bridge_command(
         brief="Save a message to your DM",
-        description="Save whatever message you mention when this command is ran. \
-                      If no message is mentioned, save the last message that has an embed in it",
     )
-    async def savethis(self, ctx):
+    async def savethis(self, ctx: bridge.BridgeContext):
+        """
+        Save whatever message you mention when this command is ran.
+        
+        If no message is mentioned, save the last message that has an embed in it
+        """
         print(
             "@"
-            + ctx.message.author.name
+            + ctx.author.name
             + "#"
-            + ctx.message.author.discriminator
+            + ctx.author.discriminator
             + " try to save!"
         )
-        if ctx.message.reference:
-            if ctx.message.reference.resolved != None:
-                search_msg = ctx.message.reference.resolved
-                await ctx.message.author.send(
-                    embed=self.construct_save_embed_img(search_msg)
-                )
-                await asyncio.sleep(5)
-                await ctx.message.delete()
-
-        else:
-            messages = await ctx.message.channel.history(limit=20).flatten()
-            for mesg in messages:
-                if mesg.attachments.__len__() > 0 or mesg.embeds.__len__() > 0:
+        if ctx.message:
+            if ctx.message.reference:
+                if ctx.message.reference.resolved != None:
+                    search_msg = ctx.message.reference.resolved
                     await ctx.message.author.send(
-                        embed=self.construct_save_embed_img(mesg)
+                        embed=self.construct_save_embed_img(search_msg)
                     )
                     await asyncio.sleep(5)
                     await ctx.message.delete()
+
+        else:
+            messages = await ctx.channel.history(limit=20).flatten()
+            for mesg in messages:
+                if mesg.attachments.__len__() > 0 or mesg.embeds.__len__() > 0:
+                    await ctx.author.send(
+                        embed=self.construct_save_embed_img(mesg)
+                    )
+                    if isinstance(ctx, bridge.BridgeExtContext):
+                        await asyncio.sleep(5)
+                        await ctx.message.delete()
+                    elif isinstance(ctx, bridge.BridgeApplicationContext):
+                        resp = await ctx.reply("Message saved to your DMs")
+                        await asyncio.sleep(5)
+                        await resp.delete()
                     break
 
-    @commands.command(
+    @bridge.bridge_command(
         brief="Save n messages to your DM",
-        description="Save up to n message in the current channel",
     )
-    async def saveall(self, ctx, amount):
+    async def saveall(self, ctx, amount: int):
+        """
+        Save up to n messages in the current channel
+        """
         if not amount.isnumeric():
-            alert = await ctx.send("You silly, that is not a number!!")
+            alert = await ctx.respond("You silly, that is not a number!!")
             await asyncio.sleep(3)
             await alert.delete()
             return
         amount = int(amount)
         if amount > 10:
-            alert = await ctx.send("You can only save up to 10 messages back in time!")
+            alert = await ctx.respond("You can only save up to 10 messages back in time!")
             await asyncio.sleep(3)
             await alert.delete()
             return
-        messages = await ctx.message.channel.history(limit=20).flatten()
+        messages = await ctx.channel.history(limit=20).flatten()
         for mesg in messages:
             if (
                 mesg.attachments.__len__() > 0 or mesg.embeds.__len__() > 0
             ) and amount > 0:
-                await ctx.message.author.send(embed=self.construct_save_embed_img(mesg))
+                await ctx.author.send(embed=self.construct_save_embed_img(mesg))
                 amount = amount - 1
 
     @commands.Cog.listener()
@@ -87,10 +98,12 @@ class MessageUtils(commands.Cog, name="Message Utilities"):
 
     @commands.command(
         brief="Delete the last message the bot send",
-        description="Use this command to delete the bot's last message. \
-                          Used in case things went wrong",
     )
     async def oofie(self, ctx):
+        """
+        Use this command to delete the bot's last message. 
+        Used in case things went wrong
+        """
         print(
             "Uh oh, @"
             + ctx.message.author.name

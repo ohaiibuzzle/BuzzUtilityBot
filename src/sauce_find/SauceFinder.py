@@ -1,6 +1,7 @@
-from discord.ext import commands
+from discord.ext import commands, bridge
 from .saucenao import find_sauce
 from .iqdb import get_sauce
+from ..utils import embed_finder
 import discord
 import configparser
 from pysaucenao.saucenao import SauceNaoResults
@@ -23,157 +24,107 @@ class SauceFinder(commands.Cog, name="Picture Sauce Finding"):
     #                f"There was an error processing your request \nDetails: {error}"
     #            )
 
-    @commands.command(
+    @bridge.bridge_command(
         brief="Search for picture on SauceNAO, using Pixiv Database",
-        description="Search for a picture in an embed or attachment, using the SauceNAO engine.\n\
-                          Pixiv only as of now. Twitter is scary",
     )
     async def sauceplz(self, ctx):
+        """
+        Search for a picture in an embed or attachment, using the SauceNAO engine.
+
+        Pixiv only as of now. Twitter is scary
+        """
         print(
             "@"
-            + ctx.message.author.name
+            + ctx.author.name
             + "#"
-            + ctx.message.author.discriminator
+            + ctx.author.discriminator
             + " try to find sauce!"
         )
-        async with ctx.channel.typing():
-            if ctx.message.reference:
-                if ctx.message.reference.resolved != None:
-                    search_msg = ctx.message.reference.resolved
-                    if search_msg.embeds.__len__() > 0:
-                        for attachment in search_msg.embeds:
-                            if attachment.image != None:
-                                try:
-                                    found = await find_sauce(attachment.url)
-                                    # print(attachment.url)
-                                    if found == None:
-                                        await ctx.send(
-                                            "I am sssorry, can't get your sauce :("
-                                        )
-                                        await ctx.send("Ask Buzzle why that is")
-                                    else:
-                                        try:
-                                            att_embed = await self.construct_saucenao_embed_pixiv(
-                                                found
-                                            )
-                                            await ctx.send(embed=att_embed)
-                                        except (
-                                            discord.errors.HTTPException,
-                                            AttributeError,
-                                        ) as e:
-                                            print(e)
-                                            await ctx.send(
-                                                "Something went wrong and I can't look up your image."
-                                            )
-                                            await ctx.send(
-                                                "Either it has been deleted or hidden by the author, or it isn't on Pixiv"
-                                            )
-                                except TypeError:
-                                    await ctx.send("I couldn't find anything :(")
-                    elif search_msg.attachments.__len__() > 0:
-                        for attachment in search_msg.attachments:
-                            if attachment.content_type.startswith("image"):
-                                found = await find_sauce(attachment.url)
-                                # print(attachment.url)
-                                if found == None:
-                                    await ctx.send(
-                                        "I am sssorry, can't get your sauce :("
-                                    )
-                                    await ctx.send("Ask Buzzle why that is")
-                                else:
-                                    try:
-                                        att_embed = (
-                                            await self.construct_saucenao_embed_pixiv(
-                                                found
-                                            )
-                                        )
-                                        await ctx.send(embed=att_embed)
-                                    except (
-                                        discord.errors.HTTPException,
-                                        AttributeError,
-                                    ) as e:
-                                        print(e)
-                                        await ctx.send(
-                                            "Something went wrong and I can't look up your image."
-                                        )
-                                        await ctx.send(
-                                            "Either it has been deleted or hidden by the author, or it isn't on Pixiv"
-                                        )
+        await ctx.defer()
+        msg = await embed_finder.find_message_with_embeds(ctx, 10)
+        if msg is not None:
+            if msg.embeds.__len__() > 0:
+                for embed in msg.embeds:
+                    if embed.image.url is not discord.Embed.Empty:
+                        res = await find_sauce(embed.image.url)
+                        if res is not None:
+                            return await ctx.send(embed=res)
+                        else:
+                            return await ctx.send("No sauce found")
+                    elif embed.thumbnail.url is not discord.Embed.Empty:
+                        res = await find_sauce(embed.thumbnail.url)
+                        if res is not None:
+                            return await ctx.send(embed=res)
+                        else:
+                            return await ctx.send("No sauce found")
+                    elif embed.url is not discord.Embed.Empty:
+                        res = await find_sauce(embed.url)
+                        if res is not None:
+                            return await ctx.send(embed=res)
+                        else:
+                            return await ctx.send("No sauce found")
+            elif msg.attachments.__len__() > 0:
+                for attachment in msg.attachments:
+                    if attachment.content_type.startswith("image"):
+                        res = await find_sauce(attachment.url)
+                        if res is not None:
+                            return await ctx.send(embed=res)
+                        else:
+                            return await ctx.send("No sauce found")
             else:
-                await ctx.send("Please mention a message containing pasta!")
+                return await ctx.send("No sauce found")
+        else:
+            return await ctx.send("Please mention a message containing pasta!")
 
-    @commands.command(
+    @bridge.bridge_command(
         brief="Search for picture on IQDB",
-        description="Search for a picture in an embed or attachment, using the IQDB engine.\n\
-                          Slower than SauceNAO, but has a higher search limit",
     )
     async def iqdb(self, ctx):
+        """
+        Search for a picture in an embed or attachment, using the IQDB engine.
+
+        Slower than SauceNAO, but has a higher search limit
+        """
         print(
             "@"
-            + ctx.message.author.name
+            + ctx.author.name
             + "#"
-            + ctx.message.author.discriminator
+            + ctx.author.discriminator
             + " try to find sauce on IQDB!"
         )
-        async with ctx.channel.typing():
-            if ctx.message.reference:
-                if ctx.message.reference.resolved != None:
-                    search_msg = ctx.message.reference.resolved
-                    if search_msg.embeds.__len__() > 0:
-                        for attachment in search_msg.embeds:
-                            if attachment.image != None:
-                                try:
-                                    found = await self.construct_iqdb_embed(
-                                        attachment.url
-                                    )
-                                    # print(attachment.url)
-                                    if found == None:
-                                        await ctx.send(
-                                            "I am sssorry, can't get your sauce :("
-                                        )
-                                        await ctx.send("Ask Buzzle why that is")
-                                    else:
-                                        try:
-                                            await ctx.send(embed=found)
-                                        except (
-                                            discord.errors.HTTPException,
-                                            AttributeError,
-                                        ) as e:
-                                            print(e)
-                                            await ctx.send(
-                                                "Something went wrong and I can't look up your image."
-                                            )
-                                            await ctx.send(
-                                                "Either it has been deleted or hidden by the author, or it isn't on Pixiv"
-                                            )
-                                        pass
-                                except TypeError:
-                                    await ctx.send("I couldn't find anything :(")
-                    elif search_msg.attachments.__len__() > 0:
-                        for attachment in search_msg.attachments:
-                            if attachment.content_type.startswith("image"):
-                                found = await self.construct_iqdb_embed(attachment.url)
-                                if found == None:
-                                    await ctx.send(
-                                        "I am sssorry, can't get your sauce :("
-                                    )
-                                    await ctx.send("Ask Buzzle why that is")
-                                else:
-                                    try:
-                                        await ctx.send(embed=found)
-                                    except (
-                                        discord.errors.HTTPException,
-                                        AttributeError,
-                                    ) as e:
-                                        print(e)
-                                        await ctx.send(
-                                            "Something went wrong and I can't look up your image."
-                                        )
-                                        await ctx.send(
-                                            "Either it has batt_embedeen deleted or hidden by the author, or it isn't on Pixiv"
-                                        )
+        await ctx.defer()
+        msg = await embed_finder.find_message_with_embeds(ctx, 10)
+        if msg is not None:
+            if msg.embeds.__len__() > 0:
+                for embed in msg.embeds:
+                    if embed.image.url is not discord.Embed.Empty:
+                        res = await get_sauce(embed.image.url)
+                        if res is not None:
+                            return await ctx.send(embed=res)
+                        else:
+                            return await ctx.send("No sauce found")
+                    elif embed.thumbnail.url is not discord.Embed.Empty:
+                        res = await get_sauce(embed.thumbnail.url)
+                        if res is not None:
+                            return await ctx.send(embed=res)
+                        else:
+                            return await ctx.send("No sauce found")
+                    elif embed.url is not discord.Embed.Empty:
+                        res = await get_sauce(embed.url)
+                        if res is not None:
+                            return await ctx.send(embed=res)
+                        else:
+                            return await ctx.send("No sauce found")
+            elif msg.attachments.__len__() > 0:
+                for attachment in msg.attachments:
+                    if attachment.content_type.startswith("image"):
+                        res = await get_sauce(attachment.url)
+                        if res is not None:
+                            return await ctx.send(embed=res)
+                        else:
+                            return await ctx.send("No sauce found")
             else:
-                await ctx.send("Please mention a message containing pasta!")
+                return await ctx.send("No sauce found")
 
     @staticmethod
     async def construct_saucenao_embed_pixiv(attachment: SauceNaoResults):

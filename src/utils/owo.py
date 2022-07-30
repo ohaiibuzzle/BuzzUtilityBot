@@ -8,7 +8,7 @@ import sqlite3
 import aiohttp
 import aiosqlite
 import discord
-from discord.ext import commands
+from discord.ext import commands, bridge
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 RT_DATABASE = "runtime/server_data.db"
@@ -28,34 +28,29 @@ class OwO(commands.Cog, name="Why? I don't even know why these exists!"):
         [FirstSide] INTEGER, [SecondSide] INTEGER, [StartDate] TIMESTAMP, PRIMARY KEY ([ID] AUTOINCREMENT))"""
         )
 
-    @commands.command(brief="Yowouwuw wowowst nyghtmawe, in a cowommand.")
+    @bridge.bridge_command(brief="Yowouwuw wowowst nyghtmawe, in a cowommand.")
     async def owo(self, ctx: commands.Context, *args):
         if len(args) == 0:
             return
         else:
             await ctx.send(OwO.owoify(" ".join(args)))
 
-    @commands.command(
+    @bridge.bridge_command(
         brief="Ships 🛳️",
-        description="Ships two people together, syntax: ship @Someone and @Someone",
+        help="Ships two people together, syntax: ship @Someone and @Someone",
     )
-    async def ship(self, ctx):
-        if self.app_info == None:
-            self.app_info = await self.client.application_info()
-        if len(ctx.message.mentions) != 2:
-            await ctx.send("What the hell are you trying to do...?")
-        elif self.app_info.owner in ctx.message.mentions:
-            await ctx.send("Forget about it :wink:")
-        else:
-            await ctx.send(
-                f"Oh look {ctx.message.author.mention} ships {ctx.message.mentions[0]} and {ctx.message.mentions[1]} together \nAww... 🛳️"
-            )
+    async def ship(self, ctx, first: discord.Member, second: discord.Member):
+        ctx.respond(
+            f"Oh look {ctx.message.author.mention} ships {ctx.message.mentions[0]} and {ctx.message.mentions[1]} together \nAww... 🛳️"
+        )
 
     @commands.command(
         brief="Marry 💍",
-        description="Take your ship to the next level. Mention someone to start",
     )
     async def marry(self, ctx: commands.Context):
+        """
+        Take your ship to the next level. Mention someone to start
+        """
         async with ctx.channel.typing():
             if self.app_info == None:
                 self.app_info = await self.client.application_info()

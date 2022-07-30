@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, bridge
 from utils.AdminTools import AdminTools
 import os
 import configparser
@@ -42,8 +42,9 @@ else:
 
 intents = discord.Intents.default()
 intents.members = True  # pylint: disable=assigning-non-slot
+intents.message_content = True
 
-client = commands.Bot(command_prefix=".", intents=intents)
+client = bridge.Bot(command_prefix=".", intents=intents)
 
 
 @client.event
