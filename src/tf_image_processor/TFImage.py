@@ -3,20 +3,18 @@ from discord.ext import commands, bridge
 from PIL import UnidentifiedImageError
 
 from . import async_process_url
-from ..utils import embed_finder
+from utils import embed_finder
 
 
 class TFImage(commands.Cog, name="AI-based image rating"):
     def __init__(self, client):
         self.client = client
 
-    @bridge.bridge_command(
-        brief="Ask Ai-chan to comment about an image",
-    )
-    async def police(self, ctx):
+    @bridge.bridge_command(brief="Ask Ai-chan to comment about an image")
+    async def police(self, ctx: bridge.BridgeContext):
         """
         Ask Ai-chan, Buzzle's highly trained professional to comment on your image!
-        
+
         Mention an image to use!
         """
         print(

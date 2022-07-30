@@ -153,3 +153,6 @@ etc/
 
 # VSCode
 .vscode/
+
+# macOS stuff
+.DS_Store

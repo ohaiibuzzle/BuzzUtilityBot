@@ -1,7 +1,7 @@
 from discord.ext import commands, bridge
 from .saucenao import find_sauce
 from .iqdb import get_sauce
-from ..utils import embed_finder
+from utils import embed_finder
 import discord
 import configparser
 from pysaucenao.saucenao import SauceNaoResults
