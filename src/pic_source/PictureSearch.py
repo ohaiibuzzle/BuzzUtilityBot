@@ -39,7 +39,7 @@ class PictureSearch(commands.Cog, name="Random image finder"):
     async def sbrandom(self, ctx, *, tags):
         """
         Look for a random image on SafeBooru, input can be any of SafeBooru's tag query
-        
+
         Combine tags using "+"
         """
         print(
@@ -165,8 +165,13 @@ class PictureSearch(commands.Cog, name="Random image finder"):
             else:
                 await ctx.respond("Your search returned no result :(")
 
-    @bridge.bridge_command(brief="Display a Pixiv post in bot's format", aliases=["pxs"])
+    @bridge.bridge_command(
+        brief="Display a Pixiv post in bot's format", aliases=["pxs"]
+    )
     async def pixivshow(self, ctx, *, url_or_illustid):
+        """
+        Formats Pixiv arts in a way that makes it less... bad
+        """
         await ctx.defer()
         print(
             "@"
@@ -199,6 +204,7 @@ class PictureSearch(commands.Cog, name="Random image finder"):
                 await ctx.respond(embed=target, file=file)
             else:
                 await ctx.respond("Your search returned no result :(")
+
     pass
 
     @bridge.bridge_command(
