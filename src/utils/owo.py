@@ -30,16 +30,22 @@ class OwO(commands.Cog, name="Why? I don't even know why these exists!"):
 
     @bridge.bridge_command(brief="Yowouwuw wowowst nyghtmawe, in a cowommand.")
     async def owo(self, ctx: commands.Context, *args):
+        """
+        Simply terrifying.
+        """
         if len(args) == 0:
             return
         else:
-            await ctx.send(OwO.owoify(" ".join(args)))
+            await ctx.respond(OwO.owoify(" ".join(args)))
 
     @bridge.bridge_command(
         brief="Ships 🛳️",
         help="Ships two people together, syntax: ship @Someone and @Someone",
     )
     async def ship(self, ctx, first: discord.Member, second: discord.Member):
+        """
+        A shippy ship shipping ships
+        """
         ctx.respond(
             f"Oh look {ctx.message.author.mention} ships {ctx.message.mentions[0]} and {ctx.message.mentions[1]} together \nAww... 🛳️"
         )

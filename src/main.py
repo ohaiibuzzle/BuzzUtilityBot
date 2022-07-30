@@ -65,7 +65,7 @@ client.load_extension("utils.Welcome")
 client.load_extension("utils.Birthday")
 client.load_extension("utils.owo")
 client.load_extension("music.Music")
-client.load_extension("utils.nsfwRole")
+# client.load_extension("utils.nsfwRole")
 
 config = configparser.ConfigParser()
 config.read("runtime/config.cfg")
