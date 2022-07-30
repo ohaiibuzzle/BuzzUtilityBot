@@ -29,14 +29,14 @@ class OwO(commands.Cog, name="Why? I don't even know why these exists!"):
         )
 
     @bridge.bridge_command(brief="Yowouwuw wowowst nyghtmawe, in a cowommand.")
-    async def owo(self, ctx: commands.Context, *args):
+    async def owo(self, ctx: commands.Context, *, words: str):
         """
         Simply terrifying.
         """
-        if len(args) == 0:
+        if len(words) == 0:
             return
         else:
-            await ctx.respond(OwO.owoify(" ".join(args)))
+            await ctx.respond(OwO.owoify(" ".join(words)))
 
     @bridge.bridge_command(
         brief="Ships 🛳️",

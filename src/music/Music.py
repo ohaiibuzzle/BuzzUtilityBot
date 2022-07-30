@@ -14,8 +14,10 @@ class Music(commands.Cog):
     def __init__(self, client):
         self.client = client
         self.voice_states = {}
-        
-    def get_voice_state(self, ctx: bridge.BridgeContext) -> voice_state_manager.VoiceState:
+
+    def get_voice_state(
+        self, ctx: bridge.BridgeContext
+    ) -> voice_state_manager.VoiceState:
         state = self.voice_states.get(ctx.guild.id)
         if not state or state.has_timed_out:
             state = voice_state_manager.VoiceState(self.client, ctx)
@@ -228,9 +230,7 @@ class Music(commands.Cog):
         this_embed = discord.Embed(title=f"Search result for {query}")
         res_str = ""
         for number, data in enumerate(result):
-            res_str += (
-                f"**{number+1}**. {data['title']} - {data['uploader']}" + "\n"
-            )
+            res_str += f"**{number+1}**. {data['title']} - {data['uploader']}" + "\n"
         this_embed.description = res_str
         this_embed.color = int(0x0062FF)
         search_res = await ctx.respond(embed=this_embed)
@@ -277,6 +277,9 @@ class Music(commands.Cog):
 
     @bridge.bridge_command(name="queueloop")
     async def _queueloop(self, ctx: bridge.BridgeContext):
+        """
+        Loops/Unloops the entire queue
+        """
         if not ctx.voice_state.is_playing:
             return await ctx.respond("Nothing being played at the moment")
         ctx.voice_state.queueloop = not ctx.voice_state.queueloop
@@ -327,7 +330,7 @@ class Music(commands.Cog):
         return await ctx.message.add_reaction("✅")
 
     @bridge.bridge_command()
-    async def spotify(self, ctx , url: str, silent: bool = None):
+    async def spotify(self, ctx, url: str, silent: bool = None):
         print(
             f"@{ctx.author.name}#{ctx.author.discriminator} played a Spotify Playlist"
         )
@@ -344,9 +347,7 @@ class Music(commands.Cog):
                 "Please wait, converting your playlist. This could take a while!"
             )
             try:
-                if re.match(
-                    r"https?://open\.spotify\.com/album/(?P<id>[^/?&#]+)", url
-                ):
+                if re.match(r"https?://open\.spotify\.com/album/(?P<id>[^/?&#]+)", url):
                     track_list = (
                         await spotify_yt_bridge.async_spotify_album_to_track_names(
                             url, self.client.loop
@@ -355,8 +356,10 @@ class Music(commands.Cog):
                 elif re.match(
                     r"https?://open\.spotify\.com/playlist/(?P<id>[^/?&#]+)", url
                 ):
-                    track_list = await spotify_yt_bridge.async_spotify_playlist_to_track_list(
-                        url, self.client.loop
+                    track_list = (
+                        await spotify_yt_bridge.async_spotify_playlist_to_track_list(
+                            url, self.client.loop
+                        )
                     )
             except SpotifyException as e:
                 await ctx.respond(f"Something funky happened: {e}")
@@ -416,7 +419,9 @@ class Music(commands.Cog):
     async def ensure_voice(self, ctx):
         if not ctx.author.voice or not ctx.author.voice.channel:
             await ctx.respond("You are not connected to any voice channel.")
-            raise bridge.bridge_commandError("User is not connected to any voice channel.")
+            raise bridge.bridge_commandError(
+                "User is not connected to any voice channel."
+            )
 
         if ctx.voice_client:
             if ctx.voice_client.channel != ctx.author.voice.channel:
