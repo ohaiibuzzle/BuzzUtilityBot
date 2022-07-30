@@ -152,24 +152,36 @@ class Music(commands.Cog):
 
     @bridge.bridge_command(name="pause")
     async def _pause(self, ctx: bridge.BridgeContext):
+        """
+        Pause the current song
+        """
         if ctx.voice_state.is_playing and ctx.voice_state.voice.is_playing():
             ctx.voice_state.voice.pause()
-            await ctx.message.add_reaction("🆗")
+            if isinstance(ctx, bridge.BridgeExtContext):
+                await ctx.message.add_reaction("🆗")
 
     @bridge.bridge_command(name="resume")
     async def _resume(self, ctx: bridge.BridgeContext):
+        """
+        Resume the current song
+        """
         if ctx.voice_state.is_playing and ctx.voice_state.voice.is_paused():
             ctx.voice_state.voice.resume()
-            await ctx.message.add_reaction("🆗")
+            if isinstance(ctx, bridge.BridgeExtContext):
+                await ctx.message.add_reaction("🆗")
 
     @bridge.bridge_command()
     async def remove(self, ctx, index: int):
+        """
+        Remove a song from the queue
+        """
         if len(ctx.voice_state.play_queue) == 0:
             return await ctx.respond("Empty queue.")
 
         ctx.voice_state.play_queue.remove(index - 1)
-        await ctx.message.add_reaction("🆗")
-        await ctx.invoke(self.queue)
+        if isinstance(ctx, bridge.BridgeExtContext):
+            await ctx.message.add_reaction("🆗")
+            await ctx.invoke(self.queue)
 
     @bridge.bridge_command()
     async def volume(self, ctx: bridge.BridgeContext, volume: float):
@@ -255,6 +267,9 @@ class Music(commands.Cog):
 
     @bridge.bridge_command(aliases=["np"])
     async def nowplaying(self, ctx):
+        """
+        Show the currently playing song
+        """
         await ctx.respond(embed=ctx.voice_state.current.create_embed())
 
     @bridge.bridge_command(name="loop")
@@ -271,9 +286,10 @@ class Music(commands.Cog):
             msg = await ctx.respond("Looping this track")
         else:
             msg = await ctx.respond("Unlooped")
-        await asyncio.sleep(5)
-        await msg.delete()
-        await ctx.message.add_reaction("✅")
+        if isinstance(ctx, bridge.BridgeExtContext):
+            await asyncio.sleep(5)
+            await msg.delete()
+            await ctx.message.add_reaction("✅")
 
     @bridge.bridge_command(name="queueloop")
     async def _queueloop(self, ctx: bridge.BridgeContext):
@@ -287,9 +303,10 @@ class Music(commands.Cog):
             msg = await ctx.respond("Looping this queue")
         else:
             msg = await ctx.respond("Unlooped")
-        await asyncio.sleep(5)
-        await msg.delete()
-        return await ctx.message.add_reaction("✅")
+        if isinstance(ctx, bridge.BridgeExtContext):
+            await asyncio.sleep(5)
+            await msg.delete()
+            return await ctx.message.add_reaction("✅")
 
     @bridge.bridge_command()
     async def skip(self, ctx, n: int = 1):
@@ -327,7 +344,8 @@ class Music(commands.Cog):
 
             seconds += v * time_convert[j]
         ctx.voice_state.seek(seconds)
-        return await ctx.message.add_reaction("✅")
+        if isinstance(ctx, bridge.BridgeExtContext):
+            return await ctx.message.add_reaction("✅")
 
     @bridge.bridge_command()
     async def spotify(self, ctx, url: str, silent: bool = None):
