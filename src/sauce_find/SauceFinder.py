@@ -46,19 +46,21 @@ class SauceFinder(commands.Cog, name="Picture Sauce Finding"):
             if msg.embeds.__len__() > 0:
                 for embed in msg.embeds:
                     if embed.image.url is not discord.Embed.Empty:
-                        res = await find_sauce(embed.image.url)
+                        res = await self.construct_saucenao_embed_pixiv(embed.image.url)
                         if res is not None:
                             return await ctx.send(embed=res)
                         else:
                             return await ctx.send("No sauce found")
                     elif embed.thumbnail.url is not discord.Embed.Empty:
-                        res = await find_sauce(embed.thumbnail.url)
+                        res = await self.construct_saucenao_embed_pixiv(
+                            embed.thumbnail.url
+                        )
                         if res is not None:
                             return await ctx.send(embed=res)
                         else:
                             return await ctx.send("No sauce found")
                     elif embed.url is not discord.Embed.Empty:
-                        res = await find_sauce(embed.url)
+                        res = await self.construct_saucenao_embed_pixiv(embed.url)
                         if res is not None:
                             return await ctx.send(embed=res)
                         else:
@@ -66,7 +68,7 @@ class SauceFinder(commands.Cog, name="Picture Sauce Finding"):
             elif msg.attachments.__len__() > 0:
                 for attachment in msg.attachments:
                     if attachment.content_type.startswith("image"):
-                        res = await find_sauce(attachment.url)
+                        res = await self.construct_saucenao_embed_pixiv(attachment.url)
                         if res is not None:
                             return await ctx.send(embed=res)
                         else:
@@ -98,19 +100,19 @@ class SauceFinder(commands.Cog, name="Picture Sauce Finding"):
             if msg.embeds.__len__() > 0:
                 for embed in msg.embeds:
                     if embed.image.url is not discord.Embed.Empty:
-                        res = await get_sauce(embed.image.url)
+                        res = await self.construct_iqdb_embed(embed.image.url)
                         if res is not None:
                             return await ctx.send(embed=res)
                         else:
                             return await ctx.send("No sauce found")
                     elif embed.thumbnail.url is not discord.Embed.Empty:
-                        res = await get_sauce(embed.thumbnail.url)
+                        res = await self.construct_iqdb_embed(embed.thumbnail.url)
                         if res is not None:
                             return await ctx.send(embed=res)
                         else:
                             return await ctx.send("No sauce found")
                     elif embed.url is not discord.Embed.Empty:
-                        res = await get_sauce(embed.url)
+                        res = await self.construct_iqdb_embed(embed.url)
                         if res is not None:
                             return await ctx.send(embed=res)
                         else:
@@ -118,7 +120,7 @@ class SauceFinder(commands.Cog, name="Picture Sauce Finding"):
             elif msg.attachments.__len__() > 0:
                 for attachment in msg.attachments:
                     if attachment.content_type.startswith("image"):
-                        res = await get_sauce(attachment.url)
+                        res = await self.construct_iqdb_embed(attachment.url)
                         if res is not None:
                             return await ctx.send(embed=res)
                         else:
@@ -127,7 +129,8 @@ class SauceFinder(commands.Cog, name="Picture Sauce Finding"):
                 return await ctx.send("No sauce found")
 
     @staticmethod
-    async def construct_saucenao_embed_pixiv(attachment: SauceNaoResults):
+    async def construct_saucenao_embed_pixiv(url: str):
+        attachment = await find_sauce(url)
         embed = discord.Embed(title="Sauce found!")
         embed.add_field(
             name="Similarity", value=f"{attachment.similarity}%", inline=False
