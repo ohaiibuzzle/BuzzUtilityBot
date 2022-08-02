@@ -186,12 +186,11 @@ class PictureSearch(commands.Cog, name="Random image finder"):
             illust_id = url_or_illustid
         else:
             illust_id = re.findall(r"\d+", url_or_illustid)[0]
-            await ctx.message.delete()  # this is a url, so we wipe it to get rid of duped
         try:
             target, file = await get_image_by_id(illust_id)
         except ConnectionError:
             await ctx.respond(
-                "Buzzle's Internet broke :(\n(Try again in a few minutes, server is under high load)"
+                "Buzzle's Internet broke :(\n(Try again in a few minutes, server is under high load)",
             )
         except ValueError:
             await ctx.respond("Nothing found :(\nCheck your query")
@@ -200,10 +199,13 @@ class PictureSearch(commands.Cog, name="Random image finder"):
             await ctx.respond("This image is restricted :(")
         else:
             if target:
-                await ctx.respond(f"Image fetched for {ctx.author.name}")
-                await ctx.respond(embed=target, file=file)
+                await ctx.respond(
+                    f"Image fetched for {ctx.author.name}", embed=target, file=file
+                )
             else:
                 await ctx.respond("Your search returned no result :(")
+        if isinstance(ctx, bridge.BridgeExtContext):
+            await ctx.message.delete()  # this is a url, so we wipe it to get rid of duped
 
     pass
 

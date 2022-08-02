@@ -22,16 +22,10 @@ class MessageUtils(commands.Cog, name="Message Utilities"):
     async def savethis(self, ctx: bridge.BridgeContext):
         """
         Save whatever message you mention when this command is ran.
-        
+
         If no message is mentioned, save the last message that has an embed in it
         """
-        print(
-            "@"
-            + ctx.author.name
-            + "#"
-            + ctx.author.discriminator
-            + " try to save!"
-        )
+        print("@" + ctx.author.name + "#" + ctx.author.discriminator + " try to save!")
         if ctx.message:
             if ctx.message.reference:
                 if ctx.message.reference.resolved != None:
@@ -39,16 +33,15 @@ class MessageUtils(commands.Cog, name="Message Utilities"):
                     await ctx.message.author.send(
                         embed=self.construct_save_embed_img(search_msg)
                     )
-                    await asyncio.sleep(5)
-                    await ctx.message.delete()
+                    if isinstance(ctx, bridge.BridgeApplicationContext):
+                        await asyncio.sleep(5)
+                        await ctx.message.delete()
 
         else:
             messages = await ctx.channel.history(limit=20).flatten()
             for mesg in messages:
                 if mesg.attachments.__len__() > 0 or mesg.embeds.__len__() > 0:
-                    await ctx.author.send(
-                        embed=self.construct_save_embed_img(mesg)
-                    )
+                    await ctx.author.send(embed=self.construct_save_embed_img(mesg))
                     if isinstance(ctx, bridge.BridgeExtContext):
                         await asyncio.sleep(5)
                         await ctx.message.delete()
@@ -72,7 +65,9 @@ class MessageUtils(commands.Cog, name="Message Utilities"):
             return
         amount = int(amount)
         if amount > 10:
-            alert = await ctx.respond("You can only save up to 10 messages back in time!")
+            alert = await ctx.respond(
+                "You can only save up to 10 messages back in time!"
+            )
             await asyncio.sleep(3)
             await alert.delete()
             return
@@ -101,7 +96,7 @@ class MessageUtils(commands.Cog, name="Message Utilities"):
     )
     async def oofie(self, ctx):
         """
-        Use this command to delete the bot's last message. 
+        Use this command to delete the bot's last message.
         Used in case things went wrong
         """
         print(
