@@ -18,11 +18,10 @@ async def find_message_with_embeds(
         if ctx.message.reference:
             this_msg = ctx.message.reference.resolved
             if this_msg.embeds.__len__() > 0 or this_msg.attachments.__len__() > 0:
-                found_msg = this_msg
-    else:
-        messages = await ctx.channel.history(limit=length).flatten()
-        for mesg in messages:
-            if mesg.attachments.__len__() > 0 or mesg.embeds.__len__() > 0:
-                found_msg = mesg
-                break
+                return this_msg
+    messages = await ctx.channel.history(limit=length).flatten()
+    for mesg in messages:
+        if mesg.attachments.__len__() > 0 or mesg.embeds.__len__() > 0:
+            found_msg = mesg
+            break
     return found_msg
