@@ -164,7 +164,7 @@ class TwitterWatcher(commands.Cog):
                     # Spawn a temporary discord.Webhook on the channel
                     try:
                         async with aiohttp.ClientSession(
-                            timeout=aiohttp.ClientTimeout(total=3)
+                            timeout=aiohttp.ClientTimeout(total=10)
                         ) as session:
                             thumbnail_rq = await session.get(
                                 f"https://unavatar.io/twitter/{author_name}"
@@ -175,7 +175,7 @@ class TwitterWatcher(commands.Cog):
                             webhook = await channel.create_webhook(
                                 name=author_name, avatar=file
                             )
-                    except aiohttp.ClientError:
+                    except aiohttp.ClientError or asyncio.TimeoutError:
                         webhook = await channel.create_webhook(name=author_name)
                         pass
                     # Send the url to the tweet to the webhook
