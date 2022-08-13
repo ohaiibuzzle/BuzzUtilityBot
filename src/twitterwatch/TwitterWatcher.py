@@ -169,11 +169,8 @@ class TwitterWatcher(commands.Cog):
                             thumbnail_rq = await session.get(
                                 f"https://unavatar.io/twitter/{author_name}"
                             )
-                            thumbnail_bin = io.BytesIO(await thumbnail_rq.read())
-                            thumbnail_bin.seek(0)
-                            file = discord.File(thumbnail_bin, filename="thumbnail.png")
                             webhook = await channel.create_webhook(
-                                name=author_name, avatar=file
+                                name=author_name, avatar=await thumbnail_rq.read()
                             )
                     except aiohttp.ClientError or asyncio.TimeoutError:
                         webhook = await channel.create_webhook(name=author_name)
