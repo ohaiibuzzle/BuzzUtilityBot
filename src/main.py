@@ -20,6 +20,7 @@ if not os.path.isdir("runtime"):
         "youtube_data_v3_key": "",
         "spotify_web_api_cid": "",
         "spotify_web_api_sec": "",
+        "twitter_bearer_token": "",
     }
 
     config["Dependancies"] = {
@@ -65,6 +66,7 @@ client.load_extension("utils.Welcome")
 client.load_extension("utils.Birthday")
 client.load_extension("utils.owo")
 client.load_extension("music.Music")
+client.load_extension("twitterwatch.TwitterWatcher")
 # client.load_extension("utils.nsfwRole")
 
 config = configparser.ConfigParser()
