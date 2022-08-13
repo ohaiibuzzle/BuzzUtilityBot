@@ -56,6 +56,9 @@ class TwitterWatcher(commands.Cog):
     @commands.command()
     @commands.has_permissions(manage_messages=True)
     async def tweetwatch(self, ctx, *, twitter_account):
+        """
+        Add a twitter account to the watching list
+        """
         channel = ctx.channel.id
         # Check if the account is already being watched
         async with aiosqlite.connect("runtime/server_data.db") as db:
