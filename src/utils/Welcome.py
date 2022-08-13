@@ -80,7 +80,7 @@ class WelcomeMessage(commands.Cog):
         timeout = aiohttp.ClientTimeout(total=15)
         # print(member.avatar_url)
         async with aiohttp.ClientSession(timeout=timeout) as session:
-            raw_icon = await session.get(str(member.avatar_url))
+            raw_icon = await session.get(str(member.avatar.url))
             buffer = io.BytesIO(await raw_icon.read())
             buffer.seek(0)
 
