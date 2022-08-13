@@ -1,8 +1,11 @@
 import asyncio
 import configparser
+import io
 import sqlite3
 
+import aiohttp
 import aiosqlite
+import discord
 import tweepy
 from discord.ext import commands, tasks
 
@@ -13,7 +16,6 @@ config.read("runtime/config.ini")
 
 
 class TwitterWatcher(commands.Cog):
-
     def __init__(self, client):
         self.client = client
 
@@ -157,7 +159,22 @@ class TwitterWatcher(commands.Cog):
                 for channel in channels:
                     channel = self.client.get_channel(int(channel))
                     # Spawn a temporary discord.Webhook on the channel
-                    webhook = await channel.create_webhook(name=f"@{author_name}")
+                    try:
+                        async with aiohttp.ClientSession(
+                            timeout=aiohttp.ClientTimeout(total=3)
+                        ) as session:
+                            thumbnail_rq = await session.get(
+                                f"https://unavatar.io/twitter/{author_name}"
+                            )
+                            thumbnail_bin = io.BytesIO(await thumbnail_rq.read())
+                            thumbnail_bin.seek(0)
+                            file = discord.File(thumbnail_bin, filename="thumbnail.png")
+                            webhook = await channel.create_webhook(
+                                name=author_name, avatar=file
+                            )
+                    except aiohttp.ClientError:
+                        webhook = await channel.create_webhook(name=author_name)
+                        pass
                     # Send the url to the tweet to the webhook
                     await webhook.send(
                         f"https://twitter.com/{author_name}/status/{tweet.id}"
