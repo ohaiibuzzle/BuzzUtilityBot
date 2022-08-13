@@ -12,7 +12,7 @@ from discord.ext import commands, tasks
 from . import tweetstream
 
 config = configparser.RawConfigParser()
-config.read("runtime/config.ini")
+config.read("runtime/config.cfg")
 
 
 class TwitterWatcher(commands.Cog):

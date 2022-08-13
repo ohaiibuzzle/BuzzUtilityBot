@@ -12,16 +12,13 @@ class TweetStreamer(AsyncStreamingClient):
 
     async def update_rules(self):
         # Remove all rules
-        ids = [rule_ids.id for rule_ids in (await self.get_rules()).data]
+        try:
+            ids = [rule_ids.id for rule_ids in (await self.get_rules()).data]
+        except TypeError:
+            ids = []
+
         if len(ids) > 0:
-            try:
-                await self.delete_rules(
-                    ids=[rule_ids.id for rule_ids in (await self.get_rules()).data]
-                )
-            except Exception as e:
-                # print(e)
-                # Empty rules list, ignore
-                pass
+            await self.delete_rules(ids=ids)
 
         if self.users is None or len(self.users) == 0:
             return
