@@ -17,11 +17,13 @@ from PIL import Image
 config = configparser.ConfigParser()
 config.read("runtime/config.cfg")
 model_path = config["Dependancies"]["nsfw_model_path"]
-
 IMAGE_DIM = int(config["Dependancies"]["nsfw_image_dim"])
+TFLITE_THREADS = int(config["Dependancies"]["nsfw_tflite_threads"])
 
 print("TF: Loading NSFW Model. This may take a while...")
-model_interpreter = tflite.Interpreter(model_path=model_path)
+model_interpreter = tflite.Interpreter(
+    model_path=model_path, num_threads=TFLITE_THREADS
+)
 model_interpreter.allocate_tensors()
 input_details = model_interpreter.get_input_details()
 output_details = model_interpreter.get_output_details()
@@ -64,7 +66,7 @@ def process_url(url: str):
         dict: A dictionary describing the results
     """
     im = Image.open(requests.get(url, stream=True, timeout=15).raw)
-    im = im.resize((IMAGE_DIM, IMAGE_DIM))
+    im = im.resize((IMAGE_DIM, IMAGE_DIM), resample=0)
     if im.mode != "RGB":
         im = im.convert("RGB")
 

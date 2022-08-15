@@ -26,6 +26,7 @@ if not os.path.isdir("runtime"):
     config["Dependancies"] = {
         "nsfw_model_path": "runtime/models/mobileNet.tflite",
         "nsfw_image_dim": "224",
+        "nsfw_tflite_threads": "1",
         "redis_host": "redis://localhost",
     }
 
