@@ -29,7 +29,7 @@ class TweetStreamer(AsyncStreamingClient):
         await self.add_rules(tweepy.StreamRule(value=user_filter))
 
         # dump the rule from the API
-        rules = await self.get_rules()
+        # rules = await self.get_rules()
         # print(rules)
         # print("Rules updated")
         return
