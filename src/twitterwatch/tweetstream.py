@@ -39,5 +39,5 @@ class TweetStreamer(AsyncStreamingClient):
         await super().on_data(raw_data)
 
     async def on_tweet(self, tweet):
-        # print(tweet)
+        # print(f"Incoming tweet: {tweet.data}")
         await self.on_tweet_handler(tweet)

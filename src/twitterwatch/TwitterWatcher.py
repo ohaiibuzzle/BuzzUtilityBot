@@ -7,6 +7,7 @@ import aiohttp
 import aiosqlite
 import discord
 import tweepy
+import re
 from discord.ext import commands, tasks
 
 from . import tweetstream
@@ -51,7 +52,10 @@ class TwitterWatcher(commands.Cog):
     async def on_ready(self):
         # Do an initial update of the rules
         await self.tweetstream.update_rules()
-        self.tweetstream_task = self.tweetstream.filter(expansions="author_id")
+        self.tweetstream_task = self.tweetstream.filter(
+            expansions=["author_id", "referenced_tweets.id"],
+            tweet_fields=["id", "author_id", "text", "referenced_tweets"],
+        )
 
     @commands.command()
     @commands.has_permissions(manage_messages=True)
@@ -152,36 +156,62 @@ class TwitterWatcher(commands.Cog):
 
     async def on_tweet(self, tweet: tweepy.Tweet):
         async with aiosqlite.connect("runtime/server_data.db") as db:
-            cursor = await db.execute(
-                "SELECT * FROM tweetwatch WHERE twitter_id = ?", (tweet.author_id,)
-            )
-            # send messages to the appropriate channels
-            for row in await cursor.fetchall():
-                author_name = row[1]
+            # Check if the tweet is a retweet
+            if tweet.referenced_tweets:
+                # [{'type': 'retweeted', 'id': '1560091613908520960'}]
+                type = tweet.referenced_tweets[0]["type"]
+                if type == "retweeted":
+                    # get the original tweet id
+                    tweet_id = tweet.referenced_tweets[0]["id"]
+                    # 'text' will now starts with 'RT @', get that part to reconstruct the link
+                    author_name = tweet.text.split("RT @")[1].split(":")[0]
+
+                cursor = await db.execute(
+                    "SELECT * FROM tweetwatch WHERE twitter_id = ?", (tweet.author_id,)
+                )
+                row = await cursor.fetchone()
+                org_author = row[1]
                 channels = row[2].split(",")
-                for channel in channels:
-                    channel = self.client.get_channel(int(channel))
-                    # Spawn a temporary discord.Webhook on the channel
-                    try:
-                        async with aiohttp.ClientSession(
-                            timeout=aiohttp.ClientTimeout(total=10)
-                        ) as session:
-                            thumbnail_rq = await session.get(
-                                f"https://unavatar.io/twitter/{author_name}"
-                            )
-                            webhook = await channel.create_webhook(
-                                name=author_name, avatar=await thumbnail_rq.read()
-                            )
-                    except aiohttp.ClientError or asyncio.TimeoutError:
-                        webhook = await channel.create_webhook(name=author_name)
-                        pass
-                    # Send the url to the tweet to the webhook
-                    await webhook.send(
-                        f"https://twitter.com/{author_name}/status/{tweet.id}"
-                    )
-                    # Delete the webhook
-                    await webhook.delete()
-        pass
+
+                content = f"{type.capitalize()} by {org_author}: https://twitter.com/{author_name}/status/{tweet_id}"
+                # Replace the name of the author with the original author
+                author_name = org_author
+            else:
+                cursor = await db.execute(
+                    "SELECT * FROM tweetwatch WHERE twitter_id = ?", (tweet.author_id,)
+                )
+                for row in await cursor.fetchone():
+                    author_name = row[1]
+                    channels = row[2].split(",")
+                    tweet_id = tweet.id
+
+                content = f"https://twitter.com/{author_name}/status/{tweet_id}"
+
+            # send messages to the appropriate channels
+            for channel in channels:
+                channel = self.client.get_channel(int(channel))
+                # Spawn a temporary discord.Webhook on the channel
+                try:
+                    async with aiohttp.ClientSession(
+                        timeout=aiohttp.ClientTimeout(total=10)
+                    ) as session:
+                        thumbnail_rq = await session.get(
+                            f"https://unavatar.io/twitter/{author_name}"
+                        )
+                        webhook = await channel.create_webhook(
+                            name=author_name, avatar=await thumbnail_rq.read()
+                        )
+                except (aiohttp.ClientError, asyncio.TimeoutError):
+                    webhook = await channel.create_webhook(name=author_name)
+                    pass
+                # Send the url to the tweet to the webhook
+                await webhook.send(content)
+                # Delete the webhook
+                await webhook.delete()
+            pass
+
+    def __del__(self):
+        self.tweetstream.disconnect()
 
 
 def setup(client):
