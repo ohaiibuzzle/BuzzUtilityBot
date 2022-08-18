@@ -170,7 +170,11 @@ class TwitterWatcher(commands.Cog):
                     "SELECT * FROM tweetwatch WHERE twitter_id = ?", (tweet.author_id,)
                 )
                 row = await cursor.fetchone()
-                org_author = row[1]
+                # if the author_name is still None, fill it with the one from the database
+                if not author_name:
+                    author_name = row[1]
+                else:
+                    org_author = row[1]
                 channels = row[2].split(",")
 
                 content = f"{type.capitalize()} by {org_author}: https://twitter.com/{author_name}/status/{tweet_id}"
