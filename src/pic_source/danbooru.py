@@ -19,7 +19,9 @@ async def search_danbooru(query: str) -> dict:
         )
         result_json = await res_tag_search.json()
         tag = result_json[0]["name"]
-        choice = global_random.choice(range(result_json[0]["post_count"]))
+        # we cannot go above page 1000, so that limits the max choice to 1000*100 = 100000
+        post_count = min(result_json[0]["post_count"], 100000)
+        choice = global_random.choice(range(post_count))
         page = choice // 100
         choice = choice % 100
         res = await client.get(
