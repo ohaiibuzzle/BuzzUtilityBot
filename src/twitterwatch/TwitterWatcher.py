@@ -158,8 +158,9 @@ class TwitterWatcher(commands.Cog):
         async with aiosqlite.connect("runtime/server_data.db") as db:
             # Check if the tweet is a retweet
             if tweet.referenced_tweets:
+                author_name = None
                 # [{'type': 'retweeted', 'id': '1560091613908520960'}]
-                type = tweet.referenced_tweets[0]["type"]
+                type: str = tweet.referenced_tweets[0]["type"]
                 if type == "retweeted":
                     # get the original tweet id
                     tweet_id = tweet.referenced_tweets[0]["id"]
@@ -172,12 +173,13 @@ class TwitterWatcher(commands.Cog):
                 row = await cursor.fetchone()
                 # if the author_name is still None, fill it with the one from the database
                 if not author_name:
-                    author_name = row[1]
+                    tweet_id = tweet.id
+                    org_author = author_name = row[1]
                 else:
                     org_author = row[1]
                 channels = row[2].split(",")
 
-                content = f"{type.capitalize()} by {org_author}: https://twitter.com/{author_name}/status/{tweet_id}"
+                content = f"{type.replace('_', ' ').capitalize()}: {org_author}: https://twitter.com/{author_name}/status/{tweet_id}"
                 # Replace the name of the author with the original author
                 author_name = org_author
             else:
