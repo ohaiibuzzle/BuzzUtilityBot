@@ -1,6 +1,6 @@
-import asyncio
 import tweepy
 import tweepy.errors
+import time
 from tweepy.asynchronous import AsyncStreamingClient
 
 
@@ -41,3 +41,7 @@ class TweetStreamer(AsyncStreamingClient):
     async def on_tweet(self, tweet):
         # print(f"Incoming tweet: {tweet.data}")
         await self.on_tweet_handler(tweet)
+
+    async def on_errors(self, errors):
+        print(f'{time.strftime("%Y-%m-%d %H:%M:%S")}: ', end="")
+        return await super().on_errors(errors)
