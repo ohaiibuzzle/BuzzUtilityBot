@@ -45,3 +45,11 @@ class TweetStreamer(AsyncStreamingClient):
     async def on_errors(self, errors):
         print(f'{time.strftime("%Y-%m-%d %H:%M:%S")}: ', end="")
         return await super().on_errors(errors)
+
+    async def on_request_error(self, status_code):
+        print(f'{time.strftime("%Y-%m-%d %H:%M:%S")}: ', end="")
+        return await super().on_request_error(status_code)
+
+    async def on_exception(self, exception):
+        print(f'{time.strftime("%Y-%m-%d %H:%M:%S")}: ', end="")
+        return await super().on_exception(exception)
