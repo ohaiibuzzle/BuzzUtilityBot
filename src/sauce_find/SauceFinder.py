@@ -48,35 +48,35 @@ class SauceFinder(commands.Cog, name="Picture Sauce Finding"):
                     if embed.image.url is not discord.Embed.Empty:
                         res = await self.construct_saucenao_embed_pixiv(embed.image.url)
                         if res is not None:
-                            return await ctx.send(embed=res)
+                            return await ctx.respond(embed=res)
                         else:
-                            return await ctx.send("No sauce found")
+                            return await ctx.respond("No sauce found")
                     elif embed.thumbnail.url is not discord.Embed.Empty:
                         res = await self.construct_saucenao_embed_pixiv(
                             embed.thumbnail.url
                         )
                         if res is not None:
-                            return await ctx.send(embed=res)
+                            return await ctx.respond(embed=res)
                         else:
-                            return await ctx.send("No sauce found")
+                            return await ctx.respond("No sauce found")
                     elif embed.url is not discord.Embed.Empty:
                         res = await self.construct_saucenao_embed_pixiv(embed.url)
                         if res is not None:
-                            return await ctx.send(embed=res)
+                            return await ctx.respond(embed=res)
                         else:
-                            return await ctx.send("No sauce found")
+                            return await ctx.respond("No sauce found")
             elif msg.attachments.__len__() > 0:
                 for attachment in msg.attachments:
                     if attachment.content_type.startswith("image"):
                         res = await self.construct_saucenao_embed_pixiv(attachment.url)
                         if res is not None:
-                            return await ctx.send(embed=res)
+                            return await ctx.respond(embed=res)
                         else:
-                            return await ctx.send("No sauce found")
+                            return await ctx.respond("No sauce found")
             else:
-                return await ctx.send("No sauce found")
+                return await ctx.respond("No sauce found")
         else:
-            return await ctx.send("Please mention a message containing pasta!")
+            return await ctx.respont("Please mention a message containing pasta!")
 
     @bridge.bridge_command(
         brief="Search for picture on IQDB",
@@ -102,31 +102,31 @@ class SauceFinder(commands.Cog, name="Picture Sauce Finding"):
                     if embed.image.url is not discord.Embed.Empty:
                         res = await self.construct_iqdb_embed(embed.image.url)
                         if res is not None:
-                            return await ctx.send(embed=res)
+                            return await ctx.respond(embed=res)
                         else:
-                            return await ctx.send("No sauce found")
+                            return await ctx.respond("No sauce found")
                     elif embed.thumbnail.url is not discord.Embed.Empty:
                         res = await self.construct_iqdb_embed(embed.thumbnail.url)
                         if res is not None:
-                            return await ctx.send(embed=res)
+                            return await ctx.respond(embed=res)
                         else:
-                            return await ctx.send("No sauce found")
+                            return await ctx.respond("No sauce found")
                     elif embed.url is not discord.Embed.Empty:
                         res = await self.construct_iqdb_embed(embed.url)
                         if res is not None:
-                            return await ctx.send(embed=res)
+                            return await ctx.respond(embed=res)
                         else:
-                            return await ctx.send("No sauce found")
+                            return await ctx.respond("No sauce found")
             elif msg.attachments.__len__() > 0:
                 for attachment in msg.attachments:
                     if attachment.content_type.startswith("image"):
                         res = await self.construct_iqdb_embed(attachment.url)
                         if res is not None:
-                            return await ctx.send(embed=res)
+                            return await ctx.respond(embed=res)
                         else:
-                            return await ctx.send("No sauce found")
+                            return await ctx.respond("No sauce found")
             else:
-                return await ctx.send("No sauce found")
+                return await ctx.respnd("No sauce found")
 
     @staticmethod
     async def construct_saucenao_embed_pixiv(url: str):
