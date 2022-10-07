@@ -179,7 +179,7 @@ class TwitterWatcher(commands.Cog):
                     org_author = row[1]
                 channels = row[2].split(",")
 
-                content = f"{type.replace('_', ' ').capitalize()}: {org_author}: https://twitter.com/{author_name}/status/{tweet_id}"
+                content = f"{type.replace('_', ' ').capitalize()} {author_name}: https://twitter.com/{author_name}/status/{tweet_id}"
                 # Replace the name of the author with the original author
                 author_name = org_author
             else:
