@@ -20,7 +20,6 @@ async def search_danbooru(query: str) -> dict:
         )
         result_json = await res_tag_search.json()
         tag = result_json[0]["name"]
-        print(tag)
         # we cannot go above page 1000, so that limits the max choice to 1000*100 = 100000
         post_count = min(result_json[0]["post_count"], 100000)
         choice = random.randint(0, post_count)

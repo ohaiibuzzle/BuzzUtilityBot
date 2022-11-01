@@ -22,15 +22,15 @@ class PictureSearch(commands.Cog, name="Random image finder"):
         self.client = client
         self.redis_pool = aioredis.from_url(redis_host, decode_responses=True)
 
-    # def cog_command_error(self, ctx, error):
-    #     if error is AttributeError or error is commands.errors.MissingRequiredArgument:
-    #         return ctx.respond(
-    #             f"There was an error processing your request (Perhaps checks your command?) \n Details:{error}"
-    #         )
-    #     else:
-    #         return ctx.respond(
-    #             f"There was an error processing your request \nDetails: {error}"
-    #         )
+    def cog_command_error(self, ctx, error):
+        if error is AttributeError or error is commands.errors.MissingRequiredArgument:
+            return ctx.respond(
+                f"There was an error processing your request (Perhaps checks your command?) \n Details:{error}"
+            )
+        else:
+            return ctx.respond(
+                f"There was an error processing your request \nDetails: {error}"
+            )
 
     @bridge.bridge_command(
         brief="Random image from SafeBooru",
