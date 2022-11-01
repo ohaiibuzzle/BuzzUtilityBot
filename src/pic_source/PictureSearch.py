@@ -22,15 +22,15 @@ class PictureSearch(commands.Cog, name="Random image finder"):
         self.client = client
         self.redis_pool = aioredis.from_url(redis_host, decode_responses=True)
 
-    def cog_command_error(self, ctx, error):
-        if error is AttributeError or error is commands.errors.MissingRequiredArgument:
-            return ctx.respond(
-                f"There was an error processing your request (Perhaps checks your command?) \n Details:{error}"
-            )
-        else:
-            return ctx.respond(
-                f"There was an error processing your request \nDetails: {error}"
-            )
+    # def cog_command_error(self, ctx, error):
+    #     if error is AttributeError or error is commands.errors.MissingRequiredArgument:
+    #         return ctx.respond(
+    #             f"There was an error processing your request (Perhaps checks your command?) \n Details:{error}"
+    #         )
+    #     else:
+    #         return ctx.respond(
+    #             f"There was an error processing your request \nDetails: {error}"
+    #         )
 
     @bridge.bridge_command(
         brief="Random image from SafeBooru",
@@ -321,7 +321,10 @@ class PictureSearch(commands.Cog, name="Random image finder"):
         res = await search_danbooru(query)
         embed = discord.Embed(title=query)
         embed.url = f"https://danbooru.donmai.us/posts/{res['id']}"
-        embed.set_image(url=res["large_file_url"])
+        if res["has_large"]:
+            embed.set_image(url=res["large_file_url"])
+        else:
+            embed.set_image(url=res["file_url"])
 
         embed.add_field(name="Source", value=res["source"], inline=False)
         embed.add_field(

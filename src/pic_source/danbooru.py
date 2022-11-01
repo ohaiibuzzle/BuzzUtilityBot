@@ -3,8 +3,6 @@ import random
 
 import aiohttp
 
-global_random = random.SystemRandom()
-
 
 async def search_danbooru(query: str) -> dict:
     """
@@ -14,14 +12,18 @@ async def search_danbooru(query: str) -> dict:
     """
     timeout = aiohttp.ClientTimeout(total=15)
     async with aiohttp.ClientSession(timeout=timeout) as client:
+        # Convert spaces into underscores
+        query = query.replace(" ", "_")
+
         res_tag_search = await client.get(
-            f"https://danbooru.donmai.us/tags.json?search[name_or_alias_matches]={query}"
+            f"https://danbooru.donmai.us/tags.json?search[fuzzy_name_matches]={query}&search[hide_empty]=1"
         )
         result_json = await res_tag_search.json()
         tag = result_json[0]["name"]
+        print(tag)
         # we cannot go above page 1000, so that limits the max choice to 1000*100 = 100000
         post_count = min(result_json[0]["post_count"], 100000)
-        choice = global_random.choice(range(post_count))
+        choice = random.randint(0, post_count)
         page = choice // 100
         choice = choice % 100
         res = await client.get(
