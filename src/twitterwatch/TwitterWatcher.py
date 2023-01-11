@@ -211,7 +211,7 @@ class TwitterWatcher(commands.Cog):
                     # Delete the webhook
                     await webhook.delete()
                 pass
-        return super().on_data(data)
+        return
 
     def __del__(self):
         self.tweetstream.disconnect()
