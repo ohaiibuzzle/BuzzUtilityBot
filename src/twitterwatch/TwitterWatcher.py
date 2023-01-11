@@ -165,19 +165,19 @@ class TwitterWatcher(commands.Cog):
         content = None
         # Check if there is a referenced tweet
         if data["data"]["referenced_tweets"]:
+            # include -> users will now contain multiple user objects, select the first one that isn't the same as data -> author_id
+            referenced_user = [
+                user
+                for user in data["includes"]["users"]
+                if user["id"] != data["data"]["author_id"]
+            ][0]
             # ONLY do this with retweets. Doing this with QRT void the point of the QRT
             if data["data"]["referenced_tweets"][0]["type"] == "retweeted":
-                # include -> users will now contain multiple user objects, select the first one that isn't the same as data -> author_id
-                referenced_user = [
-                    user
-                    for user in data["includes"]["users"]
-                    if user["id"] != data["data"]["author_id"]
-                ][0]
                 tweet_url = f"https://twitter.com/{referenced_user['username']}/status/{data['data']['referenced_tweets'][0]['id']}"
                 content = f"{data['data']['referenced_tweets'][0]['type'].replace('_', ' ').capitalize()} {referenced_user['name']}: {tweet_url}"
             else:
                 tweet_url = f"https://twitter.com/{data['includes']['users'][0]['username']}/status/{data['data']['id']}"
-                content = tweet_url
+                content = f"{data['data']['referenced_tweets'][0]['type'].replace('_', ' ').capitalize()} {referenced_user['name']}: {tweet_url}"
         else:
             tweet_url = f"https://twitter.com/{data['includes']['users'][0]['username']}/status/{data['data']['id']}"
             content = tweet_url
