@@ -27,7 +27,7 @@ class TwitterWatcher(commands.Cog):
             )
         )
         self.tweetstream = tweetstream.TweetStreamer(
-            config["Credentials"]["twitter_bearer_token"], self.on_tweet
+            config["Credentials"]["twitter_bearer_token"], self.on_data
         )
 
         # Initializing database
@@ -209,6 +209,7 @@ class TwitterWatcher(commands.Cog):
                     # Delete the webhook
                     await webhook.delete()
                 pass
+        return super().on_data(data)
 
     def __del__(self):
         self.tweetstream.disconnect()
