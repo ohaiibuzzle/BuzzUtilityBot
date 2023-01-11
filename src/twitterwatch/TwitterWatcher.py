@@ -184,9 +184,11 @@ class TwitterWatcher(commands.Cog):
                     "SELECT * FROM tweetwatch WHERE twitter_id = ?",
                     (data["data"]["author_id"],),
                 )
-                for row in await cursor.fetchone():
-                    author_name = row[1]
-                    channels = row[2].split(",")
+                row = await cursor.fetchone()
+                if not row:
+                    return
+                channels = row[2].split(",")
+                author_name = data["includes"]["users"][0]["name"]
 
                 for channel in channels:
                     channel = self.client.get_channel(int(channel))
