@@ -162,6 +162,10 @@ class TwitterWatcher(commands.Cog):
     async def on_data(self, data):
         # Deserialize data
         data = json.loads(data)
+
+        if "data" not in data:
+            return
+
         content = None
         # Check if there is a referenced tweet
         if data["data"]["referenced_tweets"]:
