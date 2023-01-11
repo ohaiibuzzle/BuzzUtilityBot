@@ -37,11 +37,6 @@ class TweetStreamer(AsyncStreamingClient):
     async def on_data(self, raw_data):
         # print(raw_data)
         await self.on_data_handler(raw_data)
-        return await super().on_data(raw_data)
-
-    async def on_tweet(self, tweet):
-        # print(f"Incoming tweet: {tweet.data}")
-        return await super().on_tweet(tweet)
 
     async def on_errors(self, errors):
         print(f'{time.strftime("%Y-%m-%d %H:%M:%S")}: ', end="", flush=True)
