@@ -168,7 +168,8 @@ class TwitterWatcher(commands.Cog):
 
         content = None
         # Check if there is a referenced tweet
-        if data["data"]["referenced_tweets"]:
+        referenced_tweets = data["data"].get("referenced_tweets")
+        if referenced_tweets is not None:
             # include -> users will now contain multiple user objects, select the first one that isn't the same as data -> author_id
             referenced_user = [
                 user
