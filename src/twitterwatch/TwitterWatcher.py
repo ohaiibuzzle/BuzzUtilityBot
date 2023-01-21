@@ -171,11 +171,15 @@ class TwitterWatcher(commands.Cog):
         referenced_tweets = data["data"].get("referenced_tweets")
         if referenced_tweets is not None:
             # include -> users will now contain multiple user objects, select the first one that isn't the same as data -> author_id
-            referenced_user = [
-                user
-                for user in data["includes"]["users"]
-                if user["id"] != data["data"]["author_id"]
-            ][0]
+            try:
+                referenced_user = [
+                    user
+                    for user in data["includes"]["users"]
+                    if user["id"] != data["data"]["author_id"]
+                ][0]
+            except IndexError:
+                # Make a reference user that has no username, avoid a tweet miss
+                referenced_user = {"username": "", "name": ""}
             # ONLY do this with retweets. Doing this with QRT void the point of the QRT
             if data["data"]["referenced_tweets"][0]["type"] == "retweeted":
                 tweet_url = f"https://twitter.com/{referenced_user['username']}/status/{data['data']['referenced_tweets'][0]['id']}"
