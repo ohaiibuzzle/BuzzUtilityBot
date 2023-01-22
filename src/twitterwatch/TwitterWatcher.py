@@ -178,8 +178,8 @@ class TwitterWatcher(commands.Cog):
                     if user["id"] != data["data"]["author_id"]
                 ][0]
             except IndexError:
-                # Make a reference user that has no username, avoid a tweet miss
-                referenced_user = {"username": "", "name": ""}
+                # User is referencing themselves (eg. replying to their own tweet)
+                referenced_user = data["includes"]["users"][0]
             # ONLY do this with retweets. Doing this with QRT void the point of the QRT
             if data["data"]["referenced_tweets"][0]["type"] == "retweeted":
                 tweet_url = f"https://twitter.com/{referenced_user['username']}/status/{data['data']['referenced_tweets'][0]['id']}"
