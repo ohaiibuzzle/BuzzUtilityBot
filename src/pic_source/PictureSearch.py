@@ -270,13 +270,21 @@ class PictureSearch(commands.Cog, name="Random image finder"):
             return
         last_exec = str(last_exec)
         if last_exec.startswith("ZEROCHAN"):
-            await self.zcrandom(ctx, tags=last_exec[9:])
+            # await self.zcrandom(ctx, tags=last_exec[9:])
+            ctx.message.content = f"{ctx.prefix}zcr {last_exec[9:]}"
+            await self.client.process_commands(ctx.message)
         elif last_exec.startswith("SAFEBOORU"):
-            await self.sbrandom(ctx, tags=last_exec[10:])
+            # await self.sbrandom(ctx, tags=last_exec[10:])
+            ctx.message.content = f"{ctx.prefix}sbr {last_exec[10:]}"
+            await self.client.process_commands(ctx.message)
         elif last_exec.startswith("PIXIV"):
-            await self.pixivrandom(ctx, tags=last_exec[6:])
+            # await self.pixivrandom(ctx, tags=last_exec[6:])
+            ctx.message.content = f"{ctx.prefix}pxr {last_exec[6:]}"
+            await self.client.process_commands(ctx.message)
         elif last_exec.startswith("DANBOORU"):
-            await self.danboorurandom(ctx, tags=last_exec[9:])
+            # await self.danboorurandom(ctx, tags=last_exec[9:])
+            ctx.message.content = f"{ctx.prefix}dbr {last_exec[9:]}"
+            await self.client.process_commands(ctx.message)
 
     @staticmethod
     async def construct_zerochan_embed(ch, query: str) -> discord.Embed:
