@@ -4,6 +4,7 @@ from random import SystemRandom
 from random import choice as rchoice
 
 import aiohttp
+import requests
 from bs4 import BeautifulSoup
 
 from . import tf_scan
@@ -14,6 +15,7 @@ pls_no_tags = [
     "Nipples"
 ]  # The AI *should* handle these, 'Bend Over', 'Panties', 'Bra', 'Underwear', 'Lingerie']
 
+CURRENT_UA = requests.get("https://www.useragents.me/api").json()["data"][0]["ua"]
 
 def kw_filter(keywords: str):
     for x in pls_no_tags:
@@ -37,8 +39,8 @@ async def search_zerochan(bypass, query: str):
     xml_specifier = "?xml&s=id"
     pagination = "&p="
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; rv:78.0) Gecko/20100101 Firefox/78.0",
-        "referer": "https://www.zerochan.net/",
+        "User-Agent": CURRENT_UA,
+        "Referer": "https://www.zerochan.net/",
     }
 
     timeout = aiohttp.ClientTimeout(total=15)
@@ -125,7 +127,8 @@ async def search_zerochan(bypass, query: str):
                         else rchoice(range(100))
                     )
                     res = await session.get(
-                        tag_target + query + "?xml" + pagination + str(page)
+                        tag_target + query + "?xml" + pagination + str(page),
+                        headers=headers,
                     )
                     page_soup = BeautifulSoup(await res.read(), features="xml")
 
