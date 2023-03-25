@@ -19,6 +19,7 @@ config.read("runtime/config.cfg")
 model_path = config["Dependancies"]["nsfw_model_path"]
 IMAGE_DIM = int(config["Dependancies"]["nsfw_image_dim"])
 TFLITE_THREADS = int(config["Dependancies"]["nsfw_tflite_threads"])
+CURRENT_UA = requests.get("https://www.useragents.me/api").json()["data"][0]["ua"]
 
 print("TF: Loading NSFW Model. This may take a while...")
 model_interpreter = tflite.Interpreter(
@@ -65,7 +66,10 @@ def process_url(url: str):
     Returns:
         dict: A dictionary describing the results
     """
-    im = Image.open(requests.get(url, stream=True, timeout=15).raw)
+    HEADERS = {
+        "User-Agent": CURRENT_UA,
+    }
+    im = Image.open(requests.get(url, stream=True, headers=HEADERS, timeout=15).raw)
     im = im.resize((IMAGE_DIM, IMAGE_DIM), resample=0)
     if im.mode != "RGB":
         im = im.convert("RGB")
