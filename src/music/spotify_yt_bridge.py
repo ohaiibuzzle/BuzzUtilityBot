@@ -121,7 +121,7 @@ async def async_single_track_to_yt(track_name: str, loop=None):
     return await loop.run_in_executor(None, single_track_to_yt_url, track_name)
 
 
-async def async_single_track_to_yt_alt(track: str, loop=None):
+async def async_single_track_to_yt_alt(track_name: str, loop=None):
     """
     Use youtube-dl to search for matching song, asynchronously
     :param track: A track name
@@ -129,7 +129,7 @@ async def async_single_track_to_yt_alt(track: str, loop=None):
     :return: A YouTube Link
     """
     loop = loop or asyncio.get_event_loop()
-    result = await YouTubeDLSingleSource.list_from_query(track, loop=loop, amount=1)
+    result = await YouTubeDLSingleSource.list_from_query(track_name, loop=loop, amount=1)
     return result["entries"][0]["webpage_url"]
 
 
@@ -156,7 +156,7 @@ async def async_single_spotify_track_to_yt(spotify_track_url: str, loop=None) ->
     track_name = await loop.run_in_executor(
         None, single_spotify_track_to_track_name, spotify_track_url
     )
-    return await async_single_track_to_yt(track_name=track_name, loop=loop)
+    return await async_single_track_to_yt_alt(track_name=track_name, loop=loop)
 
 
 def spotify_album_to_track_names(spotify_album_url: str) -> list:
