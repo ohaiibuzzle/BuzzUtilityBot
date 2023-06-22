@@ -28,6 +28,8 @@ if not os.path.isdir("runtime"):
         "nsfw_image_dim": "224",
         "nsfw_tflite_threads": "1",
         "redis_host": "redis://localhost",
+        "nitter_instances": "",
+        "tweetwatch_wait_time": "60",
     }
 
     with open("runtime/config.cfg", "w+") as configfile:

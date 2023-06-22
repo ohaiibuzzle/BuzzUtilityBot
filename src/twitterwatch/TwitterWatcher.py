@@ -21,7 +21,7 @@ class TwitterWatcher(commands.Cog):
             pnytter_instances=config["Dependancies"]["nitter_instances"].split(
                 ","
             ),
-            callback=self.on_tweet,
+            callback=self.on_tweet, wait_time=config["Dependancies"]["tweetwatch_wait_time"],
         )
 
         # Initializing database
