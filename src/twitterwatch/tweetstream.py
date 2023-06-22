@@ -1,52 +1,48 @@
-import tweepy
-import tweepy.errors
-import time
-from tweepy.asynchronous import AsyncStreamingClient
+import datetime
+import pnytter
+import asyncio
 
 
-class TweetStreamer(AsyncStreamingClient):
-    def __init__(self, bearer_token, on_data_handler):
-        super().__init__(bearer_token=bearer_token)
-        self.users = []
-        self.on_data_handler = on_data_handler
+class TweetStreamer:
+    def __init__(self, pnytter_instances: list, callback):
+        self.nitter_client = pnytter.Pnytter(
+            nitter_instances=pnytter_instances
+        )
+        self.on_data_callback = callback
+        self.streaming_task: asyncio.Task = None
 
-    async def update_rules(self):
-        # Remove all rules
-        try:
-            ids = [rule_ids.id for rule_ids in (await self.get_rules()).data]
-        except TypeError:
-            ids = []
+    async def stream(self, accounts: list):
+        # print("Scraper started")
+        latest_tweets = {}
+        while True:
+            today_utc = datetime.datetime.utcnow()
+            tomorrow_utc = today_utc + datetime.timedelta(days=1)
+            yesterday_utc = today_utc - datetime.timedelta(days=1)
+            for account in accounts:
+                # print(f"Checking {account}")
+                if account not in latest_tweets:
+                    latest_tweets[account] = []
+                try:
+                    tweets = self.nitter_client.get_user_tweets_list(
+                        username=account,
+                        filter_from=yesterday_utc,
+                        filter_to=tomorrow_utc,
+                    )
+                    if tweets:
+                        for tweet in tweets:
+                            if tweet.tweet_id not in latest_tweets[account]:
+                                await self.on_data_callback(tweet, account)
+                        latest_tweets[account] = [
+                            tweet.tweet_id for tweet in tweets
+                        ]
 
-        if len(ids) > 0:
-            await self.delete_rules(ids=ids)
+                except Exception as e:
+                    print(e)
+            await asyncio.sleep(60)
 
-        if self.users is None or len(self.users) == 0:
-            return
+    def start(self, accounts: list):
+        self.streaming_task = asyncio.create_task(self.stream(accounts))
 
-        # Filter for users: (from: user1 OR from: user2 OR from: user3)
-        user_filter = " OR ".join(f"from:{user}" for user in self.users)
-
-        await self.add_rules(tweepy.StreamRule(value=user_filter))
-
-        # dump the rule from the API
-        # rules = await self.get_rules()
-        # print(rules)
-        # print("Rules updated")
-        return
-
-    async def on_data(self, raw_data):
-        await super().on_data(raw_data)
-        # print(raw_data)
-        await self.on_data_handler(raw_data)
-
-    async def on_errors(self, errors):
-        print(f'{time.strftime("%Y-%m-%d %H:%M:%S")}: ', end="", flush=True)
-        return await super().on_errors(errors)
-
-    async def on_request_error(self, status_code):
-        print(f'{time.strftime("%Y-%m-%d %H:%M:%S")}: ', end="", flush=True)
-        return await super().on_request_error(status_code)
-
-    async def on_exception(self, exception):
-        print(f'{time.strftime("%Y-%m-%d %H:%M:%S")}: ', end="", flush=True)
-        return await super().on_exception(exception)
+    def stop(self):
+        if self.streaming_task:
+            self.streaming_task.cancel()

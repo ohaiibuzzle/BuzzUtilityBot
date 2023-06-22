@@ -1,15 +1,10 @@
-import asyncio
 import configparser
-import io
 import sqlite3
 
 import aiohttp
 import aiosqlite
-import discord
-import tweepy
-import re
-from discord.ext import commands, tasks
-import json
+from discord.ext import commands
+import pnytter
 
 from . import tweetstream
 
@@ -21,13 +16,12 @@ class TwitterWatcher(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-        self.api = tweepy.API(
-            auth=tweepy.OAuth2BearerHandler(
-                config["Credentials"]["twitter_bearer_token"]
-            )
-        )
+        # Initializing the tweetstream
         self.tweetstream = tweetstream.TweetStreamer(
-            config["Credentials"]["twitter_bearer_token"], self.on_data
+            pnytter_instances=config["Dependancies"]["nitter_instances"].split(
+                ","
+            ),
+            callback=self.on_tweet,
         )
 
         # Initializing database
@@ -36,7 +30,7 @@ class TwitterWatcher(commands.Cog):
         cursor.execute(
             """
             CREATE TABLE IF NOT EXISTS tweetwatch (
-                twitter_id INTEGER PRIMARY KEY,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 twitter_account TEXT UNIQUE,
                 watching_channels TEXT
             )
@@ -51,13 +45,11 @@ class TwitterWatcher(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        # Do an initial update of the rules
-        await self.tweetstream.update_rules()
-        self.tweetstream_task = self.tweetstream.filter(
-            expansions=["author_id", "referenced_tweets.id"],
-            tweet_fields=["id", "author_id", "text", "referenced_tweets"],
-            user_fields=["id", "name", "username", "profile_image_url"],
-        )
+        self.tweetstream.start(self.tweetstream.users)
+
+    async def restart_stream(self):
+        self.tweetstream.stop()
+        self.tweetstream.start(self.tweetstream.users)
 
     @commands.command()
     @commands.has_permissions(manage_messages=True)
@@ -69,7 +61,8 @@ class TwitterWatcher(commands.Cog):
         # Check if the account is already being watched
         async with aiosqlite.connect("runtime/server_data.db") as db:
             cursor = await db.execute(
-                "SELECT * FROM tweetwatch WHERE twitter_account = ?", (twitter_account,)
+                "SELECT * FROM tweetwatch WHERE twitter_account = ?",
+                (twitter_account,),
             )
             row = await cursor.fetchone()
             if row:
@@ -89,22 +82,21 @@ class TwitterWatcher(commands.Cog):
                         (",".join(channels), twitter_account),
                     )
                     self.tweetstream.users.append(twitter_account)
-                    await self.tweetstream.update_rules()
+                    await self.restart_stream()
                     await ctx.send(
                         f"{twitter_account} is now being watched in this channel."
                     )
 
                     return await db.commit()
             else:
-                # resolves the twitter account id
-                user = self.api.get_user(screen_name=twitter_account)
                 # add the account to the database
                 await db.execute(
-                    "INSERT INTO tweetwatch (twitter_id, twitter_account, watching_channels) VALUES (?, ?, ?)",
-                    (user.id, twitter_account, str(channel)),
+                    "INSERT INTO tweetwatch (twitter_account, watching_channels) VALUES (?, ?)",
+                    (twitter_account, str(channel)),
                 )
+
                 self.tweetstream.users.append(twitter_account)
-                await self.tweetstream.update_rules()
+                await self.restart_stream()
                 await ctx.send(
                     f"{twitter_account} is now being watched in this channel."
                 )
@@ -120,7 +112,8 @@ class TwitterWatcher(commands.Cog):
         # Check if the account is already being watched
         async with aiosqlite.connect("runtime/server_data.db") as db:
             cursor = await db.execute(
-                "SELECT * FROM tweetwatch WHERE twitter_account = ?", (twitter_account,)
+                "SELECT * FROM tweetwatch WHERE twitter_account = ?",
+                (twitter_account,),
             )
             row = await cursor.fetchone()
             if row:
@@ -136,7 +129,7 @@ class TwitterWatcher(commands.Cog):
                             (twitter_account,),
                         )
                         self.tweetstream.users.remove(twitter_account)
-                        await self.tweetstream.update_rules()
+                        await self.restart_stream()
                     else:
                         await db.execute(
                             "UPDATE tweetwatch SET watching_channels = ? WHERE twitter_account = ?",
@@ -156,84 +149,43 @@ class TwitterWatcher(commands.Cog):
                 await ctx.send(f"{twitter_account} is not being watched.")
                 return
 
-    async def on_tweet(self, tweet: tweepy.Tweet):
-        pass
-
-    async def on_data(self, data):
-        # Deserialize data
-        data = json.loads(data)
-
-        if "data" not in data:
-            return
-
-        content = None
-        # Check if there is a referenced tweet
-        referenced_tweets = data["data"].get("referenced_tweets")
-        if referenced_tweets is not None:
-            # include -> users will now contain multiple user objects, select the first one that isn't the same as data -> author_id
-            try:
-                referenced_user = [
-                    user
-                    for user in data["includes"]["users"]
-                    if user["id"] != data["data"]["author_id"]
-                ][0]
-            except IndexError:
-                # User is referencing themselves (eg. replying to their own tweet)
-                referenced_user = data["includes"]["users"][0]
-            # ONLY do this with retweets. Doing this with QRT void the point of the QRT
-            if data["data"]["referenced_tweets"][0]["type"] == "retweeted":
-                tweet_url = f"https://twitter.com/{referenced_user['username']}/status/{data['data']['referenced_tweets'][0]['id']}"
-                content = f"{data['data']['referenced_tweets'][0]['type'].replace('_', ' ').capitalize()} {referenced_user['name']}: {tweet_url}"
-            else:
-                tweet_url = f"https://twitter.com/{data['includes']['users'][0]['username']}/status/{data['data']['id']}"
-                content = f"{data['data']['referenced_tweets'][0]['type'].replace('_', ' ').capitalize()} {referenced_user['name']}: {tweet_url}"
-        else:
-            tweet_url = f"https://twitter.com/{data['includes']['users'][0]['username']}/status/{data['data']['id']}"
-            content = tweet_url
-
-        if content is not None:
-            # Send content to the channels
-            async with aiosqlite.connect("runtime/server_data.db") as db:
-                cursor = await db.execute(
-                    "SELECT * FROM tweetwatch WHERE twitter_id = ?",
-                    (data["data"]["author_id"],),
-                )
-                row = await cursor.fetchone()
-                if not row:
-                    return
+    async def on_tweet(self, tweet: pnytter.models.TwitterTweet, account: str):
+        """
+        Callback for the tweetstream
+        """
+        # print(f"Received tweet from {account}: {tweet.tweet_id}")
+        # Get the channel list from the database
+        async with aiosqlite.connect("runtime/server_data.db") as db:
+            cursor = await db.execute(
+                "SELECT * FROM tweetwatch WHERE twitter_account = ?",
+                (account,),
+            )
+            row = await cursor.fetchone()
+            if row:
                 channels = row[2].split(",")
-                author_name = data["includes"]["users"][0]["name"]
-
                 for channel in channels:
                     channel = self.client.get_channel(int(channel))
-                    # Spawn a temporary discord.Webhook on the channel
-                    try:
-                        async with aiohttp.ClientSession(
-                            timeout=aiohttp.ClientTimeout(total=10)
-                        ) as session:
-                            thumbnail_rq = await session.get(
-                                data["includes"]["users"][0]["profile_image_url"]
-                            )
-                            webhook = await channel.create_webhook(
-                                name=author_name, avatar=await thumbnail_rq.read()
-                            )
-                    except (aiohttp.ClientError, asyncio.TimeoutError):
-                        webhook = await channel.create_webhook(name=author_name)
-                        pass
-                    # Send the url to the tweet to the webhook
-                    await webhook.send(content)
-                    # Delete the webhook
-                    await webhook.delete()
-                pass
-        return
+                    if channel:
+                        # Create a webhook, using the unavatar.io service for the avatar
+                        async with aiohttp.ClientSession() as session:
+                            async with session.get(
+                                f"https://unavatar.io/twitter/{tweet.author}"
+                            ) as response:
+                                avatar = await response.read()
+                        webhook = await channel.create_webhook(
+                            name=tweet.author, avatar=avatar
+                        )
+                        # Send the tweet
+                        await webhook.send(
+                            f"https://fxtwitter.com/{tweet.author}/status/{tweet.tweet_id}"
+                        )
+                        # Delete the webhook
+            await db.commit()
 
     def __del__(self):
-        self.tweetstream.disconnect()
+        self.tweetstream.stop()
 
 
 def setup(client):
     print("Loading Twitter Watcher...")
-    if config["Credentials"]["twitter_bearer_token"] == "":
-        print("Twitter bearer token not found. Twitter watcher will not be loaded.")
-        return
     client.add_cog(TwitterWatcher(client))
