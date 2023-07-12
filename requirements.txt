@@ -55,4 +55,4 @@ uvloop==0.17.0
 websockets==11.0.3
 wrapt==1.15.0
 yarl==1.9.2
-yt-dlp==2023.6.22
+yt-dlp==2023.7.6
