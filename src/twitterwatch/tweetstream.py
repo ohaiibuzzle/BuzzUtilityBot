@@ -29,10 +29,11 @@ class TweetStreamer:
                         filter_from=yesterday_utc,
                         filter_to=tomorrow_utc,
                     )
+                    profile = self.nitter_client.find_user(account)
                     if tweets:
                         for tweet in tweets:
                             if tweet.tweet_id not in latest_tweets[account]:
-                                await self.on_data_callback(tweet, account)
+                                await self.on_data_callback(tweet, profile)
                         latest_tweets[account] = [
                             tweet.tweet_id for tweet in tweets
                         ]

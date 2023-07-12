@@ -1,4 +1,5 @@
 import configparser
+import random
 import sqlite3
 
 import aiohttp
@@ -15,12 +16,11 @@ config.read("runtime/config.cfg")
 class TwitterWatcher(commands.Cog):
     def __init__(self, client):
         self.client = client
+        self.instances = config["Dependancies"]["nitter_instances"].split(",")
 
         # Initializing the tweetstream
         self.tweetstream = tweetstream.TweetStreamer(
-            pnytter_instances=config["Dependancies"]["nitter_instances"].split(
-                ","
-            ),
+            pnytter_instances=self.instances,
             callback=self.on_tweet, wait_time=config["Dependancies"]["tweetwatch_wait_time"],
         )
 
@@ -149,16 +149,16 @@ class TwitterWatcher(commands.Cog):
                 await ctx.send(f"{twitter_account} is not being watched.")
                 return
 
-    async def on_tweet(self, tweet: pnytter.models.TwitterTweet, account: str):
+    async def on_tweet(self, tweet: pnytter.models.TwitterTweet, profile: pnytter.models.profiles.TwitterProfile):
         """
         Callback for the tweetstream
         """
-        # print(f"Received tweet from {account}: {tweet.tweet_id}")
+        print(f"Received tweet from {profile.username}: {tweet.tweet_id}")
         # Get the channel list from the database
         async with aiosqlite.connect("runtime/server_data.db") as db:
             cursor = await db.execute(
                 "SELECT * FROM tweetwatch WHERE twitter_account = ?",
-                (account,),
+                (profile.username,),
             )
             row = await cursor.fetchone()
             if row:
@@ -168,12 +168,18 @@ class TwitterWatcher(commands.Cog):
                     if channel:
                         # Create a webhook, using the unavatar.io service for the avatar
                         async with aiohttp.ClientSession() as session:
-                            async with session.get(
-                                f"https://unavatar.io/twitter/{tweet.author}"
-                            ) as response:
-                                avatar = await response.read()
+                            nitter_path = profile.pictures.profile.nitter_path
+                            if nitter_path:
+                                url = random.choice(self.instances) + nitter_path
+                                print(url)
+                                async with session.get(
+                                    url
+                                ) as response:
+                                    avatar = await response.read()
+                            else:
+                                avatar = None
                         webhook = await channel.create_webhook(
-                            name=tweet.author, avatar=avatar
+                            name=f"{profile.username} - {profile.fullname}", avatar=avatar
                         )
                         # Send the tweet
                         await webhook.send(
