@@ -153,7 +153,7 @@ class TwitterWatcher(commands.Cog):
         """
         Callback for the tweetstream
         """
-        print(f"Received tweet from {profile.username}: {tweet.tweet_id}")
+        # print(f"Received tweet from {profile.username}: {tweet.tweet_id}")
         # Get the channel list from the database
         async with aiosqlite.connect("runtime/server_data.db") as db:
             cursor = await db.execute(
@@ -171,7 +171,7 @@ class TwitterWatcher(commands.Cog):
                             nitter_path = profile.pictures.profile.nitter_path
                             if nitter_path:
                                 url = random.choice(self.instances) + nitter_path
-                                print(url)
+                                # print(url)
                                 async with session.get(
                                     url
                                 ) as response:
