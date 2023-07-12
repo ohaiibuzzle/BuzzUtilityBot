@@ -15,7 +15,10 @@ pls_no_tags = [
     "Nipples"
 ]  # The AI *should* handle these, 'Bend Over', 'Panties', 'Bra', 'Underwear', 'Lingerie']
 
-CURRENT_UA = requests.get("https://www.useragents.me/api").json()["data"][0]["ua"]
+try:
+    CURRENT_UA = requests.get("https://www.useragents.me/api").json()["data"][0]["ua"]
+except Exception:
+    CURRENT_UA = "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0"
 
 def kw_filter(keywords: str):
     for x in pls_no_tags:
