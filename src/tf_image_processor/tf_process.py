@@ -19,7 +19,11 @@ config.read("runtime/config.cfg")
 model_path = config["Dependancies"]["nsfw_model_path"]
 IMAGE_DIM = int(config["Dependancies"]["nsfw_image_dim"])
 TFLITE_THREADS = int(config["Dependancies"]["nsfw_tflite_threads"])
-CURRENT_UA = requests.get("https://www.useragents.me/api").json()["data"][0]["ua"]
+
+try:
+    CURRENT_UA = requests.get("https://www.useragents.me/api").json()["data"][0]["ua"]
+except Exception:
+    CURRENT_UA = "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0"
 
 print("TF: Loading NSFW Model. This may take a while...")
 model_interpreter = tflite.Interpreter(
