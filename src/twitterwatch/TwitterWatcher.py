@@ -180,6 +180,7 @@ class TwitterWatcher(commands.Cog):
                             f"https://fxtwitter.com/{tweet.author}/status/{tweet.tweet_id}"
                         )
                         # Delete the webhook
+                        await webhook.delete()
             await db.commit()
 
     def __del__(self):
