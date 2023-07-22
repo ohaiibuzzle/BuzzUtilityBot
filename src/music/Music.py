@@ -139,13 +139,25 @@ class Music(commands.Cog):
             await ctx.voice_state.play_queue.put(item)
             if not hidden:
                 if not isurl:
-                    status = await ctx.respond(
-                        f"Added {source.title} - {source.uploader} to the queue!"
-                    )
+                    if ctx is bridge.BridgeExtContext:
+                        status = await ctx.respond(
+                            f"Added {source.title} - {source.uploader} to the queue!",
+                            mention_author=False,
+                        )
+                    elif ctx is bridge.BridgeApplicationContext:
+                        status = await ctx.respond(
+                            f"Added {source.title} - {source.uploader} to the queue!"
+                        )
                 else:
-                    status = await ctx.respond(
-                        f"Added {source.title} - {source.uploader} ({source.webpage}) to the queue!"
-                    )
+                    if ctx is bridge.BridgeExtContext:
+                        status = await ctx.respond(
+                            f"Added {source.title} - {source.uploader} ({source.webpage}) to the queue!",
+                            mention_author=False,
+                        )
+                    elif ctx is bridge.BridgeApplicationContext:
+                        status = await ctx.respond(
+                            f"Added {source.title} - {source.uploader} ({source.webpage}) to the queue!"
+                        )
                 if silent_mesg:
                     await asyncio.sleep(8)
                     await status.delete()
@@ -362,9 +374,6 @@ class Music(commands.Cog):
         if re.match(
             r"https?://open\.spotify\.com/(playlist|album)/(?P<id>[^/?&#]+)", url
         ):
-            await ctx.respond(
-                "Please wait, converting your playlist. This could take a while!"
-            )
             try:
                 if re.match(r"https?://open\.spotify\.com/album/(?P<id>[^/?&#]+)", url):
                     track_list = (
@@ -406,9 +415,6 @@ class Music(commands.Cog):
 
                 ctx.message.content = f"{ctx.prefix}queue"
                 await self.client.process_commands(ctx.message)
-                await ctx.respond(
-                    "Done! Tip: You can also use `exportqueue` to get the queue exported and use it with other bots!"
-                )
         elif re.match(r"https?://open\.spotify\.com/track/(?P<id>[^/?&#]+)", url):
             yt_url = await spotify_yt_bridge.async_single_spotify_track_to_yt(
                 url, loop=self.client.loop
