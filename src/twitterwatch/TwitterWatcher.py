@@ -21,7 +21,8 @@ class TwitterWatcher(commands.Cog):
         # Initializing the tweetstream
         self.tweetstream = tweetstream.TweetStreamer(
             pnytter_instances=self.instances,
-            callback=self.on_tweet, wait_time=config["Dependancies"]["tweetwatch_wait_time"],
+            callback=self.on_tweet, 
+            wait_time=config["Dependancies"]["tweetwatch_wait_time"],
         )
 
         # Initializing database
