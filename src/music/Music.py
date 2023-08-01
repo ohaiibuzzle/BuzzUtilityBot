@@ -393,8 +393,6 @@ class Music(commands.Cog):
                 await ctx.respond(f"Something funky happened: {e}")
             else:
                 for track in track_list:
-                    if not self.voice_states[ctx.guild.id]:
-                        return
                     try:
                         track_link = (
                             await spotify_yt_bridge.async_single_track_to_yt_alt(
@@ -405,6 +403,9 @@ class Music(commands.Cog):
                         await ctx.respond(f"Something funky happened. Stopping")
                         break
                     else:
+                        if not self.voice_states[ctx.guild.id]:
+                            # User disconnected
+                            return
                         if not silent:
                             ctx.message.content = f"{ctx.prefix}play {track_link} silent_mesg=True isurl=True"
                             await self.client.process_commands(ctx.message)
