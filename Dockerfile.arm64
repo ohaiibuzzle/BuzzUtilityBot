@@ -17,6 +17,8 @@ COPY --from=wheel_builder /tmp/wheels /tmp/wheels
 RUN pip install --no-index --find-links=/tmp/wheels -r /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt
 
+RUN rm -rf /tmp/wheels
+
 RUN mkdir -p /app/src
 COPY src/ /app/src
 
