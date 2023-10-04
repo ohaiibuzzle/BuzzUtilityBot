@@ -18,7 +18,7 @@ class TweetStreamer:
     async def stream(self, accounts: list):
         while True:
             logging.debug(f"Waiting {self.wait_time} seconds between each fetch")
-            await asyncio.sleep(60)
+            await asyncio.sleep(self.wait_time)
             logging.debug("Fetching...")
             await self.fetch(accounts)
 
