@@ -44,7 +44,7 @@ jobs:
         with:
           context: .
           file: ./Dockerfile.arm64
-          platform: linux/arm64/v8
+          platforms: linux/arm64/v8
           push: true
           tags: |
             ghcr.io/${{ github.repository_owner }}/buzz-utils-bot:latest-arm64
