@@ -11,6 +11,9 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        archs: [linux/amd64, linux/arm64/v8]
     steps:
       - uses: actions/checkout@v4
       - name: Set up Docker Buildx
@@ -22,13 +25,24 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push Docker image
+      - name: Build and push Docker image (amd64)
         uses: docker/build-push-action@v5
+        if: matrix.archs == 'linux/amd64'
         with:
           context: .
           file: ./Dockerfile
-          platforms: linux/amd64,linux/arm64/v8
           push: true
           tags: |
             ghcr.io/${{ github.repository_owner }}/buzz-utils-bot:latest
             ghcr.io/${{ github.repository_owner }}/buzz-utils-bot:${{ github.sha }}
+
+      - name: Build and push Docker image (arm64)
+        uses: docker/build-push-action@v5
+        if: matrix.archs == 'linux/arm64/v8'
+        with:
+          context: .
+          file: ./Dockerfile.arm64
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/buzz-utils-bot:latest-arm64
+            ghcr.io/${{ github.repository_owner }}/buzz-utils-bot:${{ github.sha }}-arm64
