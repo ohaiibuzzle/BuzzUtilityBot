@@ -18,7 +18,7 @@ Deprecated==1.2.14
 frozenlist==1.4.0
 idna==3.4
 isodate==0.6.1
-lxml==4.9.2
+lxml==4.9.3
 marshmallow==3.19.0
 marshmallow-enum==1.5.1
 multidict==6.0.4
