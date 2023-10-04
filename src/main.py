@@ -40,7 +40,7 @@ if not os.path.isdir("runtime"):
 
     config["Features"] = {
         "blacklisted_features": "utils.nsfwRole",
-        "log_level": "INFO",
+        "log_level": "WARNING",
     }
 
     with open("runtime/config.cfg", "w+") as configfile:
