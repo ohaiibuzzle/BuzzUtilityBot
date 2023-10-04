@@ -2,6 +2,7 @@ import asyncio
 import configparser
 import io
 import random
+import logging
 
 import aiohttp
 import discord
@@ -46,13 +47,13 @@ async def get_image(query: str, bypass=False):
         aapi = pixivpy_async.AppPixivAPI(client=client)
         aapi.set_accept_language("en-us")
 
-        # print(query)
+        logging.debug(query)
         try:
             total = await px_getamount(query)
         except TimeoutError:
             total = 30
 
-        # print(total)
+        logging.debug(total)
 
         if total > 1450:
             total = 1450
@@ -61,19 +62,19 @@ async def get_image(query: str, bypass=False):
 
         await aapi.login(refresh_token=config["Credentials"]["pixiv_key"])
 
-        # print(total)
+        logging.debug(total)
         for _ in range(3):
             choice = random_source.randrange(total) - 1
 
             if choice < 0:
                 choice = 0
 
-            # print(choice)
+            logging.debug(choice)
 
             # res = await aapi.search_illust(query, offset=1450)
 
-            # print(res)
-            # print(res['illusts'].__len__())
+            # logging.debug(res)
+            # logging.debug(res['illusts'].__len__())
 
             result = (await aapi.search_illust(query, offset=choice))["illusts"][0]
 
@@ -82,7 +83,7 @@ async def get_image(query: str, bypass=False):
                     continue
                 if result["sanity_level"] > 5:
                     continue
-            # print(choice)
+            logging.debug(choice)
             raw_data = [
                 x
                 async for x in await aapi.down(
@@ -109,7 +110,7 @@ async def get_image_by_id(illust_id: int):
         await aapi.login(refresh_token=config["Credentials"]["pixiv_key"])
         res = (await aapi.illust_detail(illust_id))["illust"]
 
-        #print(res)
+        logging.debug(res)
 
         if res["x_restrict"] != 0:
             return None
@@ -130,7 +131,7 @@ async def get_image_by_id(illust_id: int):
             url="https://www.pixiv.net/en/artworks/" + str(res["id"]),
         )
         fn = res["image_urls"]["large"].split("/")[-1]
-        # print(fn)
+        logging.debug(fn)
         file = discord.File(image_data, filename=fn)
         embed.set_image(url="attachment://" + fn)
 
@@ -176,7 +177,7 @@ async def construct_pixiv_embed(query, channel):
             url="https://www.pixiv.net/en/artworks/" + str(res["id"]),
         )
         fn = res["image_urls"]["large"].split("/")[-1]
-        # print(fn)
+        logging.debug(fn)
         file = discord.File(img, filename=fn)
         embed.set_image(url="attachment://" + fn)
 
@@ -208,4 +209,4 @@ async def construct_pixiv_embed(query, channel):
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-    print(loop.run_until_complete(get_image("ganyu")))
+    logging.debug(loop.run_until_complete(get_image("ganyu")))

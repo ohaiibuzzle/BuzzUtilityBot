@@ -1,8 +1,10 @@
+import logging
+
 try:
-    from tf_image_processor.tf_process import async_process_url
+    from image_analyze.tf_process import async_process_url
 except (ValueError, ModuleNotFoundError) as e:
-    print("Model Error: " + str(e))
-    print("ML features will be disabled")
+    logging.critical("Model Error: " + str(e))
+    logging.critical("ML features will be disabled")
 
     async def tf_scan(url: str):
         return True
@@ -18,16 +20,16 @@ else:
         try:
             res = await async_process_url(url)
         except ValueError:
-            print("Model Error")
+            logging.critical("Model Error")
             return True
-        # print(res)
+        logging.debug(res)
         if res["(o-_-o) (Hentai)"][0] >= 0.5:
-            print("Model detected Hentai content")
+            logging.info("Model detected Hentai content")
             return False
         if res["(╬ Ò﹏Ó) (Porn)"][0] >= 0.5:
-            print("Model detected pornographic content")
+            logging.info("Model detected pornographic content")
             return False
         if res["(°ㅂ°╬) (Sexy)"][0] >= 0.5:
-            print("Model detected sexy content")
+            logging.info("Model detected sexy content")
             return False
         return True

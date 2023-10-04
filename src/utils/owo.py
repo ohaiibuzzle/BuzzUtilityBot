@@ -1,6 +1,7 @@
 import asyncio
 import datetime
 import io
+import logging
 import random
 import re
 import sqlite3
@@ -81,7 +82,7 @@ class OwO(commands.Cog, name="Why? I don't even know why these exists!"):
                     ) as rows:
                         this_row = await rows.fetchone()
                         if this_row:
-                            # print(this_row)
+                            logging.debug(this_row)
                             second_member = discord.utils.find(
                                 lambda m: m.id == this_row[1], ctx.guild.members
                             )
@@ -96,7 +97,7 @@ class OwO(commands.Cog, name="Why? I don't even know why these exists!"):
                     ) as rows:
                         this_row = await rows.fetchone()
                         if this_row:
-                            # print(this_row)
+                            logging.debug(this_row)
                             second_member = discord.utils.find(
                                 lambda m: m.id == this_row[1], ctx.guild.members
                             )
@@ -111,7 +112,7 @@ class OwO(commands.Cog, name="Why? I don't even know why these exists!"):
                     ) as rows:
                         this_row = await rows.fetchone()
                         if this_row:
-                            # print(this_row)
+                            logging.debug(this_row)
                             first_member = discord.utils.find(
                                 lambda m: m.id == this_row[1], ctx.guild.members
                             )
@@ -126,7 +127,7 @@ class OwO(commands.Cog, name="Why? I don't even know why these exists!"):
                     ) as rows:
                         this_row = await rows.fetchone()
                         if this_row:
-                            # print(this_row)
+                            logging.debug(this_row)
                             first_member = discord.utils.find(
                                 lambda m: m.id == this_row[1], ctx.guild.members
                             )
@@ -380,8 +381,8 @@ class OwO(commands.Cog, name="Why? I don't even know why these exists!"):
         ) as session:
             background = Image.open("runtime/assets/bg.png", "r")
             bg_w, bg_h = background.size
-            # print(first_member.avatar_url)
-            # print(second_member.avatar_url)
+            logging.debug(first_member.avatar_url)
+            logging.debug(second_member.avatar_url)
 
             cert_text = f"@{first_member} x @{second_member}"
 
@@ -508,4 +509,4 @@ def setup(client):
 
 
 if __name__ == "__main__":
-    print(OwO.owoify("Why would you even want this kind of thing owo"))
+    logging.debug(OwO.owoify("Why would you even want this kind of thing owo"))

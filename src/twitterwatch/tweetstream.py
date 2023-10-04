@@ -1,6 +1,7 @@
 import datetime
 import pnytter
 import asyncio
+import logging
 
 
 class TweetStreamer:
@@ -16,9 +17,9 @@ class TweetStreamer:
         
     async def stream(self, accounts: list):
         while True:
-            # print(f"Waiting {self.wait_time} seconds between each fetch")
+            logging.debug(f"Waiting {self.wait_time} seconds between each fetch")
             await asyncio.sleep(60)
-            # print("Fetching...")
+            logging.debug("Fetching...")
             await self.fetch(accounts)
 
     async def fetch(self, accounts: list):
@@ -26,7 +27,7 @@ class TweetStreamer:
         tomorrow_utc = today_utc + datetime.timedelta(days=1)
         yesterday_utc = today_utc - datetime.timedelta(days=1)
         for account in accounts:
-            # print(f"Checking {account}")
+            logging.debug(f"Checking {account}")
             if account not in self.latest_tweets:
                 self.latest_tweets[account] = []
             try:
@@ -45,7 +46,7 @@ class TweetStreamer:
                     ]
 
             except Exception as e:
-                print(e)
+                logging.critical(e)
 
     def start(self, accounts: list):
         loop = asyncio.get_event_loop()

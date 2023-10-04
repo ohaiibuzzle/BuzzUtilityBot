@@ -1,6 +1,7 @@
 from discord.ext import commands, bridge
 import discord
 import asyncio
+import logging
 
 
 class MessageUtils(commands.Cog, name="Message Utilities"):
@@ -13,7 +14,7 @@ class MessageUtils(commands.Cog, name="Message Utilities"):
                 f"There was an error processing your request (Perhaps checks your command?) \n Details:{error}"
             )
         else:
-            print(error)
+            logging.critical(error)
             return ctx.send(f"There was an error processing your request")
 
     @bridge.bridge_command(
@@ -25,7 +26,7 @@ class MessageUtils(commands.Cog, name="Message Utilities"):
 
         If no message is mentioned, save the last message that has an embed in it
         """
-        print("@" + ctx.author.name + "#" + ctx.author.discriminator + " try to save!")
+        logging.info("@" + ctx.author.name + "#" + ctx.author.discriminator + " try to save!")
         if ctx.message:
             if ctx.message.reference:
                 if ctx.message.reference.resolved != None:
@@ -99,7 +100,7 @@ class MessageUtils(commands.Cog, name="Message Utilities"):
         Use this command to delete the bot's last message.
         Used in case things went wrong
         """
-        print(
+        logging.info(
             "Uh oh, @"
             + ctx.message.author.name
             + "#"

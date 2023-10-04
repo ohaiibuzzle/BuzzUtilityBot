@@ -1,4 +1,5 @@
 import datetime
+import logging
 import sqlite3
 
 import aiosqlite
@@ -106,7 +107,7 @@ class Birthday(commands.Cog, name="Birthdays!"):
         Date follows [day] [month] [year]. Clear your birthday with "clear"',
     )
     async def bday(self, ctx, *args):
-        # print(args)
+        logging.debug(args)
         async with aiosqlite.connect(self.RT_DATABASE) as db:
             async with db.cursor() as curr:
                 server = await db.execute(
@@ -166,10 +167,10 @@ class Birthday(commands.Cog, name="Birthdays!"):
     async def sendBirthdayMessages(self):
         tz = pytz.timezone("Asia/Tokyo")
         today_mmdd = "%{} %".format(datetime.datetime.now(tz).strftime("%m-%d"))
-        # print(today_mmdd)
+        logging.debug(today_mmdd)
         with open("runtime/today.status", "r") as today_file:
             today_mmdd_file = today_file.readline()
-            # print(today_mmdd_file)
+            logging.debug(today_mmdd_file)
             if today_mmdd_file == today_mmdd:
                 return
 
@@ -179,7 +180,7 @@ class Birthday(commands.Cog, name="Birthdays!"):
                 {"currentDate": today_mmdd},
             ) as cursor:
                 async for row in cursor:
-                    # print(row)
+                    logging.debug(row)
                     server_info = await (
                         await db.execute(
                             """SELECT ChannelID FROM BirthdayMessage WHERE GuildID = :guildID""",
@@ -196,7 +197,7 @@ class Birthday(commands.Cog, name="Birthdays!"):
 
         with open("runtime/today.status", "w+") as today_file:
             today_file.write(today_mmdd)
-            print("Birthdays: Done for today!")
+            logging.info("Birthdays: Done for today!")
 
     @sendBirthdayMessages.before_loop
     async def before_sendBirthdayMessages(self):

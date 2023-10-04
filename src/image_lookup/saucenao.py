@@ -1,6 +1,6 @@
 from pysaucenao import SauceNao
 from pysaucenao.errors import SauceNaoException
-import asyncio, configparser
+import asyncio, configparser, logging
 
 config = configparser.ConfigParser()
 config.read("runtime/config.cfg")
@@ -24,10 +24,10 @@ async def find_sauce(url):
     """
     try:
         results = await saucer.from_url(url)
-        # print(results)
+        logging.debug(results)
         return results[0]
     except SauceNaoException as e:
-        print(e)
+        logging.critical(e)
         return None
     except IndexError:
         return None
@@ -40,4 +40,4 @@ if __name__ == "__main__":
             "https://i.pximg.net/img-master/img/2021/04/21/18/00/47/89297449_p0_master1200.jpg"
         )
     )
-    print(sauce)
+    logging.debug(sauce)

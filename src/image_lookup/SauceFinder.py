@@ -5,6 +5,7 @@ from utils import embed_finder
 import discord
 import configparser
 from pysaucenao.saucenao import SauceNaoResults
+import logging
 
 config = configparser.ConfigParser()
 config.read("runtime/config.cfg")
@@ -33,7 +34,7 @@ class SauceFinder(commands.Cog, name="Picture Sauce Finding"):
 
         Pixiv only as of now. Twitter is scary
         """
-        print(
+        logging.info(
             "@"
             + ctx.author.name
             + "#"
@@ -87,7 +88,7 @@ class SauceFinder(commands.Cog, name="Picture Sauce Finding"):
 
         Slower than SauceNAO, but has a higher search limit
         """
-        print(
+        logging.info(
             "@"
             + ctx.author.name
             + "#"
