@@ -14,9 +14,18 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 
-if not os.path.isdir("runtime"):
+HAS_CONFIG = True
+
+if not os.path.exists("runtime"):
     os.mkdir("runtime")
     os.mkdir("runtime/models")
+    HAS_CONFIG = False
+
+if not os.path.exists("runtime/config.cfg"):
+    logging.critical("No config file found!")
+    HAS_CONFIG = False
+
+if not HAS_CONFIG:
     logging.critical("Please populate the /runtime directory with your credentials!")
     config = configparser.ConfigParser()
     config["Credentials"] = {
