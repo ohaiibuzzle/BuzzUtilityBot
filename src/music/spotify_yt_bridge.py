@@ -129,7 +129,9 @@ async def async_single_track_to_yt_alt(track_name: str, loop=None):
     :return: A YouTube Link
     """
     loop = loop or asyncio.get_event_loop()
-    result = await YouTubeDLSingleSource.list_from_query(track_name, loop=loop, amount=1)
+    result = await YouTubeDLSingleSource.list_from_query(
+        track_name, loop=loop, amount=1
+    )
     return result["entries"][0]["webpage_url"]
 
 

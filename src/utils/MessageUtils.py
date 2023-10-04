@@ -26,7 +26,9 @@ class MessageUtils(commands.Cog, name="Message Utilities"):
 
         If no message is mentioned, save the last message that has an embed in it
         """
-        logging.info("@" + ctx.author.name + "#" + ctx.author.discriminator + " try to save!")
+        logging.info(
+            "@" + ctx.author.name + "#" + ctx.author.discriminator + " try to save!"
+        )
         if ctx.message:
             if ctx.message.reference:
                 if ctx.message.reference.resolved != None:

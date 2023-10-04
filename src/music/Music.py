@@ -411,7 +411,9 @@ class Music(commands.Cog):
                             ctx.message.content = f"{ctx.prefix}play {track_link} silent_mesg=True isurl=True"
                             await self.client.process_commands(ctx.message)
                         else:
-                            ctx.message.content = f"{ctx.prefix}play {track_link} hidden=True"
+                            ctx.message.content = (
+                                f"{ctx.prefix}play {track_link} hidden=True"
+                            )
                             await self.client.process_commands(ctx.message)
                         await asyncio.sleep(2)
 
@@ -421,7 +423,9 @@ class Music(commands.Cog):
             yt_url = await spotify_yt_bridge.async_single_spotify_track_to_yt(
                 url, loop=self.client.loop
             )
-            ctx.message.content = f"{ctx.prefix}play {yt_url} silent_mesg=True isurl=True"
+            ctx.message.content = (
+                f"{ctx.prefix}play {yt_url} silent_mesg=True isurl=True"
+            )
             return await self.client.process_commands(ctx.message)
 
     @bridge.bridge_command()

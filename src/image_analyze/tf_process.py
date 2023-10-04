@@ -24,7 +24,9 @@ TFLITE_THREADS = int(config["Dependancies"]["nsfw_tflite_threads"])
 try:
     CURRENT_UA = requests.get("https://www.useragents.me/api").json()["data"][0]["ua"]
 except Exception:
-    CURRENT_UA = "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0"
+    CURRENT_UA = (
+        "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0"
+    )
 logging.info("TF: Loading NSFW Model. This may take a while...")
 model_interpreter = tflite.Interpreter(
     model_path=model_path, num_threads=TFLITE_THREADS

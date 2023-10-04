@@ -19,7 +19,10 @@ pls_no_tags = [
 try:
     CURRENT_UA = requests.get("https://www.useragents.me/api").json()["data"][0]["ua"]
 except Exception:
-    CURRENT_UA = "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0"
+    CURRENT_UA = (
+        "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0"
+    )
+
 
 def kw_filter(keywords: str):
     for x in pls_no_tags:
@@ -97,7 +100,6 @@ async def search_zerochan(bypass, query: str):
             for _ in range(3):
                 choice = random_gen.randint(0, total_amount - 1)
                 if choice < item_amount - 1:
-
                     if choice < 0:
                         choice = 0
                     item = soup.find_all("item")[choice]
@@ -171,7 +173,6 @@ async def search_zerochan(bypass, query: str):
                     }
         else:
             for _ in range(3):
-
                 c = random_gen.randint(0, item_amount - 1)
                 item = soup.find_all("item")[c]
 
@@ -180,7 +181,7 @@ async def search_zerochan(bypass, query: str):
 
                     if not kw_filter(kw):
                         continue
-                    if not await (tf_scan(item.find("media:thumbnail")["url"])):
+                    if not await tf_scan(item.find("media:thumbnail")["url"]):
                         continue
 
                 logging.debug(item)

@@ -54,9 +54,7 @@ config.read("runtime/config.cfg")
 # Now we change the logging level
 logging.getLogger().setLevel(logging.getLevelName(config["Features"]["log_level"]))
 if config["Features"]["log_file"]:
-    logging.getLogger().addHandler(
-        logging.FileHandler(config["Features"]["log_file"])
-    )
+    logging.getLogger().addHandler(logging.FileHandler(config["Features"]["log_file"]))
 logging.info("Starting up...")
 
 try:
@@ -74,11 +72,13 @@ intents.message_content = True
 
 client = bridge.Bot(command_prefix=".", intents=intents)
 
+
 @client.event
 async def on_ready():
     logging.info("Logged in as {0.user}".format(client))
     game = discord.Game("in Buzzle's Box. Available on GitHub")
     await client.change_presence(status=discord.Status.online, activity=game)
+
 
 client.add_cog(AdminTools(client))
 
