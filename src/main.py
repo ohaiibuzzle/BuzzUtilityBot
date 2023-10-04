@@ -47,6 +47,13 @@ if not os.path.isdir("runtime"):
         config.write(configfile)
     exit(0)
 
+config = configparser.ConfigParser()
+config.read("runtime/config.cfg")
+
+# Now we change the logging level
+logging.getLogger().setLevel(logging.getLevelName(config["Features"]["log_level"]))
+logging.info("Starting up...")
+
 try:
     import uvloop
 except ModuleNotFoundError:
@@ -55,12 +62,6 @@ else:
     logging.info("Installing UVLoop...")
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-config = configparser.ConfigParser()
-config.read("runtime/config.cfg")
-
-# Now we change the logging level
-logging.getLogger().setLevel(logging.getLevelName(config["Features"]["log_level"]))
-logging.info("Starting up...")
 
 intents = discord.Intents.default()
 intents.members = True  # pylint: disable=assigning-non-slot
