@@ -86,7 +86,7 @@ async def search_zerochan(bypass, query: str):
             return "No result"
 
         logging.debug(total_amount)
-        logging.debug(choice)
+        # logging.debug(choice)
         if is_tag:
             try:
                 total_amount = int(
