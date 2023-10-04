@@ -5,10 +5,8 @@ import logging
 
 
 class TweetStreamer:
-    def __init__(self, pnytter_instances: list, callback, wait_time=60):
-        self.nitter_client = pnytter.Pnytter(
-            nitter_instances=pnytter_instances
-        )
+    def __init__(self, pnytter_instances: list, callback, wait_time: int = 60):
+        self.nitter_client = nitter.NitterClient(nitter_instances=pnytter_instances)
         self.on_data_callback = callback
         self.streaming_task: asyncio.Task = None
         self.wait_time = wait_time
