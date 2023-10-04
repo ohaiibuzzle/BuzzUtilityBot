@@ -27,7 +27,7 @@ mypy-extensions==1.0.0
 numpy==1.25.0
 oauthlib==3.2.2
 orjson==3.9.1
-packaging==23.1
+packaging==23.2
 Pillow==10.0.1
 PixivPy-Async==1.2.14
 pnytter==0.2.1
