@@ -1,5 +1,6 @@
 import asyncio
 import random
+import logging
 
 import aiohttp
 
@@ -34,4 +35,4 @@ async def search_danbooru(query: str) -> dict:
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-    print(loop.run_until_complete(search_danbooru("hu tao")))
+    logging.debug(loop.run_until_complete(search_danbooru("hu tao")))

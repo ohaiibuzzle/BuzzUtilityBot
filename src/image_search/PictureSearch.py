@@ -1,6 +1,7 @@
 import asyncio
 import re
 import configparser
+import logging
 
 import aioredis
 import discord
@@ -42,7 +43,7 @@ class PictureSearch(commands.Cog, name="Random image finder"):
 
         Combine tags using "+"
         """
-        print(
+        logging.info(
             "@"
             + ctx.author.name
             + "#"
@@ -85,7 +86,7 @@ class PictureSearch(commands.Cog, name="Random image finder"):
         Combine tags using "+"
         """
         await ctx.defer()
-        print(
+        logging.info(
             "@"
             + ctx.author.name
             + "#"
@@ -96,7 +97,7 @@ class PictureSearch(commands.Cog, name="Random image finder"):
         try:
             res = await self.construct_zerochan_embed(ctx.channel, tags)
         except TypeError as e:
-            print(e)
+            logging.warning(e)
             await ctx.respond(
                 "Your search string was wonky, or it included NSFW tags.\nTry again"
             )
@@ -134,7 +135,7 @@ class PictureSearch(commands.Cog, name="Random image finder"):
         Look for a random image on Pixiv
         """
         await ctx.defer()
-        print(
+        logging.info(
             "@"
             + ctx.author.name
             + "#"
@@ -173,14 +174,13 @@ class PictureSearch(commands.Cog, name="Random image finder"):
         Formats Pixiv arts in a way that makes it less... bad
         """
         await ctx.defer()
-        print(
+        logging.info(
             "@"
             + ctx.author.name
             + "#"
             + ctx.author.discriminator
             + " wants to display Pixiv art!"
         )
-        # print(args[0])
         # if the url is just the illust id
         if url_or_illustid.isdigit():
             illust_id = url_or_illustid
@@ -218,7 +218,7 @@ class PictureSearch(commands.Cog, name="Random image finder"):
         Search for a random image on Danbooru."
         """
         await ctx.defer()
-        print(
+        logging.info(
             "@"
             + ctx.author.name
             + "#"

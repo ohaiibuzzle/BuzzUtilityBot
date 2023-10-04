@@ -4,6 +4,7 @@ from PIL import UnidentifiedImageError
 
 from . import async_process_url
 from utils import embed_finder
+import logging
 
 
 class TFImage(commands.Cog, name="AI-based image rating"):
@@ -17,7 +18,7 @@ class TFImage(commands.Cog, name="AI-based image rating"):
 
         Mention an image to use!
         """
-        print(
+        logging.info(
             "@"
             + ctx.author.name
             + "#"
@@ -54,7 +55,7 @@ class TFImage(commands.Cog, name="AI-based image rating"):
                             res = await self.tensorflow_embed(attachment.url)
                             return await ctx.respond(embed=res)
                         except UnidentifiedImageError:
-                            print(msg.attachments)
+                            logging.debug(msg.attachments)
                             await ctx.respond("Hey, that is not an image")
             # Catch if we can't process it at all
             await ctx.respond("Hey, that is not an image")
@@ -97,8 +98,8 @@ def setup(client):
     try:
         from .tf_process import async_process_url
     except (ValueError, ModuleNotFoundError) as e:
-        print("Model Error: " + str(e))
-        print("ML features will be disabled")
+        logging.critical("Model Error: " + str(e))
+        logging.critical("ML features will be disabled")
         return
     else:
         client.add_cog(TFImage(client))

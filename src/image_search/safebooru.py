@@ -1,4 +1,5 @@
 import random
+import logging
 
 import aiohttp
 import discord
@@ -26,8 +27,8 @@ async def get_image(tags: str, bypass=False):
         soup = BeautifulSoup(await res.read(), features="xml")
         count = int(soup.find("posts")["count"])
 
-        # print(endpoint + tags)
-        # print(count)
+        logging.debug(endpoint + tags)
+        logging.debug(count)
         try:
             position = random_gen.randint(0, count - 1)
         except ValueError:
@@ -36,7 +37,7 @@ async def get_image(tags: str, bypass=False):
             if position < 100:
                 try:
                     post = soup.find_all("post")[position]
-                    # print(position)
+                    logging.debug(position)
 
                     if not bypass:
                         if not (await tf_scan(post.get("file_url"))):
@@ -72,8 +73,8 @@ async def get_image(tags: str, bypass=False):
 
                 post = remote_soup.find_all("post")[position]
 
-                # print(page)
-                # print(position)
+                logging.debug(page)
+                logging.debug(position)
 
                 if not bypass:
                     if not (await tf_scan(post.get("file_url"))):
@@ -108,7 +109,7 @@ def convert_to_sb_tag(tags: list):
         tag = tag.replace(" ", "_")
         new_tags.append(tag)
     ret = " ".join(new_tags)
-    # print(ret)
+    logging.debug(ret)
     return ret
 
 
@@ -135,5 +136,5 @@ if __name__ == "__main__":
     arg = "Ganyu (Genshin Impact) + Amber (Genshin Impact)"
     args = arg.split("+")
 
-    # print(safebooru_random_img(args).to_dict(), discord.ext.commands.Context())
+    logging.debug(safebooru_random_img(args).to_dict(), discord.ext.commands.Context())
     pass

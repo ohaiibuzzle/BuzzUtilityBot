@@ -1,4 +1,4 @@
-import aiohttp, asyncio
+import aiohttp, asyncio, logging
 from bs4 import BeautifulSoup
 
 iqdb_endpoint = "https://iqdb.org/?url="
@@ -19,7 +19,7 @@ async def get_sauce(url: str):
         res = await session.get(iqdb_endpoint + url)
         soup = BeautifulSoup(await res.read(), "html.parser")
         result_disp = soup.find("div", id="pages")
-        # print(result_disp)
+        logging.debug(result_disp)
         res = result_disp.find_all("table")
         res.remove(res[0])
         for _ in res:
@@ -29,7 +29,7 @@ async def get_sauce(url: str):
             img_info = _.find("a").find("img")
 
             tds = _.find_all("td")
-            # print(tds)
+            logging.debug(tds)
             for td in tds:
                 if "Safe" in td.text:
                     return {
@@ -45,4 +45,4 @@ if __name__ == "__main__":
     sauce = loop.run_until_complete(
         get_sauce("https://s1.zerochan.net/600/47/21/3166097.jpg")
     )
-    print(sauce)
+    logging.debug(sauce)

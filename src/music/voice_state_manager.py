@@ -1,5 +1,6 @@
 import asyncio
 import itertools
+import logging
 
 import async_timeout
 import discord
@@ -186,7 +187,7 @@ class VoiceState:
 
     def play_next_song(self, error=None):
         if error:
-            print(error)
+            logging.critical(error)
             raise VoiceError(str(error))
         self.next.set()
 

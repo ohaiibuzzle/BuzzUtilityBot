@@ -1,4 +1,5 @@
 import io
+import logging
 import sqlite3
 
 import aiohttp
@@ -78,7 +79,7 @@ class WelcomeMessage(commands.Cog):
         bg_w, bg_h = background.size
 
         timeout = aiohttp.ClientTimeout(total=15)
-        # print(member.avatar_url)
+        logging.debug(member.avatar_url)
         async with aiohttp.ClientSession(timeout=timeout) as session:
             raw_icon = await session.get(str(member.avatar.url))
             buffer = io.BytesIO(await raw_icon.read())

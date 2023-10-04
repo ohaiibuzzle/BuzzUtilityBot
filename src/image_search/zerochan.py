@@ -1,5 +1,6 @@
 import asyncio
 import re
+import logging
 from random import SystemRandom
 from random import choice as rchoice
 
@@ -23,7 +24,7 @@ except Exception:
 def kw_filter(keywords: str):
     for x in pls_no_tags:
         if re.search(r"\b" + re.escape(x) + r"\b", keywords):
-            print("Found banned tag: " + x)
+            logging.info("Found banned tag: " + x)
             return False
     return True
 
@@ -35,7 +36,7 @@ async def search_zerochan(bypass, query: str):
     :param query: What to look for
     """
     global random_gen
-    # print(query)
+    logging.debug(query)
     is_tag = True
     target = "https://zerochan.net/search?q="
     tag_target = "https://zerochan.net/"
@@ -58,7 +59,7 @@ async def search_zerochan(bypass, query: str):
             soup = BeautifulSoup(await res.read(), features="xml")
             # url = res.url+xml_specifier
             query = str(res.url).split("/")[-1].replace("+", " ")
-            # print(query)
+            logging.debug(query)
         elif "application/rss+xml" in str(await res.read()):
             is_tag = True
             soup = BeautifulSoup(await res.read(), features="xml")
@@ -70,19 +71,19 @@ async def search_zerochan(bypass, query: str):
             is_tag = False
             # sleep(0.5)
 
-        # print(url)
-        # print(is_tag)
-        # print(soup)
+        # logging.debug(url)
+        logging.debug(is_tag)
+        logging.debug(soup)
 
         total_amount = 0
         item_amount = len(soup.find_all("item"))
         if item_amount == 0:
-            # print(is_tag)
-            # print(soup)
+            logging.debug(is_tag)
+            logging.debug(soup)
             return "No result"
 
-        # print(total_amount)
-        # print(choice)
+        logging.debug(total_amount)
+        logging.debug(choice)
         if is_tag:
             try:
                 total_amount = int(
@@ -110,7 +111,7 @@ async def search_zerochan(bypass, query: str):
                         if not (await tf_scan(item.find("media:thumbnail")["url"])):
                             continue
 
-                    # print(item)
+                    logging.debug(item)
 
                     return {
                         "link": item.find("guid").text,
@@ -145,7 +146,7 @@ async def search_zerochan(bypass, query: str):
                     try:
                         item = page_soup.find_all("item")[c]
                     except ZeroDivisionError:
-                        print(page_soup)
+                        logging.critical(page_soup)
                         return None
 
                     if not bypass:
@@ -156,7 +157,7 @@ async def search_zerochan(bypass, query: str):
                         if not (await tf_scan(item.find("media:thumbnail")["url"])):
                             continue
 
-                    # print(item)
+                    logging.debug(item)
 
                     return {
                         "link": item.find("guid").text,
@@ -182,7 +183,7 @@ async def search_zerochan(bypass, query: str):
                     if not await (tf_scan(item.find("media:thumbnail")["url"])):
                         continue
 
-                # print(item)
+                logging.debug(item)
 
                 return {
                     "link": item.find("guid").text,
@@ -201,6 +202,6 @@ if __name__ == "__main__":
     res = loop.run_until_complete(search_zerochan(True, "Genshin Impact"))
 
     if res != None:
-        print(res)
+        logging.debug(res)
     else:
-        print("NSFW or forbidden tag!")
+        logging.debug("NSFW or forbidden tag!")

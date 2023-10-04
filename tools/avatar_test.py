@@ -2,6 +2,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageOps
 import asyncio
 import aiohttp
 import io
+import logging
 
 async def test_avatar():
         AVATAR_SIZE = 192
@@ -12,7 +13,7 @@ async def test_avatar():
         bg_w, bg_h = background.size
 
         timeout = aiohttp.ClientTimeout(total=15)
-        # print(member.avatar_url)
+        # logging.debug(member.avatar_url)
         async with aiohttp.ClientSession(timeout=timeout) as session:
             raw_icon = await session.get(str("https://cdn.discordapp.com/avatars/169257697345011712/fa1ff14e7510ea22f1cd72baeaa1bbb0.webp"))
             buffer = io.BytesIO(await raw_icon.read())

@@ -12,6 +12,7 @@ import numpy as np
 import requests
 import tflite_runtime.interpreter as tflite
 from PIL import Image
+import logging
 
 # Read the runtime config
 config = configparser.ConfigParser()
@@ -24,8 +25,7 @@ try:
     CURRENT_UA = requests.get("https://www.useragents.me/api").json()["data"][0]["ua"]
 except Exception:
     CURRENT_UA = "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0"
-
-print("TF: Loading NSFW Model. This may take a while...")
+logging.info("TF: Loading NSFW Model. This may take a while...")
 model_interpreter = tflite.Interpreter(
     model_path=model_path, num_threads=TFLITE_THREADS
 )
@@ -105,12 +105,12 @@ if __name__ == "__main__":
     url = "https://media.discordapp.net/attachments/807448656763944960/991395165153546400/FB_IMG_1656166673189.jpg"
     predicts = loop.run_until_complete(async_process_url(url))
 
-    print(url)
+    logging.debug(url)
     sorted = {
         k: v
         for k, v in sorted(predicts.items(), key=lambda item: item[1], reverse=True)
     }
     for _ in sorted:
-        print(_ + " --> " + str(format(sorted[_][0] * 100, ".2f")) + "%")
+        logging.debug(_ + " --> " + str(format(sorted[_][0] * 100, ".2f")) + "%")
 
-    print("==> " + list(sorted.keys())[0].capitalize())
+    logging.debug("==> " + list(sorted.keys())[0].capitalize())

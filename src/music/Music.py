@@ -2,6 +2,7 @@ import asyncio
 import io
 import math
 import re
+import logging
 
 import discord
 from discord.ext import commands, tasks, bridge
@@ -31,7 +32,7 @@ class Music(commands.Cog):
                 f"There was an error processing your request (Perhaps checks your command?) \n Details:{error}"
             )
         else:
-            print(error)
+            logging.critical(error)
             return ctx.respond(f"There was an error processing your request :(")
 
     def cog_unload(self):
@@ -239,7 +240,7 @@ class Music(commands.Cog):
 
     @bridge.bridge_command()
     async def search(self, ctx: bridge.BridgeContext, *, query: str):
-        print(
+        logging.info(
             f"@{ctx.author.name}#{ctx.author.discriminator} searches something on YouTube"
         )
         """
@@ -361,7 +362,7 @@ class Music(commands.Cog):
 
     @bridge.bridge_command()
     async def spotify(self, ctx, url: str, silent: bool = None):
-        print(
+        logging.info(
             f"@{ctx.author.name}#{ctx.author.discriminator} played a Spotify Playlist"
         )
         """
