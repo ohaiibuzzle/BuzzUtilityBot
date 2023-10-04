@@ -1,4 +1,4 @@
-name: Build nightly container and push to GHCR
+name: Build container and push to GHCR
 
 on:
   push:
@@ -30,5 +30,5 @@ jobs:
           platforms: linux/amd64,linux/arm64/v8
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/senpai:latest
-            ghcr.io/${{ github.repository_owner }}/senpai:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/buzz-utils-bot:latest
+            ghcr.io/${{ github.repository_owner }}/buzz-utils-bot:${{ github.sha }}
