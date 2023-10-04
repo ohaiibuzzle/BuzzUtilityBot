@@ -1,0 +1,23 @@
+name: Test dependancy compatibility
+
+on:
+  push:
+    paths: requirements.txt
+    branches: ["senpai"]
+  pull_request:
+    paths: requirements.txt
+    branches: ["senpai"]
+
+jobs:
+  test_deps:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
