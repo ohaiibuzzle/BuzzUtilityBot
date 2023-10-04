@@ -41,6 +41,7 @@ if not os.path.isdir("runtime"):
     config["Features"] = {
         "blacklisted_features": "utils.nsfwRole",
         "log_level": "WARNING",
+        "log_file": "",
     }
 
     with open("runtime/config.cfg", "w+") as configfile:
@@ -52,6 +53,10 @@ config.read("runtime/config.cfg")
 
 # Now we change the logging level
 logging.getLogger().setLevel(logging.getLevelName(config["Features"]["log_level"]))
+if config["Features"]["log_file"]:
+    logging.getLogger().addHandler(
+        logging.FileHandler(config["Features"]["log_file"])
+    )
 logging.info("Starting up...")
 
 try:
