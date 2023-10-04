@@ -42,7 +42,7 @@ if not HAS_CONFIG:
         "nsfw_model_path": "runtime/models/mobileNet.tflite",
         "nsfw_image_dim": "224",
         "nsfw_tflite_threads": "1",
-        "redis_host": "redis://localhost",
+        "redis_host": "redis://redis",
         "nitter_instances": "",
         "tweetwatch_wait_time": "60",
     }

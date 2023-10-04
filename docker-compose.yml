@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  buzzle-bot:
+    image: ghcr.io/ohaiibuzzle/buzz-utils-bot:latest
+    container_name: buzzle-bot
+    restart: unless-stopped
+    volumes:
+      - ./runtime:/app/runtime
+    depends_on:
+      - redis
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    user: 1000:1000
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    user: 1000:1000
+
+volumes:
+  redis_data:
