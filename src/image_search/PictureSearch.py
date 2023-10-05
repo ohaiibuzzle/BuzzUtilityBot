@@ -3,7 +3,7 @@ import re
 import configparser
 import logging
 
-import aioredis
+from redis import asyncio as aioredis
 import discord
 from discord.ext import commands, bridge
 
