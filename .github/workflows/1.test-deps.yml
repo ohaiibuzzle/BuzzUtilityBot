@@ -36,6 +36,7 @@ jobs:
           arch: aarch64
           distro: ubuntu20.04
           run: |
+            apt-get install sudo
             sudo apt-get update
             sudo apt-get install -y python3.9 python3.9-dev python3.9-venv python3.9-distutils
             python3.9 -m pip install --upgrade pip
