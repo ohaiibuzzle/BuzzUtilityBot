@@ -31,7 +31,7 @@ Pillow==10.0.1
 PixivPy-Async==1.2.14
 pnytter @ git+https://github.com/ohaiibuzzle/pnytter.git
 py-cord==2.4.1
-pycares==4.3.0
+pycares==4.4.0
 pycparser==2.21
 pycryptodomex==3.19.0
 pydantic==1.9.1
