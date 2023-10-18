@@ -49,7 +49,7 @@ tflite-runtime==2.13.0
 typing-inspect==0.9.0
 typing_extensions==4.8.0
 urljoin==1.0.0
-urllib3==2.0.6
+urllib3==2.0.7
 uvloop==0.18.0
 websockets==11.0.3
 wrapt==1.15.0
