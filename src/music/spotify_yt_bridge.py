@@ -1,7 +1,6 @@
 import asyncio
 import configparser
 
-import pyyoutube
 import spotipy
 
 from .youtube_dl_source import YouTubeDLSingleSource
@@ -34,25 +33,6 @@ def spotify_to_track_name(playlist_url: str):
 
     return tracks
 
-
-def track_names_to_yt_api(tracks: list):
-    """
-    Use the YouTube Data V3 API (via pyyoutube) to search for matching songs
-    :param tracks: a list of tracks
-    """
-    yt_tracks = []
-    youtube_api = pyyoutube.Api(api_key=config["Credentials"]["youtube_data_v3_key"])
-    for track in tracks:
-        this_video_id = (
-            youtube_api.search_by_keywords(q=track, search_type="video")
-            .items[0]
-            .to_dict()["id"]["videoId"]
-        )
-        yt_tracks.append("https://youtu.be/" + this_video_id)
-
-    return yt_tracks
-
-
 async def async_spotify_playlist_to_track_list(playlist_url: str, loop):
     """Convert a Spotify playlist to a list of track name, asynchronously
 
@@ -81,44 +61,6 @@ async def track_names_to_yt_alt(tracks: list, loop):
         yt_tracks.append(result["entries"][0]["webpage_url"])
 
     return yt_tracks
-
-
-async def async_spotify_to_yt(playlist_url: str, loop=None):
-    """
-    Use youtube-dl to search for matching songs, asynchronously
-    :param playlist_url: The URL to a playlist
-    :param loop: an asyncio event loop
-    """
-    loop = loop or asyncio.get_event_loop()
-    track_list = await loop.run_in_executor(None, spotify_to_track_name, playlist_url)
-    return await loop.run_in_executor(None, track_names_to_yt_api, track_list)
-
-
-def single_track_to_yt_url(track_name: str) -> str:
-    """
-    Use the YouTube Data V3 API (via pyyoutube) to search for matching song
-    :param track_name: A track name
-    :param loop: an asyncio event loop
-    :return: A YouTube Link
-    """
-    youtube_api = pyyoutube.Api(api_key=config["Credentials"]["youtube_data_v3_key"])
-    this_video_id = (
-        youtube_api.search_by_keywords(q=track_name, search_type="video")
-        .items[0]
-        .to_dict()["id"]["videoId"]
-    )
-    return "https://youtu.be/" + this_video_id
-
-
-async def async_single_track_to_yt(track_name: str, loop=None):
-    """
-    Use the YouTube Data V3 API (via pyyoutube) to search for matching song, asynchronously
-    :param track_name: A track name
-    :param loop: an asyncio event loop
-    :return: A YouTube Link
-    """
-    loop = loop or asyncio.get_event_loop()
-    return await loop.run_in_executor(None, single_track_to_yt_url, track_name)
 
 
 async def async_single_track_to_yt_alt(track_name: str, loop=None):
