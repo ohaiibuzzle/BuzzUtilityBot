@@ -31,7 +31,9 @@ class WelcomeMessage(commands.Cog):
                     channel = discord.utils.get(
                         member.guild.channels, id=server_info[1]
                     )
-                    embed, file = await WelcomeMessage.construct_welcome_embed(member)
+                    embed, file = await WelcomeMessage.construct_welcome_embed(
+                        member
+                    )
                     await channel.send(file=file, embed=embed)
                 pass
 
@@ -63,7 +65,9 @@ class WelcomeMessage(commands.Cog):
             {"guildid": ctx.guild.id},
         )
         self.db.commit()
-        await ctx.send("Success. Removed the welcome messages from this channel!")
+        await ctx.send(
+            "Success. Removed the welcome messages from this channel!"
+        )
 
     @staticmethod
     async def construct_welcome_embed(member: discord.Member):
@@ -121,14 +125,18 @@ class WelcomeMessage(commands.Cog):
             text_layer = Image.new("RGBA", (background.size), (0, 0, 0, 0))
             draw = ImageDraw.Draw(text_layer)
 
-            text_w, text_h = draw.textsize(member_msg, font=text_font)
-            welc_w, welc_h = draw.textsize(server_msg, font=text_font)
+            text_w = int(draw.textlength(member_msg, font=text_font))
+            text_h = len(member_msg.split("\n")) * text_font.size
+            welc_w = int(draw.textlength(server_msg, font=text_font))
+            welc_h = len(server_msg.split("\n")) * text_font.size
 
             welc_layer = Image.new("RGBA", (welc_w, welc_h), (0, 0, 0, 200))
             draw = ImageDraw.Draw(welc_layer)
             draw.text((0, 0), server_msg, fill="white", font=text_font)
 
-            username_layer = Image.new("RGBA", (text_w, text_h), (0, 0, 0, 200))
+            username_layer = Image.new(
+                "RGBA", (text_w, text_h), (0, 0, 0, 200)
+            )
             draw = ImageDraw.Draw(username_layer)
             draw.text((0, 0), member_msg, fill="white", font=text_font)
 
@@ -137,7 +145,9 @@ class WelcomeMessage(commands.Cog):
                 ((bg_w - text_w) // 2, bg_h - 10 - text_h),
                 username_layer,
             )
-            text_layer.paste(welc_layer, ((bg_w - welc_w) // 2, 10), welc_layer)
+            text_layer.paste(
+                welc_layer, ((bg_w - welc_w) // 2, 10), welc_layer
+            )
 
             final_img = Image.alpha_composite(blurple, text_layer)
 
@@ -146,7 +156,9 @@ class WelcomeMessage(commands.Cog):
             embed.add_field(name="Member", value=member_msg, inline=False)
 
             embed.add_field(
-                name="Account Creation Date", value=member.created_at, inline=False
+                name="Account Creation Date",
+                value=str(member.created_at),
+                inline=False,
             )
 
             embed.add_field(name="Enjoy your stay!", value="👋", inline=False)
