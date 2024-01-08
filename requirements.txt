@@ -6,7 +6,7 @@ lxml==4.9.4
 marshmallow-enum==1.5.1
 numpy==1.26.3
 orjson==3.9.10
-pillow==10.1.0
+pillow==10.2.0
 pixivpy-async==1.2.14
 pnytter @ git+https://github.com/ohaiibuzzle/pnytter.git
 py-cord==2.4.1
