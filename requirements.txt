@@ -2,7 +2,7 @@ aiodns==3.1.1
 aiosqlite==0.19.0
 cchardet==2.1.7
 isodate==0.6.1
-lxml==4.9.4
+lxml==5.1.0
 marshmallow-enum==1.5.1
 numpy==1.26.3
 orjson==3.9.10
