@@ -9,7 +9,7 @@ orjson==3.10.5
 pillow==10.4.0
 pixivpy-async==1.2.14
 pnytter @ git+https://github.com/ohaiibuzzle/pnytter.git
-py-cord==2.4.1
+py-cord==2.6.0
 pynacl==1.5.0
 pysaucenao==1.6.2
 pytz==2024.1
