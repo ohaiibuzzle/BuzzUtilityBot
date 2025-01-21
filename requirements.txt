@@ -5,7 +5,7 @@ isodate==0.7.2
 lxml==5.3.0
 marshmallow-enum==1.5.1
 numpy==1.26.4
-orjson==3.10.14
+orjson==3.10.15
 pillow==10.4.0
 pixivpy-async==1.2.14
 pnytter @ git+https://github.com/ohaiibuzzle/pnytter.git
