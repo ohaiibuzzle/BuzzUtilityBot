@@ -1,12 +1,11 @@
-FROM python:3.10-bullseye AS wheel_builder
-RUN apt-get update && apt-get install -y --no-install-recommends --no-install-suggests \
-    build-essential git
+FROM python:3.11-bookworm AS wheel_builder
+RUN apt-get update && apt-get install -y build-essential git
 
 COPY requirements.txt /tmp/requirements.txt
 RUN pip wheel -r /tmp/requirements.txt --wheel-dir /tmp/wheels
 
 
-FROM python:3.10-slim-bullseye
+FROM python:3.11-slim-bookworm
 
 # Install OS deps
 RUN apt-get update && apt-get install -y --no-install-recommends --no-install-suggests \
