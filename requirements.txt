@@ -17,4 +17,4 @@ spotipy==2.25.1
 tflite-runtime==2.14.0
 typing-inspect==0.9.0
 uvloop==0.21.0
-yt-dlp==2025.6.25
+yt-dlp==2025.6.30
