@@ -13,7 +13,7 @@ pynacl==1.6.0
 pysaucenao==1.6.3
 pytz==2025.2
 requests-oauthlib==2.0.0
-spotipy==2.25.1
+spotipy==2.25.2
 tflite-runtime==2.14.0
 typing-inspect==0.9.0
 uvloop==0.22.1
