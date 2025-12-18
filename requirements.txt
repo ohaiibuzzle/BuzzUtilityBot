@@ -1,4 +1,4 @@
-aiodns==3.5.0
+aiodns==3.6.1
 aiosqlite==0.21.0
 isodate==0.7.2
 lxml==6.0.2
