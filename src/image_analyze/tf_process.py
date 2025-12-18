@@ -10,7 +10,7 @@ import configparser
 
 import numpy as np
 import requests
-import tflite_runtime.interpreter as tflite
+import ai_edge_litert.interpreter as tflite
 from PIL import Image
 import logging
 
