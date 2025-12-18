@@ -36,6 +36,7 @@ if not HAS_CONFIG:
         "spotify_web_api_cid": "",
         "spotify_web_api_sec": "",
         "twitter_bearer_token": "",
+        "zerochan_user_agent": "",
     }
 
     config["Dependancies"] = {

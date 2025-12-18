@@ -3,9 +3,9 @@ import re
 import logging
 from random import SystemRandom
 from random import choice as rchoice
+import configparser
 
 import aiohttp
-import requests
 from bs4 import BeautifulSoup
 
 from . import tf_scan
@@ -16,12 +16,10 @@ pls_no_tags = [
     "Nipples"
 ]  # The AI *should* handle these, 'Bend Over', 'Panties', 'Bra', 'Underwear', 'Lingerie']
 
-try:
-    CURRENT_UA = requests.get("https://www.useragents.me/api").json()["data"][0]["ua"]
-except Exception:
-    CURRENT_UA = (
-        "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0"
-    )
+config = configparser.ConfigParser()
+config.read("runtime/config.cfg")
+
+CURRENT_UA = config["Credentials"]["zerochan_user_agent"]
 
 
 def kw_filter(keywords: str):
