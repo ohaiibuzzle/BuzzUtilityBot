@@ -8,7 +8,7 @@ orjson==3.11.4
 pillow==11.3.0
 pixivpy-async==1.2.14
 py-cord==2.4.1
-pynacl==1.6.0
+pynacl==1.6.1
 pysaucenao==1.6.3
 pytz==2025.2
 requests-oauthlib==2.0.0
