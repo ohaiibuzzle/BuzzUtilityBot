@@ -66,15 +66,6 @@ if config["Features"]["log_file"]:
     logging.getLogger().addHandler(logging.FileHandler(config["Features"]["log_file"]))
 logging.info("Starting up...")
 
-try:
-    import uvloop
-except ModuleNotFoundError:
-    pass
-else:
-    logging.info("Installing UVLoop...")
-    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-
-
 intents = discord.Intents.default()
 intents.members = True  # pylint: disable=assigning-non-slot
 intents.message_content = True

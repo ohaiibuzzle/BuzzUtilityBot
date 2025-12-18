@@ -7,7 +7,6 @@ numpy==1.26.4
 orjson==3.11.4
 pillow==11.3.0
 pixivpy-async==1.2.14
-pnytter @ git+https://github.com/ohaiibuzzle/pnytter.git
 py-cord==2.4.1
 pynacl==1.6.0
 pysaucenao==1.6.3
@@ -18,3 +17,4 @@ tflite-runtime==2.14.0
 typing-inspect==0.9.0
 uvloop==0.22.1
 yt-dlp==2025.10.22
+beautifulsoup4==4.14.3
