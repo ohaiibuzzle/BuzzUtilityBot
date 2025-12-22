@@ -3,7 +3,7 @@ aiosqlite==0.22.0
 isodate==0.7.2
 lxml==6.0.2
 marshmallow-enum==1.5.1
-numpy==1.26.4
+numpy==2.4.0
 orjson==3.11.5
 pillow==11.3.0
 pixivpy-async==1.2.14
