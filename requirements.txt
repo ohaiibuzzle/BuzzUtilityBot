@@ -5,7 +5,7 @@ lxml==6.0.2
 marshmallow-enum==1.5.1
 numpy==1.26.4
 orjson==3.11.6
-pillow==11.3.0
+pillow==12.1.0
 pixivpy-async==1.2.14
 py-cord==2.4.1
 pynacl==1.6.2
