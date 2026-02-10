@@ -1,13 +1,16 @@
-from pysaucenao import SauceNao
-from pysaucenao.errors import SauceNaoException
+from pysaucenao import SauceNao, SauceNaoIndexes, SauceNaoFilter
+from pysaucenao.errors import SauceNaoError
 from config_reader import GLOBAL_CONFIG as config
 import asyncio, logging
 
+indexes = SauceNaoIndexes()
+indexes.add(SauceNaoIndexes.ALL)
+
 saucer = SauceNao(
     api_key=config["Credentials"]["saucenao_key"],
-    db_mask=1443126841888,
-    db=None,
-    results_limit=1,
+    indexes=indexes,
+    filter_level=SauceNaoFilter.POTENTIALLY_EXPLICIT,
+    max_results=1,
 )
 
 
@@ -20,11 +23,12 @@ async def find_sauce(url):
     Returns:
         BasicSauce: The first search result
     """
+    logging.debug("Searching SauceNAO for image: " + url)
     try:
         results = await saucer.from_url(url)
         logging.debug(results)
         return results[0]
-    except SauceNaoException as e:
+    except SauceNaoError as e:
         logging.critical(e)
         return None
     except IndexError:

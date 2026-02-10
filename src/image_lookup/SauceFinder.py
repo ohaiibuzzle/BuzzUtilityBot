@@ -45,13 +45,13 @@ class SauceFinder(commands.Cog, name="Picture Sauce Finding"):
         if msg is not None:
             if msg.embeds.__len__() > 0:
                 for embed in msg.embeds:
-                    if embed.image.url is not discord.Embed.Empty:
+                    if embed.image.url is not None:
                         res = await self.construct_saucenao_embed_pixiv(embed.image.url)
                         if res is not None:
                             return await ctx.respond(embed=res)
                         else:
                             return await ctx.respond("No sauce found")
-                    elif embed.thumbnail.url is not discord.Embed.Empty:
+                    elif embed.thumbnail.url is not None:
                         res = await self.construct_saucenao_embed_pixiv(
                             embed.thumbnail.url
                         )
@@ -59,7 +59,7 @@ class SauceFinder(commands.Cog, name="Picture Sauce Finding"):
                             return await ctx.respond(embed=res)
                         else:
                             return await ctx.respond("No sauce found")
-                    elif embed.url is not discord.Embed.Empty:
+                    elif embed.url is not None:
                         res = await self.construct_saucenao_embed_pixiv(embed.url)
                         if res is not None:
                             return await ctx.respond(embed=res)
@@ -99,19 +99,19 @@ class SauceFinder(commands.Cog, name="Picture Sauce Finding"):
         if msg is not None:
             if msg.embeds.__len__() > 0:
                 for embed in msg.embeds:
-                    if embed.image.url is not discord.Embed.Empty:
+                    if embed.image.url is not None:
                         res = await self.construct_iqdb_embed(embed.image.url)
                         if res is not None:
                             return await ctx.respond(embed=res)
                         else:
                             return await ctx.respond("No sauce found")
-                    elif embed.thumbnail.url is not discord.Embed.Empty:
+                    elif embed.thumbnail.url is not None:
                         res = await self.construct_iqdb_embed(embed.thumbnail.url)
                         if res is not None:
                             return await ctx.respond(embed=res)
                         else:
                             return await ctx.respond("No sauce found")
-                    elif embed.url is not discord.Embed.Empty:
+                    elif embed.url is not None:
                         res = await self.construct_iqdb_embed(embed.url)
                         if res is not None:
                             return await ctx.respond(embed=res)
@@ -143,8 +143,8 @@ class SauceFinder(commands.Cog, name="Picture Sauce Finding"):
                 value=f"{attachment.author_name} - {attachment.author_url}",
                 inline=False,
             )
-        if attachment.source_url:
-            embed.add_field(name="Source", value=attachment.source_url, inline=False)
+        if attachment.urls and len(attachment.urls) > 0:
+            embed.add_field(name="Source", value=attachment.urls[0], inline=False)
         if attachment.index_name:
             embed.add_field(name="Index", value=attachment.index_name, inline=False)
         embed.set_thumbnail(url=attachment.thumbnail)
