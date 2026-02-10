@@ -6,7 +6,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends --no-install-su
 
 COPY requirements.txt /tmp/requirements.txt
 
-COPY --from=wheel_builder /tmp/wheels /tmp/wheels
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
 RUN rm -rf /tmp/wheels
 
