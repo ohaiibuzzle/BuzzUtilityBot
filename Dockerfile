@@ -1,4 +1,4 @@
-FROM python:3.11-bookworm AS wheel_builder
+FROM python:3.13-bookworm AS wheel_builder
 RUN apt-get update && apt-get install -y build-essential git
 
 COPY requirements.txt /tmp/requirements.txt
@@ -12,9 +12,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends --no-install-su
     ffmpeg
 
 COPY requirements.txt /tmp/requirements.txt
-# Subsitute pnytter @ git+https://github.com/ohaiibuzzle/pnytter.git with pnytter==0.2.2
-# (as we don't want to install git in the final image)
-RUN sed -i 's/pnytter @ git+https:\/\/github.com\/ohaiibuzzle\/pnytter.git/pnytter==0.2.2/g' /tmp/requirements.txt
 
 COPY --from=wheel_builder /tmp/wheels /tmp/wheels
 RUN pip install --no-index --no-cache --find-links=/tmp/wheels -r /tmp/requirements.txt
