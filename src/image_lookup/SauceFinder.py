@@ -2,13 +2,12 @@ from discord.ext import commands, bridge
 from .saucenao import find_sauce
 from .iqdb import get_sauce
 from utils import embed_finder
+from config_reader import GLOBAL_CONFIG as config
 import discord
-import configparser
 from pysaucenao.saucenao import SauceNaoResults
 import logging
 
-config = configparser.ConfigParser()
-config.read("runtime/config.cfg")
+
 
 
 class SauceFinder(commands.Cog, name="Picture Sauce Finding"):

@@ -1,9 +1,7 @@
 from pysaucenao import SauceNao
 from pysaucenao.errors import SauceNaoException
-import asyncio, configparser, logging
-
-config = configparser.ConfigParser()
-config.read("runtime/config.cfg")
+from config_reader import GLOBAL_CONFIG as config
+import asyncio, logging
 
 saucer = SauceNao(
     api_key=config["Credentials"]["saucenao_key"],

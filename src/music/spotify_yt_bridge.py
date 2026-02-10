@@ -1,12 +1,10 @@
 import asyncio
-import configparser
 
 import spotipy
 
 from .youtube_dl_source import YouTubeDLSingleSource
 
-config = configparser.ConfigParser()
-config.read("runtime/config.cfg")
+from config_reader import GLOBAL_CONFIG as config
 
 spotify_creds_manager = spotipy.SpotifyClientCredentials(
     config["Credentials"]["spotify_web_api_cid"],

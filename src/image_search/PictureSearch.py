@@ -1,6 +1,5 @@
 import asyncio
 import re
-import configparser
 import logging
 
 from redis import asyncio as aioredis
@@ -13,8 +12,7 @@ from .safebooru import safebooru_random_img
 from .zerochan import search_zerochan
 
 # load config for redis
-config = configparser.ConfigParser()
-config.read("runtime/config.cfg")
+from config_reader import GLOBAL_CONFIG as config
 redis_host = config["Dependancies"]["redis_host"]
 
 
@@ -37,7 +35,7 @@ class PictureSearch(commands.Cog, name="Random image finder"):
         brief="Random image from SafeBooru",
         aliases=["sbr"],
     )
-    async def sbrandom(self, ctx, *, tags):
+    async def sbrandom(self, ctx: bridge.BridgeContext, *, tags):
         """
         Look for a random image on SafeBooru, input can be any of SafeBooru's tag query
 
@@ -50,6 +48,7 @@ class PictureSearch(commands.Cog, name="Random image finder"):
             + ctx.author.discriminator
             + " wants something random (SafeBooru)!"
         )
+
         await ctx.defer()
         try:
             target = await safebooru_random_img(tags.split("+"), ctx.channel)
@@ -130,7 +129,7 @@ class PictureSearch(commands.Cog, name="Random image finder"):
         brief="Look for a random image on Pixiv",
         aliases=["pxr"],
     )
-    async def pixivrandom(self, ctx, *, tags):
+    async def pixivrandom(self, ctx: bridge.BridgeContext, *, tags):
         """
         Look for a random image on Pixiv
         """
@@ -169,7 +168,7 @@ class PictureSearch(commands.Cog, name="Random image finder"):
     @bridge.bridge_command(
         brief="Display a Pixiv post in bot's format", aliases=["pxs"]
     )
-    async def pixivshow(self, ctx, *, url_or_illustid):
+    async def pixivshow(self, ctx: bridge.BridgeContext, *, url_or_illustid):
         """
         Formats Pixiv arts in a way that makes it less... bad
         """
@@ -213,7 +212,7 @@ class PictureSearch(commands.Cog, name="Random image finder"):
         brief="Danbooru (NSFW) search",
         aliases=["dbr"],
     )
-    async def danboorurandom(self, ctx: commands.Context, *, tags):
+    async def danboorurandom(self, ctx: bridge.BridgeContext, *, tags):
         """
         Search for a random image on Danbooru."
         """
@@ -255,10 +254,16 @@ class PictureSearch(commands.Cog, name="Random image finder"):
                 await asyncio.sleep(5)
                 await msg.delete()
 
+    async def _bridge_call_trampoline(self, func, ctx, *args, **kwargs):
+        if ctx.is_app:
+            await func.invoke(ctx, *args, **kwargs)
+        else:
+            await func.ext_variant(self, ctx, *args, **kwargs)
+
     @bridge.bridge_command(
         brief="Execute the last command, again!",
     )
-    async def more(self, ctx: commands.Context):
+    async def more(self, ctx: bridge.BridgeContext):
         """
         Run the last command you executed, timeout is 15s
 
@@ -270,21 +275,14 @@ class PictureSearch(commands.Cog, name="Random image finder"):
             return
         last_exec = str(last_exec)
         if last_exec.startswith("ZEROCHAN"):
-            # await self.zcrandom(ctx, tags=last_exec[9:])
-            ctx.message.content = f"{ctx.prefix}zcr {last_exec[9:]}"
-            await self.client.process_commands(ctx.message)
+            # await self.zcrandom.invoke(ctx, tags=last_exec[9:])
+            await self._bridge_call_trampoline(self.zcrandom, ctx, tags=last_exec[9:])
         elif last_exec.startswith("SAFEBOORU"):
-            # await self.sbrandom(ctx, tags=last_exec[10:])
-            ctx.message.content = f"{ctx.prefix}sbr {last_exec[10:]}"
-            await self.client.process_commands(ctx.message)
+            await self._bridge_call_trampoline(self.sbrandom, ctx, tags=last_exec[10:])
         elif last_exec.startswith("PIXIV"):
-            # await self.pixivrandom(ctx, tags=last_exec[6:])
-            ctx.message.content = f"{ctx.prefix}pxr {last_exec[6:]}"
-            await self.client.process_commands(ctx.message)
+            await self._bridge_call_trampoline(self.pixivrandom, ctx, tags=last_exec[6:])
         elif last_exec.startswith("DANBOORU"):
-            # await self.danboorurandom(ctx, tags=last_exec[9:])
-            ctx.message.content = f"{ctx.prefix}dbr {last_exec[9:]}"
-            await self.client.process_commands(ctx.message)
+            await self._bridge_call_trampoline(self.danboorurandom, ctx, tags=last_exec[9:])
 
     @staticmethod
     async def construct_zerochan_embed(ch, query: str) -> discord.Embed:

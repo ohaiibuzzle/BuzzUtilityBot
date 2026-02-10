@@ -20,7 +20,7 @@ class NSFWRoleManagement(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def setNSFWRole(self, ctx: commands.Context):
+    async def setNSFWRole(self, ctx):
         """
         Set NSFW Role and enable NSFW support features on this server
         """
@@ -56,7 +56,7 @@ class NSFWRoleManagement(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def delNSFWRole(self, ctx: commands.Context):
+    async def delNSFWRole(self, ctx):
         """
         Remove NSFW role and clear all bans from this server
         """
@@ -165,7 +165,7 @@ class NSFWRoleManagement(commands.Cog):
                     await ctx.author.send("Done.")
 
     @commands.command()
-    async def nsfwban(self, ctx: commands.Context, *, reason: str):
+    async def nsfwban(self, ctx, *, reason: str):
         """
         Ban member from getting NSFW roles
         """
@@ -194,7 +194,7 @@ class NSFWRoleManagement(commands.Cog):
             await ctx.send("User have been banned from NSFW")
 
     @commands.command()
-    async def nsfwunban(self, ctx: commands.Context):
+    async def nsfwunban(self, ctx):
         """
         Unban member from NSFW
         """

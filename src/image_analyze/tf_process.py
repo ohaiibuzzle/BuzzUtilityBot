@@ -6,7 +6,7 @@ from traceback import print_tb
 environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 import asyncio
-import configparser
+from config_reader import GLOBAL_CONFIG as config
 
 import numpy as np
 import requests
@@ -15,8 +15,6 @@ from PIL import Image
 import logging
 
 # Read the runtime config
-config = configparser.ConfigParser()
-config.read("runtime/config.cfg")
 model_path = config["Dependancies"]["nsfw_model_path"]
 IMAGE_DIM = int(config["Dependancies"]["nsfw_image_dim"])
 TFLITE_THREADS = int(config["Dependancies"]["nsfw_tflite_threads"])

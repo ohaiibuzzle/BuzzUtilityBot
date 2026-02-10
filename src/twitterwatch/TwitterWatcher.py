@@ -1,4 +1,3 @@
-import configparser
 import logging
 import random
 import sqlite3
@@ -10,8 +9,7 @@ import pnytter
 
 from . import tweetstream
 
-config = configparser.RawConfigParser()
-config.read("runtime/config.cfg")
+from config_reader import GLOBAL_CONFIG as config
 
 
 class TwitterWatcher(commands.Cog):

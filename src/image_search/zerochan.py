@@ -3,8 +3,6 @@ import re
 import logging
 from random import SystemRandom
 from random import choice as rchoice
-import configparser
-
 import aiohttp
 from bs4 import BeautifulSoup
 
@@ -16,8 +14,7 @@ pls_no_tags = [
     "Nipples"
 ]  # The AI *should* handle these, 'Bend Over', 'Panties', 'Bra', 'Underwear', 'Lingerie']
 
-config = configparser.ConfigParser()
-config.read("runtime/config.cfg")
+from config_reader import GLOBAL_CONFIG as config
 
 CURRENT_UA = config["Credentials"]["zerochan_user_agent"]
 

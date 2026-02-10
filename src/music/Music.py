@@ -7,6 +7,7 @@ import logging
 import discord
 from discord.ext import commands, tasks, bridge
 from spotipy.exceptions import SpotifyException
+from config_reader import GLOBAL_CONFIG as config
 
 from music import spotify_yt_bridge, voice_state_manager, youtube_dl_source
 
@@ -16,8 +17,14 @@ class Music(commands.Cog):
         self.client = client
         self.voice_states = {}
 
+    async def _bridge_call_trampoline(self, func, ctx, *args, **kwargs):
+        if ctx.is_app:
+            await func.invoke(ctx, *args, **kwargs)
+        else:
+            await func.ext_variant(self, ctx, *args, **kwargs)
+
     def get_voice_state(
-        self, ctx: bridge.BridgeContext
+        self, ctx
     ) -> voice_state_manager.VoiceState:
         state = self.voice_states.get(ctx.guild.id)
         if not state or state.has_timed_out:
@@ -49,7 +56,7 @@ class Music(commands.Cog):
         ctx.voice_state = self.get_voice_state(ctx)
 
     @bridge.bridge_command()
-    async def summon(self, ctx: bridge.BridgeContext):
+    async def summon(self, ctx):
         """
         Connects to the user's voice channel
         """
@@ -70,7 +77,7 @@ class Music(commands.Cog):
         ctx.voice_state.summon_user = ctx.author
 
     @bridge.bridge_command(aliases=["dc"])
-    async def disconnect(self, ctx: bridge.BridgeContext):
+    async def disconnect(self, ctx):
         """
         Disconnect and clear queue
         """
@@ -102,7 +109,7 @@ class Music(commands.Cog):
     @bridge.bridge_command()
     async def play(
         self,
-        ctx: bridge.BridgeContext,
+        ctx,
         *,
         url: str,
         silent_mesg: bool = False,
@@ -112,18 +119,15 @@ class Music(commands.Cog):
         """
         Play **from URL**
         """
-        if not ctx.voice_state.voice:
-            ctx.message.content = f"{ctx.prefix}summon"
-            await self.client.process_commands(ctx.message)
         await ctx.defer()
+        if not ctx.voice_state.voice:
+            await self._bridge_call_trampoline(self.summon, ctx)
         # Handle Spotify stuff separately
         if re.match(
             r"https?://open\.spotify\.com/(track|album|playlist)/(?P<id>[^/?&#]+)",
             url,
         ):
-            # Regex stolen from youtube-dl. Not dealing with that haha.
-            ctx.message.content = f"{ctx.prefix}spotify {url}"
-            return await self.client.process_commands(ctx.message)
+            await self._bridge_call_trampoline(self.spotify, ctx, url=url, silent=hidden)
         try:
             source = await youtube_dl_source.YouTubeDLSingleSource.from_url(
                 url,
@@ -166,7 +170,7 @@ class Music(commands.Cog):
                 await asyncio.sleep(8)
 
     @bridge.bridge_command(name="pause")
-    async def _pause(self, ctx: bridge.BridgeContext):
+    async def _pause(self, ctx):
         """
         Pause the current song
         """
@@ -176,7 +180,7 @@ class Music(commands.Cog):
                 await ctx.message.add_reaction("🆗")
 
     @bridge.bridge_command(name="resume")
-    async def _resume(self, ctx: bridge.BridgeContext):
+    async def _resume(self, ctx):
         """
         Resume the current song
         """
@@ -196,11 +200,10 @@ class Music(commands.Cog):
         ctx.voice_state.play_queue.remove(index - 1)
         if isinstance(ctx, bridge.BridgeExtContext):
             await ctx.message.add_reaction("🆗")
-            ctx.message.content = f"{ctx.prefix}queue"
-            await self.client.process_commands(ctx.message)
+            await self._bridge_call_trampoline(self.queue, ctx)
 
     @bridge.bridge_command()
-    async def volume(self, ctx: bridge.BridgeContext, volume: float):
+    async def volume(self, ctx, volume: float):
         """
         Adjust volume (0-100)
         """
@@ -239,7 +242,7 @@ class Music(commands.Cog):
             await ctx.respond(embed=this_embed)
 
     @bridge.bridge_command()
-    async def search(self, ctx: bridge.BridgeContext, *, query: str):
+    async def search(self, ctx, *, query: str):
         logging.info(
             f"@{ctx.author.name}#{ctx.author.discriminator} searches something on YouTube"
         )
@@ -271,9 +274,13 @@ class Music(commands.Cog):
             return await ctx.respond("Timeout!")
         else:
             if msg.content.isdigit():
-                await search_res.delete()
-                ctx.message.content = f"{ctx.prefix}play {result[int(msg.content) - 1]['webpage_url']} silent_mesg=True isurl=True"
-                return await self.client.process_commands(ctx.message)
+                return await self._bridge_call_trampoline(
+                    self.play,
+                    ctx,
+                    url=result[int(msg.content) - 1]["webpage_url"],
+                    silent_mesg=True,
+                    isurl=True,
+                )
             else:
                 return await ctx.respond("That was not a valid selection!")
 
@@ -285,7 +292,7 @@ class Music(commands.Cog):
         await ctx.respond(embed=ctx.voice_state.current.create_embed())
 
     @bridge.bridge_command(name="loop")
-    async def _loop(self, ctx: bridge.BridgeContext):
+    async def _loop(self, ctx):
         """Loops/Unloops whatever is currently being played
 
         Args:
@@ -304,7 +311,7 @@ class Music(commands.Cog):
             await ctx.message.add_reaction("✅")
 
     @bridge.bridge_command(name="queueloop")
-    async def _queueloop(self, ctx: bridge.BridgeContext):
+    async def _queueloop(self, ctx):
         """
         Loops/Unloops the entire queue
         """
@@ -329,8 +336,7 @@ class Music(commands.Cog):
             return await ctx.respond("Not playing any music right now...")
         else:
             if n > len(ctx.voice_state.play_queue):
-                ctx.message.content = f"{ctx.prefix}disconnect"
-                return await self.client.process_commands(ctx.message)
+                return await self._bridge_call_trampoline(self.disconnect, ctx)
             await ctx.respond(f"Skipping {n} track...")
             ctx.voice_state.skip(n)
 
@@ -368,10 +374,9 @@ class Music(commands.Cog):
         """
         Plays a Spotify Playlist
         """
-        if not ctx.voice_state.voice:
-            ctx.message.content = f"{ctx.prefix}summon"
-            await self.client.process_commands(ctx.message)
         await ctx.defer()
+        if not ctx.voice_state.voice:
+            await self._bridge_call_trampoline(self.summon, ctx)
         if re.match(
             r"https?://open\.spotify\.com/(playlist|album)/(?P<id>[^/?&#]+)", url
         ):
@@ -408,28 +413,35 @@ class Music(commands.Cog):
                             # User disconnected
                             return
                         if not silent:
-                            ctx.message.content = f"{ctx.prefix}play {track_link} silent_mesg=True isurl=True"
-                            await self.client.process_commands(ctx.message)
-                        else:
-                            ctx.message.content = (
-                                f"{ctx.prefix}play {track_link} hidden=True"
+                            await self._bridge_call_trampoline(
+                                self.play,
+                                ctx,
+                                url=track_link,
+                                silent_mesg=True,
+                                isurl=True,
                             )
-                            await self.client.process_commands(ctx.message)
+                        else:
+                            await self._bridge_call_trampoline(
+                                self.play,
+                                ctx,
+                                url=track_link,
+                                silent_mesg=True,
+                                isurl=True,
+                                hidden=True,
+                            )
                         await asyncio.sleep(2)
-
-                ctx.message.content = f"{ctx.prefix}queue"
-                await self.client.process_commands(ctx.message)
+                await self._bridge_call_trampoline(self.queue, ctx)
         elif re.match(r"https?://open\.spotify\.com/track/(?P<id>[^/?&#]+)", url):
             yt_url = await spotify_yt_bridge.async_single_spotify_track_to_yt(
                 url, loop=self.client.loop
             )
-            ctx.message.content = (
-                f"{ctx.prefix}play {yt_url} silent_mesg=True isurl=True"
+            await self._bridge_call_trampoline(
+                self.play,
+                ctx, url=yt_url, silent_mesg=True, isurl=True, hidden=True
             )
-            return await self.client.process_commands(ctx.message)
 
     @bridge.bridge_command()
-    async def exportqueue(self, ctx: bridge.BridgeContext):
+    async def exportqueue(self, ctx):
         """
         Export the current queue to file
         """

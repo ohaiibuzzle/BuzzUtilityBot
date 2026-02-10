@@ -1,5 +1,4 @@
 import asyncio
-import configparser
 import io
 import random
 import logging
@@ -12,8 +11,7 @@ random_source = random.SystemRandom()
 
 timeout = aiohttp.ClientTimeout(total=15)
 
-config = configparser.ConfigParser()
-config.read("runtime/config.cfg")
+from config_reader import GLOBAL_CONFIG as config
 
 
 async def px_getamount(query: str):

@@ -30,7 +30,7 @@ class OwO(commands.Cog, name="Why? I don't even know why these exists!"):
         )
 
     @bridge.bridge_command(brief="Yowouwuw wowowst nyghtmawe, in a cowommand.")
-    async def owo(self, ctx: commands.Context, *, words: str):
+    async def owo(self, ctx, *, words: str):
         """
         Simply terrifying.
         """
@@ -54,7 +54,7 @@ class OwO(commands.Cog, name="Why? I don't even know why these exists!"):
     @commands.command(
         brief="Marry 💍",
     )
-    async def marry(self, ctx: commands.Context):
+    async def marry(self, ctx):
         """
         Take your ship to the next level. Mention someone to start
         """

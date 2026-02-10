@@ -3,7 +3,7 @@ from discord.ext import commands
 
 
 async def find_message_with_embeds(
-    ctx: commands.Context, length: int
+    ctx, length: int
 ) -> discord.Message:
     """Finds a message with embeds in the context
 
