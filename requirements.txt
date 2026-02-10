@@ -10,7 +10,7 @@ pillow==12.1.0
 pixivpy-async==1.2.14
 py-cord==2.7.1
 pynacl==1.6.2
-pysaucenao==1.6.3
+pysaucenao==2.0.1
 pytz==2025.2
 ai-edge-litert==2.1.2
 typing-inspect==0.9.0
