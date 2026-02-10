@@ -5,7 +5,7 @@ COPY requirements.txt /tmp/requirements.txt
 RUN pip wheel -r /tmp/requirements.txt --wheel-dir /tmp/wheels
 
 
-FROM python:3.11-slim-bookworm
+FROM python:3.13-slim-bookworm
 
 # Install OS deps
 RUN apt-get update && apt-get install -y --no-install-recommends --no-install-suggests \
