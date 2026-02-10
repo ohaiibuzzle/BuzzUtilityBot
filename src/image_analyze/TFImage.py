@@ -30,19 +30,19 @@ class TFImage(commands.Cog, name="AI-based image rating"):
         if msg != None:
             if msg.embeds.__len__() > 0:
                 for embed in msg.embeds:
-                    if embed.image.url is not discord.Embed.Empty:
+                    if embed.image.url is not None:
                         try:
                             res = await self.tensorflow_embed(embed.image.url)
                             return await ctx.respond(embed=res)
                         except UnidentifiedImageError:
                             await ctx.respond("Hey, that is not an image")
-                    elif embed.thumbnail.url is not discord.Embed.Empty:
+                    elif embed.thumbnail.url is not None:
                         try:
                             res = await self.tensorflow_embed(embed.thumbnail.url)
                             return await ctx.respond(embed=res)
                         except UnidentifiedImageError:
                             await ctx.respond("Hey, that is not an image")
-                    elif embed.url is not discord.Embed.Empty:
+                    elif embed.url is not None:
                         try:
                             res = await self.tensorflow_embed(embed.url)
                             return await ctx.respond(embed=res)
