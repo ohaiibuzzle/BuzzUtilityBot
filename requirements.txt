@@ -33,7 +33,7 @@ pixivpy-async==1.2.14
 propcache==0.4.1
 protobuf==6.33.5
 py-cord==2.7.1
-pycares==4.11.0
+pycares==5.0.1
 pycparser==3.0
 pynacl==1.6.2
 pysaucenao==2.0.1
