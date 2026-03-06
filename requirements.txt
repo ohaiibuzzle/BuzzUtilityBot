@@ -47,6 +47,6 @@ typing-extensions==4.15.0
 typing-inspect==0.9.0
 urllib3==2.6.3
 uvloop==0.22.1
-wrapt==2.1.1
+wrapt==2.1.2
 yarl==1.22.0
 yt-dlp==2026.1.29
