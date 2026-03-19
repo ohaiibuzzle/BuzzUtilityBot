@@ -31,7 +31,7 @@ orjson==3.11.6
 pillow==12.1.0
 pixivpy-async==1.2.14
 propcache==0.4.1
-protobuf==6.33.5
+protobuf==6.33.6
 py-cord==2.7.1
 pycares==4.11.0
 pycparser==3.0
